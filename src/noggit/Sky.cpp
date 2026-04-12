@@ -435,7 +435,7 @@ const int hseg = 32;
 
 
 Skies::Skies(unsigned int mapid, Noggit::NoggitRenderContext context)
-  : stars (ModelInstance("Environments\\Stars\\Stars.mdx", context))
+  : stars (ModelInstance("Environments/Stars/Stars.mdx", context))
   , _context(context)
 {
   bool has_global = false;

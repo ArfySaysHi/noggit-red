@@ -133,7 +133,7 @@ namespace Noggit
 
                   if (style_sheet_fixed.endsWith("/"))
                     style_sheet_fixed.chop(1);
-                  else if (style_sheet_fixed.endsWith("\\"))
+                  else if (style_sheet_fixed.endsWith("/"))
                     style_sheet_fixed.chop(2);
 
                   qApp->setStyleSheet(style_sheet_fixed);

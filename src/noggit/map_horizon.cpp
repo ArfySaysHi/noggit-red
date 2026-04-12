@@ -94,13 +94,16 @@ namespace Noggit
 
 map_horizon::map_horizon(const std::string& basename, const MapIndex * const index)
 {
+  _qt_minimap = QImage(16 * 64, 16 * 64, QImage::Format_ARGB32);
+  _qt_minimap.fill(Qt::transparent);
+
   std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
+  filename << "World/Maps/" << basename << "/" << basename << ".wdl";
   _filename = filename.str();
 
   if (!Application::NoggitApplication::instance()->clientData()->exists(_filename))
   {
-    LogError << "file \"World\\Maps\\" << basename << "\\" << basename << ".wdl\" does not exist." << std::endl;
+    LogError << "file \"World/Maps/" << basename << "/" << basename << ".wdl\" does not exist." << std::endl;
     return;
   }
 
@@ -359,7 +362,7 @@ void map_horizon::save_wdl(World* world, bool regenerate)
     world->wait_for_all_tile_updates();
 
     std::stringstream filename;
-    filename << "World\\Maps\\" << world->basename << "\\" << world->basename << ".wdl";
+    filename << "World/Maps/" << world->basename << "/" << world->basename << ".wdl";
     //Log << "Saving WDL \"" << filename << "\"." << std::endl;
 
     sExtendableArray wdlFile = sExtendableArray();

@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 
   // Local CASC storage tests
   {
-    //auto directory_path = std::string("D:\\World of Warcraft");
+    //auto directory_path = std::string("D:/World of Warcraft");
     auto directory_path = std::string("/media/skarn/Boot Camp/World of Warcraft/");
 
     auto wow_fs = BlizzardArchive::ClientData(directory_path, ClientVersion::SL, Locale::enUS, proj_path);
@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 
   // Remote CASC storage tests
   {
-    //auto directory_path = std::string("D:\\World of Warcraft");
+    //auto directory_path = std::string("D:/World of Warcraft");
     auto directory_path = std::string("/home/skarn/Desktop/cdn_cache_test/");
 
     auto wow_fs = BlizzardArchive::ClientData("http://%s.falloflordaeron.com:8000/%s/%s", directory_path, ClientVersion::SL, Locale::enUS, proj_path);

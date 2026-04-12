@@ -431,7 +431,7 @@ void MapCreationWizard::selectMap(int map_id)
 
   // check if map has a wdl and prompt to create a new one
   std::stringstream filename;
-  filename << "World\\Maps\\" << _world->basename << "\\" << _world->basename << ".wdl";
+  filename << "World/Maps/" << _world->basename << "/" << _world->basename << ".wdl";
   if (!Application::NoggitApplication::instance()->clientData()->exists(filename.str()))
   {
      QMessageBox prompt;
@@ -611,7 +611,7 @@ void MapCreationWizard::saveCurrentEntry()
 
     // Create WDT empty file for new map
     std::stringstream filename;
-    filename << "World\\Maps\\" << map_internal_name << "\\" << map_internal_name << ".wdt";
+    filename << "World/Maps/" << map_internal_name << "/" << map_internal_name << ".wdt";
 
     auto project_path = std::filesystem::path(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
 
@@ -620,11 +620,7 @@ void MapCreationWizard::saveCurrentEntry()
     if (!dir.exists())
       dir.mkpath(".");
 
-    auto filepath = project_path / BlizzardArchive::ClientData::normalizeFilenameInternal (filename.str());
-
-    QFile file(filepath.string().c_str());
-    file.open(QIODevice::WriteOnly);
-    file.close();
+    // WDT is written by mapIndex.save() below - no placeholder needed
   }
 
   // Save ADTs and WDT to disk

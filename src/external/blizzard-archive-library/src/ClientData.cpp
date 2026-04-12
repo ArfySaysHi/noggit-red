@@ -266,7 +266,7 @@ std::string ClientData::getDiskPath(Listfile::FileKey const& file_key)
 
   if (file_key.hasFilepath())
   {
-    return (fs::path(_local_path) / ClientData::normalizeFilenameUnix(file_key.filepath())).string();
+    return (fs::path(_local_path) / ClientData::normalizeFilenameInternal(file_key.filepath())).string();
   }
   else
   {
@@ -276,7 +276,7 @@ std::string ClientData::getDiskPath(Listfile::FileKey const& file_key)
 
     if (!filepath.empty())
     {
-      return (fs::path(_local_path) / ClientData::normalizeFilenameUnix(filepath)).string();
+      return (fs::path(_local_path) / ClientData::normalizeFilenameInternal(filepath)).string();
     }
     else
     {

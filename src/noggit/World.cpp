@@ -45,15 +45,16 @@ bool World::IsEditableWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow
   std::string lMapName = record.Columns["Directory"].Value;
 
   std::stringstream ssfilename;
-  ssfilename << "World\\Maps\\" << lMapName << "\\" << lMapName << ".wdt";
+  ssfilename << "World/Maps/" << lMapName << "/" << lMapName << ".wdt";
+  auto wdt_path = BlizzardArchive::ClientData::normalizeFilenameInternal(ssfilename.str());
 
-  if (!Noggit::Application::NoggitApplication::instance()->clientData()->exists(ssfilename.str()))
+  if (!Noggit::Application::NoggitApplication::instance()->clientData()->exists(wdt_path))
   {
     Log << "World " << record.RecordId << ": " << lMapName << " has no WDT file!" << std::endl;
     return false;
   }
 
-  BlizzardArchive::ClientFile mf(ssfilename.str(), Noggit::Application::NoggitApplication::instance()->clientData());
+  BlizzardArchive::ClientFile mf(wdt_path, Noggit::Application::NoggitApplication::instance()->clientData());
 
   //sometimes, wdts don't open, so ignore them...
   if (mf.isEof())
@@ -82,9 +83,10 @@ bool World::IsWMOWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& rec
     std::string lMapName = record.Columns["Directory"].Value;
 
     std::stringstream ssfilename;
-    ssfilename << "World\\Maps\\" << lMapName << "\\" << lMapName << ".wdt";
+    ssfilename << "World/Maps/" << lMapName << "/" << lMapName << ".wdt";
+    auto wdt_path = BlizzardArchive::ClientData::normalizeFilenameInternal(ssfilename.str());
 
-    BlizzardArchive::ClientFile mf(ssfilename.str(), Noggit::Application::NoggitApplication::instance()->clientData());
+    BlizzardArchive::ClientFile mf(wdt_path, Noggit::Application::NoggitApplication::instance()->clientData());
 
     const char* lPointer = reinterpret_cast<const char*>(mf.getPointer());
 

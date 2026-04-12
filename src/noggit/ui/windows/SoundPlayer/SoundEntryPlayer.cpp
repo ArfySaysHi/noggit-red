@@ -16,7 +16,7 @@
 #include <QStandardItemModel>
 #include <QTableWidgetItem>
 #include <QSound>
-#include <qtemporaryfile>
+#include <QTemporaryFile>
 #include <QMediaPlayer>
 #include <QListWidget>
 #include <QToolButton>
@@ -143,7 +143,7 @@ namespace Noggit
                 if (!filename.empty())
                 {
                     // std::stringstream ss_filepah;
-                    // ss_filepath << directory << "\\" << filename;
+                    // ss_filepath << directory << "/" << filename;
                     // music_files.push_back(ss_filepah.str());
                     // music_files.push_back(filename);
                     _files_listview->addItem(filename.c_str());
@@ -168,7 +168,7 @@ namespace Noggit
         {
             std::stringstream filename;
             auto item = _files_listview->selectedItems().back();
-            filename << _directory_lbl->text().toStdString() << "\\" << item->text().toStdString();
+            filename << _directory_lbl->text().toStdString() << "/" << item->text().toStdString();
 
             if (!Noggit::Application::NoggitApplication::instance()->clientData()->exists(filename.str()))
             {

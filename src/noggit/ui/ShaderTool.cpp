@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/World.h>
+#include <noggit/ui/tools/UiCommon/expanderwidget.h>
 #include <noggit/MapView.h>
 #include <noggit/ui/ShaderTool.hpp>
 #include <util/qt/overload.hpp>

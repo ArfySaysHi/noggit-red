@@ -149,7 +149,7 @@ namespace Noggit
       if (Noggit::Ui::selected_texture::get())
         filename = Noggit::Ui::selected_texture::get().value()->file_key().filepath();
       else
-        filename = "tileset\\generic\\black.blp";
+        filename = "tileset/generic/black.blp";
 
       addTextureByFilename(filename);
 
@@ -159,7 +159,7 @@ namespace Noggit
     {
 
       QString display_name = QString(filename.c_str()).remove("tileset/");
-      display_name.remove("tileset\\");
+      display_name.remove("tileset/");
 
       for (auto path : _texture_paths)
         if (path == display_name.toStdString())
