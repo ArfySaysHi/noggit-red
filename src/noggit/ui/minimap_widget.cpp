@@ -175,7 +175,7 @@ namespace Noggit
                 }
                 else
                 {
-                  painter.setPen (QColor::fromRgbF (0.8f, 0.8f, 0.8f, 0.4f));
+                  painter.setPen (QColor::fromRgbF (0.0f, 0.8f, 0.0f, 0.8f));
                 }
               }
               else

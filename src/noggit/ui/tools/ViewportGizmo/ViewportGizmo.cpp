@@ -1,4 +1,5 @@
 #include "ViewportGizmo.hpp"
+#include <noggit/Log.h>
 #include "noggit/ModelInstance.h"
 #include "noggit/WMOInstance.h"
 #include "noggit/ActionManager.hpp"

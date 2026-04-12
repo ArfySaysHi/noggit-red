@@ -27,7 +27,7 @@ namespace BlizzardDatabaseLib
         if (!tableFound)
             std::cout << "Verion Not found" << std::endl;
 
-        auto fileStream = file_callback("DBFilesClient\\" + tableName + ".dbc");
+        auto fileStream = file_callback("DBFilesClient/" + tableName + ".dbc");
 
         auto streamReader = std::make_shared<Stream::StreamReader>(fileStream);
         auto fileFormatIdentifier = streamReader->ReadString(4);

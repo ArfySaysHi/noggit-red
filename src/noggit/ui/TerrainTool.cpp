@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ui/TerrainTool.hpp>
+#include <noggit/ui/tools/UiCommon/expanderwidget.h>
 
 #include <noggit/tool_enums.hpp>
 #include <noggit/World.h>

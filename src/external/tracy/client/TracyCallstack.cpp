@@ -157,7 +157,7 @@ void InitCallstack()
     if( EnumDeviceDrivers( dev, sizeof(dev), &needed ) != 0 )
     {
         char windir[MAX_PATH];
-        if( !GetWindowsDirectoryA( windir, sizeof( windir ) ) ) memcpy( windir, "c:\\windows", 11 );
+        if( !GetWindowsDirectoryA( windir, sizeof( windir ) ) ) memcpy( windir, "c:/windows", 11 );
         const auto windirlen = strlen( windir );
 
         const auto sz = needed / sizeof( LPVOID );

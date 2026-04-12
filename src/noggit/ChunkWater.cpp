@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ChunkWater.hpp>
+#include <noggit/Log.h>
 #include <noggit/TileWater.hpp>
 #include <noggit/liquid_layer.hpp>
 #include <noggit/MapChunk.h>

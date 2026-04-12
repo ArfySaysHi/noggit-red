@@ -4,6 +4,7 @@
 #define NOGGIT_3DOBJECT_HPP
 
 #include <glm/mat4x4.hpp>
+#include <noggit/MapHeaders.h>
 #include <math/ray.hpp>
 #include <noggit/Selection.h>
 #include <noggit/ContextObject.hpp>

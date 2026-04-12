@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "LiquidTextureManager.hpp"
+#include <noggit/Log.h>
 #include "opengl/context.inl"
 #include "noggit/DBC.h"
 #include "noggit/application/NoggitApplication.hpp"
@@ -30,7 +31,7 @@ void LiquidTextureManager::upload()
     // procedural water hack fix
     if (shader_type == 3)
     {
-      filename = "XTextures\\river\\lake_a.";
+      filename = "XTextures/river/lake_a.";
       // default param for water
       anim = glm::vec2(1.f, 0.f);
     }
@@ -45,7 +46,7 @@ void LiquidTextureManager::upload()
       }
       catch (...) // fallback for malformed DBC
       {
-        filename = "XTextures\\river\\lake_a.";
+        filename = "XTextures/river/lake_a.";
       }
 
     }

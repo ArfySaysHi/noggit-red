@@ -1,5 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #include <opengl/scoped.hpp>
+#include <noggit/Log.h>
 #include <opengl/context.hpp>
 #include <opengl/context.inl>
 #include <opengl/shader.hpp>

@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/AsyncLoader.h>
+#include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
@@ -66,7 +67,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
   }
 
   std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
+  filename << "World/Maps/" << basename << "/" << basename << ".wdt";
 
   BlizzardArchive::ClientFile theFile(filename.str(), Noggit::Application::NoggitApplication::instance()->clientData());
 
@@ -121,7 +122,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
       theFile.seekRelative(4);
 
       std::stringstream adt_filename;
-      adt_filename << "World\\Maps\\" << basename << "\\" << basename << "_" << i << "_" << j << ".adt";
+      adt_filename << "World/Maps/" << basename << "/" << basename << "_" << i << "_" << j << ".adt";
 
       mTiles[j][i].tile = nullptr;
       mTiles[j][i].onDisc = Noggit::Application::NoggitApplication::instance()->clientData()->existsOnDisk(adt_filename.str());
@@ -186,7 +187,7 @@ void MapIndex::saveall (World* world)
 void MapIndex::save()
 {
   std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
+  filename << "World/Maps/" << basename << "/" << basename << ".wdt";
 
   //Log << "Saving WDT \"" << filename << "\"." << std::endl;
 
@@ -373,7 +374,7 @@ MapTile* MapIndex::loadTile(const TileIndex& tile, bool reloading, bool load_mod
   }
 
   std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
+  filename << "World/Maps/" << basename << "/" << basename << "_" << tile.x << "_" << tile.z << ".adt";
 
   if (!Noggit::Application::NoggitApplication::instance()->clientData()->exists(filename.str()))
   {
@@ -734,7 +735,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
       }
 
       std::stringstream filename;
-      filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+      filename << "World/Maps/" << basename << "/" << basename << "_" << x << "_" << z << ".adt";
       BlizzardArchive::ClientFile file(filename.str(), Noggit::Application::NoggitApplication::instance()->clientData());
 
       if (file.isEof())
@@ -980,7 +981,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
       // that shouldn't be there to avoid creating new duplicates
 
       std::stringstream filename;
-      filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+      filename << "World/Maps/" << basename << "/" << basename << "_" << x << "_" << z << ".adt";
 
       // load the tile without the models
       MapTile tile(x, z, filename.str(), mBigAlpha, false, use_mclq_green_lava(), false, world, _context, tile_mode::uid_fix_all);
@@ -1020,7 +1021,7 @@ void MapIndex::searchMaxUID()
       }
 
       std::stringstream filename;
-      filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+      filename << "World/Maps/" << basename << "/" << basename << "_" << x << "_" << z << ".adt";
       highestGUID = std::max(highestGUID, getHighestGUIDFromFile(filename.str()));
     }
   }
@@ -1158,7 +1159,7 @@ void MapIndex::saveMinimapMD5translate()
 void MapIndex::addTile(const TileIndex& tile)
 {
   std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
+  filename << "World/Maps/" << basename << "/" << basename << "_" << tile.x << "_" << tile.z << ".adt";
 
   mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (static_cast<int>(tile.x), static_cast<int>(tile.z), filename.str(),
       mBigAlpha, true, use_mclq_green_lava(), false, _world, _context);
@@ -1176,7 +1177,7 @@ void MapIndex::removeTile(const TileIndex &tile)
   mTiles[tile.z][tile.x].flags &= ~0x1;
 
   std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
+  filename << "World/Maps/" << basename << "/" << basename << "_" << tile.x << "_" << tile.z << ".adt";
   mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (static_cast<int>(tile.x), static_cast<int>(tile.z), filename.str(),
      mBigAlpha, true, use_mclq_green_lava(), false, _world, _context);
 
@@ -1221,7 +1222,7 @@ void MapIndex::set_basename(const std::string &pBasename)
       }
 
       std::stringstream filename;
-      filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+      filename << "World/Maps/" << basename << "/" << basename << "_" << x << "_" << z << ".adt";
 
       mTiles[z][x].tile->setFilename(filename.str());
     }
@@ -1232,7 +1233,7 @@ void MapIndex::create_empty_wdl()
 {
     // for new map creation, creates a new WDL with all heights as 0
     std::stringstream filename;
-    filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl"; // mapIndex.basename ? 
+    filename << "World/Maps/" << basename << "/" << basename << ".wdl"; // mapIndex.basename ? 
     //Log << "Saving WDL \"" << filename << "\"." << std::endl;
 
     sExtendableArray wdlFile = sExtendableArray();

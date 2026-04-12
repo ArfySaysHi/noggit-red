@@ -23,7 +23,7 @@
 #include <QStandardItemModel>
 #include <QTableWidgetItem>
 #include <QSound>
-#include <qtemporaryfile>
+#include <QTemporaryFile>
 #include <QMediaPlayer>
 #include <QListWidget>
 #include <QToolButton>

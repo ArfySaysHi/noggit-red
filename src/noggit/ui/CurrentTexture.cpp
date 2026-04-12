@@ -18,7 +18,7 @@ namespace Noggit
   {
     current_texture::current_texture(bool accept_drop, QWidget* parent)
       : ClickableLabel (parent)
-      , _filename("tileset\\generic\\black.blp")
+      , _filename("tileset/generic/black.blp")
       , _need_update(true)
       , _is_selected(false)
       , _is_swap_selected(false)
