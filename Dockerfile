@@ -62,13 +62,14 @@ RUN git clone https://github.com/Auburn/FastNoise2.git FastNoise2 && \
 
 COPY . .
 
-RUN git submodule update --init --recursive 2>/dev/null || true
+# RUN git submodule update --init --recursive 2>/dev/null || true
 
 RUN cmake -S . -B build \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_C_COMPILER=gcc-13 \
         -DCMAKE_CXX_COMPILER=g++-13 \
         -DCMAKE_CXX_FLAGS="-Wno-error -Wno-deprecated -Wno-deprecated-enum-enum-conversion -Wno-unknown-warning-option" \
+	-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
         -DNOGGIT_OPENGL_ERROR_CHECK=OFF \
         -DNOGGIT_ENABLE_TRACY_PROFILER=OFF \
         -DFASTNOISE2_NOISETOOL=OFF \
