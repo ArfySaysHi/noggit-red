@@ -2772,7 +2772,7 @@ MapView::MapView( math::degrees camera_yaw0
       , [=] { _main_window->statusBar()->removeWidget(_status_database); }
   );
 
-  setContextMenuPolicy(Qt::CustomContextMenu);
+  setContextMenuPolicy(Qt::NoContextMenu);
 
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
       this, SLOT(ShowContextMenu(const QPoint&)));
