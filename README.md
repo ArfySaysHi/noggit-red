@@ -8,6 +8,26 @@ If memory serves this should be all the packages needed to build the application
 sudo pacman -S base-devel cmake git ninja qt5-base qt5-multimedia qt5-tools mesa libgl bzip2 lua zlib
 ```
 
+Build and install StormLib:
+
+```bash
+git clone https://github.com/ladislav-zezula/StormLib.git
+cd StormLib
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc)
+sudo cmake --install build
+```
+
+Build and install CascLib:
+
+```bash
+git clone https://github.com/ladislav-zezula/CascLib.git
+cd CascLib
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc)
+sudo cmake --install build
+```
+
 cd into the root of the project after git cloning or unzipping it then make the build folder:
 
 ```bash
