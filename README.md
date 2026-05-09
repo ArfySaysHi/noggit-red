@@ -1,9 +1,45 @@
+# Quick Summary
+
+I built and edited this version of noggit-red for personal use on an Arch Linux system.
+
+If memory serves this should be all the packages needed to build the application
+
+```bash
+sudo pacman -S base-devel cmake git ninja qt5-base qt5-multimedia qt5-tools mesa libgl bzip2 lua zlib
+```
+
+cd into the root of the project after git cloning or unzipping it then make the build folder:
+
+```bash
+mkdir build && cd build
+```
+
+Next configure cmake for Ninja and add flags etc:
+
+```bash
+cmake .. -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_SQL=OFF -DNOGGIT_ENABLE_TRACY_PROFILER=OFF -DNOGGIT_LOGTOCONSOLE=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+```
+
+Build the binary using ninja:
+
+```bash
+ninja -j$(nproc)
+```
+
+Now cd into the bin folder within your build and you should have your 'noggit' executable, run it
+
+```bash
+./noggit
+```
+
 # LICENSE #
+
 This software is open source software licensed under GPL3, as found in
 the COPYING file.
 
 # BUILDING #
-This project requires CMake to be built. 
+
+This project requires CMake to be built.
 
 It also requires the
 following libraries:
@@ -25,28 +61,33 @@ Further following libraries are required for MySQL GUID Storage builds:
 See below for detailed instructions
 
 ## Windows ##
+
 Text in `<brackets>` below are up to your choice but shall be replaced
 with the same choice every time the same text is contained.
 
 ### MSVC++ ###
+
 Any recent version of Microsoft Visual C++ should work. Be sure to
 remember which version you chose as later on you will have to pick
 corresponding versions for other dependencies.
 
 ### CMake ###
+
 Any recent CMake 3.x version should work. Just take the latest.
 
 ### Qt5 ###
+
 Install Qt5 to `<Qt-install>`, downloading a pre-built package from
-https://www.qt.io/download-open-source/#section-2.
+<https://www.qt.io/download-open-source/#section-2>.
 
 Note that during installation you only need **one** version of Qt and
 also only **one** compiler version. If download size is noticably large
 (more than a few hundred MB), you're probably downloading way too much.
 
 ### StormLib ###
+
 This step is only required if pulling the dependency from FetchContent is not available.
-Download StormLib from https://github.com/ladislav-zezula/StormLib (any
+Download StormLib from <https://github.com/ladislav-zezula/StormLib> (any
 recent version).
 
 * open CMake GUI
@@ -58,9 +99,11 @@ recent version).
 * Repeat for both release and debug.
 
 ### MySQL (Optional) ###
+
 Optional, required for MySQL GUID Storage builds.
-download MySQL server https://dev.mysql.com/downloads/installer/
-and MySQL C++ Connector https://dev.mysql.com/downloads/connector/cpp/
+download MySQL server <https://dev.mysql.com/downloads/installer/>
+and MySQL C++ Connector <https://dev.mysql.com/downloads/connector/cpp/>
+
 * open CMake GUI
 * enable `USE_SQL`
 * set `MYSQL_LIBRARY` (path) to `libmysql.lib` from your MYSQL server install.
@@ -72,6 +115,7 @@ e.g `"C:/Program Files/MySQL/Connector C++ 8.0/lib64/vs14/mysqlcppconn.lib"`
 * Don't forget to set your SQL settings and enable the feature in the noggit settings menu to use it.
 
 ### Noggit ###
+
 * open CMake GUI
 * set `CMAKE_PREFIX_PATH` (path) to `"<Qt-install>;<Stormlib-install>"`,
   e.g. `"C:/Qt/5.6/msvc2015;D:/StormLib/install"`
@@ -80,21 +124,22 @@ e.g `"C:/Program Files/MySQL/Connector C++ 8.0/lib64/vs14/mysqlcppconn.lib"`
   they are into `BOOST_ROOT/lib` so that CMake finds them automatically or
   set `BOOST_LIBRARYDIR` to where your lib are (.dll and .lib). Again, this
   is **highly** unlikely to be required.
-* set `CMAKE_INSTALL_PREFIX` (path) to an empty destination, e.g. 
+* set `CMAKE_INSTALL_PREFIX` (path) to an empty destination, e.g.
   `"C:/Users/blurb/Documents/noggitinstall`
 * configure, generate
 * open solution with visual studio
 * build ALL_BUILD
 * build INSTALL
- 
+
 To launch noggit you will need the following DLLs from Qt loadable. Install
 them in the system, or copy them from `C:/Qt/X.X/msvcXXXX/bin` into the
 directory containing noggit.exe, i.e. `CMAKE_INSTALL_PREFIX` configured.
 
 * release: Qt5Core, Qt5OpenGL, Qt5Widgets, Qt5Gui
-* debug: Qt5Cored, Qt5OpenGLd, Qt5Widgetsd, Qt5Guid 
+* debug: Qt5Cored, Qt5OpenGLd, Qt5Widgetsd, Qt5Guid
 
 ## Linux ##
+
 On **Ubuntu** you can install the building requirements using:
 
 ```bash
@@ -126,6 +171,7 @@ git submodule update --recursive --remote
 ```
 
 # CODING GUIDELINES #
+
 File naming rules:
 
 ```.hpp``` - is used for header files (C++ language).
@@ -134,17 +180,17 @@ File naming rules:
 
 ```.c``` - is used **only** for implementation files or modules written in C language.
 
-```.cpp``` - is used for project implementation files. 
+```.cpp``` - is used for project implementation files.
 
 ```.inl``` - is used for include files providing template instantiations.
 
 ```.ui``` - is used for QT UI definitions (output of QtDesigner/QtCreator).
 
-### Project structure: ###
+### Project structure ###
 
 ```/src/Noggit``` - is the main directory hosting .cpp, .hpp, .inl, .ui files of the project.
 
-Within this directory the subdirs should correspond to namespace names (case sensitive). 
+Within this directory the subdirs should correspond to namespace names (case sensitive).
 
 File names should use PascalCase (e.g. ```FooBan.hpp```) and either correspond to the type defined in the file,
 or represent sematics of the module.
@@ -152,13 +198,12 @@ or represent sematics of the module.
 ```/src/External``` - is the directory of hosting included libraries and subprojects. This is external or modified
 external code, so no rules from Noggit project apply to its content.
 
-```/src/Glsl``` - is the directory to store .glsl shaders for the OpenGL renderer. It is not recommended, 
+```/src/Glsl``` - is the directory to store .glsl shaders for the OpenGL renderer. It is not recommended,
 but not strictly prohibited to inline shader code as strings to ```.cpp``` implementation files.
-
 
 ### Code style ###
 
-Following is an example for file `src/Noggit/Ui/FooBan.hpp`. 
+Following is an example for file `src/Noggit/Ui/FooBan.hpp`.
 
 ```cpp
 #ifndef INCLUDE_GUARD_BASED_ON_FILENAME
