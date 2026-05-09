@@ -1,15 +1,5 @@
 // This file is part of Noggit3, licensed under GNU General Public License
 // (version 3).
-#include <noggit/Log.h>
-#include <noggit/application/NoggitApplication.hpp>
-#include <noggit/errorHandling.h>
-#include <opengl/context.hpp>
-#include <util/exception_to_string.hpp>
-
-#ifdef _WIN32
-#include <external/framelesshelper/framelesswindowsmanager.h>
-#endif
-
 #include <QSplashScreen>
 #include <QStyleFactory>
 #include <QtCore/QDir>
@@ -18,10 +8,16 @@
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMessageBox>
 #include <codecvt>
+#include <external/framelesshelper/framelesswindowsmanager.h>
+#include <noggit/Log.h>
+#include <noggit/application/NoggitApplication.hpp>
+#include <noggit/errorHandling.h>
+#include <opengl/context.hpp>
 #include <qcommandlineoption.h>
 #include <qcommandlineparser.h>
 #include <string>
 #include <string_view>
+#include <util/exception_to_string.hpp>
 
 QCommandLineParser *ProcessCommandLine() {
   QCommandLineParser *parser = new QCommandLineParser();

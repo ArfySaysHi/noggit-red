@@ -22,26 +22,24 @@ INCLUDE(FetchContent)
 #Project name
 PROJECT(Noggit)
 
-#Covered by CMAKE_CXX_STANDARD
-add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-c++98-compat)
-add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-c++98-compat-pedantic)
-#Covered by compilers used
-add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-gnu-anonymous-struct)
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-c++98-compat)
+  add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-c++98-compat-pedantic)
+  add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-gnu-anonymous-struct)
+  add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-vla-extension)
+  add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-zero-length-array)
+  add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-gnu-zero-variadic-macro-arguments)
+  add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-nested-anon-types)
+  add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-four-char-constants)
+  add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-exit-time-destructors)
+  add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-global-constructors)
+  add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-disabled-macro-expansion)
+  add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-weak-vtables)
+  add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-weak-template-vtables)
+endif()
+
 add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-variadic-macros)
 add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-vla)
-add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-vla-extension)
-add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-zero-length-array)
-add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-gnu-zero-variadic-macro-arguments)
-add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-nested-anon-types)
-add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-four-char-constants)
-#We assume that our constructors and destructors do not access other global state
-add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-exit-time-destructors)
-add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-global-constructors)
-#Is fine with GNU, required due to our libstdc
-add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-disabled-macro-expansion)
-#We can live with the compilation unit containing the vtable not being fixed
-add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-weak-vtables)
-add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-weak-template-vtables)
 # __DATE__ and __TIME__ not being reproducible is exactly why they exist.
 add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-date-time)
 #We don't care for a few bytes

@@ -82,9 +82,9 @@ void NoggitApplication::initalize(int argc, char *argv[],
   Log << "Database Definitions found! : " << databaseDefinitionPath
       << std::endl;
 
-  if (QOpenGLContext::openGLModuleType() == QOpenGlContext::LibGLES) {
-    throw std::runtime_error("Desktop OpenGL is required. ",
-                             "Your system only has OpenGL ES.");
+  if (QOpenGLContext::openGLModuleType() == QOpenGLContext::LibGLES) {
+    throw std::runtime_error(
+        "Desktop OpenGL is required. Your system only has OpenGL ES.");
   }
 
   QSurfaceFormat format;

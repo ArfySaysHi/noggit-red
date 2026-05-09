@@ -1,20 +1,3 @@
-#include <noggit/ContextObject.hpp>
-#include <noggit/DBC.h>
-#include <noggit/DBCFile.h>
-#include <noggit/Log.h>
-#include <noggit/MapView.h>
-#include <noggit/World.h>
-#include <noggit/ui/FontAwesome.hpp>
-#include <noggit/ui/UidFixWindow.hpp>
-#include <noggit/ui/minimap_widget.hpp>
-#include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
-#include <noggit/ui/windows/about/About.h>
-#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
-#include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
-#include <noggit/uid_storage.hpp>
-#ifdef _WIN32
-#include <noggit/ui/FramelessWindow.hpp>
-#endif
 #include <BlizzardDatabase.h>
 #include <QDir>
 #include <QIcon>
@@ -32,11 +15,26 @@
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
+#include <noggit/ContextObject.hpp>
+#include <noggit/DBC.h>
+#include <noggit/DBCFile.h>
+#include <noggit/Log.h>
+#include <noggit/MapView.h>
+#include <noggit/World.h>
 #include <noggit/application/Utils.hpp>
+#include <noggit/ui/FontAwesome.hpp>
+#include <noggit/ui/FramelessWindow.hpp>
+#include <noggit/ui/UidFixWindow.hpp>
+#include <noggit/ui/minimap_widget.hpp>
+#include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
 #include <noggit/ui/tools/UiCommon/StackedWidget.hpp>
+#include <noggit/ui/windows/about/About.h>
+#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
 #include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
 #include <noggit/ui/windows/noggitWindow/widgets/MapBookmarkListItem.hpp>
 #include <noggit/ui/windows/noggitWindow/widgets/MapListItem.hpp>
+#include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
+#include <noggit/uid_storage.hpp>
 #include <sstream>
 
 #ifdef USE_MYSQL_UID_STORAGE

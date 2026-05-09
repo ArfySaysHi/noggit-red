@@ -7,11 +7,11 @@
 #include <ClientData.hpp>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QOpenGLContext>
 #include <QSplashScreen>
 #include <QtCore/QDir>
 #include <QtCore/QSettings>
 #include <QtGui/QOffscreenSurface>
-#include <QtOpenGLContext>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMessageBox>
