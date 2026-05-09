@@ -131,7 +131,9 @@ IF(USE_SQL)
 ENDIF()
 
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/qt-color-widgets")
-ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/framelesshelper")
+if(WIN32)
+  ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/framelesshelper")
+endif()
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/qtimgui")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/QtAdvancedDockingSystem")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/NodeEditor")
@@ -277,9 +279,16 @@ assign_source_group(
 
 MESSAGE(STATUS ${moced})
 
+if(WIN32)
+  set(_noggit_platform_flags WIN32)
+elseif(APPLE)
+  set(_noggit_platform_flags MACOSX_BUNDLE)
+else()
+  set(_noggit_platform_flags "")
+endif()
+
 ADD_EXECUTABLE(noggit
-  WIN32
-  MACOSX_BUNDLE
+  ${_noggit_platform_flags}
   ${noggit_root_sources}
   ${opengl_sources}
   ${math_sources}
@@ -343,7 +352,7 @@ TARGET_LINK_LIBRARIES (noggit
   Qt5::Network
   Qt5::Multimedia
   ColorWidgets-qt5
-  FramelessHelper
+  $<$<BOOL:${WIN32}>:FramelessHelper>
   qt_imgui_widgets
   qtadvanceddocking
   nodes
