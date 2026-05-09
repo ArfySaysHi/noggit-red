@@ -1,48 +1,53 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
-#include <noggit/application/NoggitApplication.hpp>
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 #include <noggit/Log.h>
+#include <noggit/application/NoggitApplication.hpp>
 #include <noggit/errorHandling.h>
 #include <opengl/context.hpp>
 #include <util/exception_to_string.hpp>
+
+#ifdef _WIN32
 #include <external/framelesshelper/framelesswindowsmanager.h>
-#include <string>
-#include <string_view>
-#include <QtCore/QSettings>
+#endif
+
+#include <QSplashScreen>
+#include <QStyleFactory>
 #include <QtCore/QDir>
-#include <qcommandlineparser.h>
-#include <qcommandlineoption.h>
+#include <QtCore/QSettings>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMessageBox>
-#include <QSplashScreen>
-#include <QStyleFactory>
 #include <codecvt>
+#include <qcommandlineoption.h>
+#include <qcommandlineparser.h>
 #include <string>
+#include <string_view>
 
-QCommandLineParser* ProcessCommandLine()
-{
-    QCommandLineParser* parser = new QCommandLineParser();
-    parser->setApplicationDescription("Help");
-    parser->addHelpOption();
-    parser->addVersionOption();
-    parser->addOptions({
-        {"disable-update", QApplication::translate("main", "Disable the check for update.")},
-        {"force-changelog", QApplication::translate("main", "Force displaying the changelog popup.")}
-        });
+QCommandLineParser *ProcessCommandLine() {
+  QCommandLineParser *parser = new QCommandLineParser();
+  parser->setApplicationDescription("Help");
+  parser->addHelpOption();
+  parser->addVersionOption();
+  parser->addOptions(
+      {{"disable-update",
+        QApplication::translate("main", "Disable the check for update.")},
+       {"force-changelog",
+        QApplication::translate("main",
+                                "Force displaying the changelog popup.")}});
 
-    return parser;
+  return parser;
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   Noggit::RegisterErrorHandlers();
-  std::set_terminate(Noggit::Application::NoggitApplication::terminationHandler);
+  std::set_terminate(
+      Noggit::Application::NoggitApplication::terminationHandler);
 
   QApplication::setStyle(QStyleFactory::create("Fusion"));
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-  QApplication q_application (argc, argv);
-  q_application.setApplicationName ("Noggit");
-  q_application.setOrganizationName ("Noggit");
+  QApplication q_application(argc, argv);
+  q_application.setApplicationName("Noggit");
+  q_application.setOrganizationName("Noggit");
 
   auto parser = ProcessCommandLine();
   parser->process(q_application);
@@ -54,7 +59,8 @@ int main(int argc, char *argv[])
   auto noggit = Noggit::Application::NoggitApplication::instance();
   noggit->initalize(argc, argv, Command);
 
-  auto project_selection = new Noggit::Ui::Windows::NoggitProjectSelectionWindow(noggit);
+  auto project_selection =
+      new Noggit::Ui::Windows::NoggitProjectSelectionWindow(noggit);
   project_selection->show();
 
   return q_application.exec();
