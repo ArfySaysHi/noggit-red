@@ -1060,7 +1060,7 @@ void MapView::setupFileMenu() {
                 ([this] { _force_uid_check = true; }));
   file_menu->addSeparator();
 
-  ADD_ACTION(file_menu, "Add bookmark", Qt::CTRL | Qt::Key_F5, [this] {
+  ADD_ACTION(file_menu, "Add bookmark", Qt::CTRL + Qt::Key_F5, [this] {
     auto bookmark = Noggit::Project::NoggitProjectBookmarkMap();
     bookmark.position = _camera.position;
     bookmark.camera_pitch = _camera.pitch()._;
@@ -1686,14 +1686,14 @@ void MapView::setupViewMenu() {
   ADD_TOGGLE(view_menu, "Draw fog", Qt::Key_F12, _draw_fog);
 
   ADD_TOGGLE_POST(
-      view_menu, "Hole lines", Qt::SHIFT | Qt::Key_F1, _draw_hole_lines,
+      view_menu, "Hole lines", Qt::SHIFT + Qt::Key_F1, _draw_hole_lines,
       ([=, this] {
         _world->renderer()->getTerrainParamsUniformBlock()->draw_hole_lines =
             _draw_hole_lines.get();
         _world->renderer()->markTerrainParamsUniformBlockDirty();
       }));
 
-  ADD_TOGGLE_POST(view_menu, "Climb", Qt::SHIFT | Qt::Key_F2, _draw_climb,
+  ADD_TOGGLE_POST(view_menu, "Climb", Qt::SHIFT + Qt::Key_F2, _draw_climb,
                   ([=, this] {
                     _world->renderer()
                         ->getTerrainParamsUniformBlock()
@@ -1702,7 +1702,7 @@ void MapView::setupViewMenu() {
                   }));
 
   ADD_TOGGLE_POST(
-      view_menu, "Vertex Color", Qt::SHIFT | Qt::Key_F3, _draw_vertex_color,
+      view_menu, "Vertex Color", Qt::SHIFT + Qt::Key_F3, _draw_vertex_color,
       ([=, this] {
         _world->renderer()->getTerrainParamsUniformBlock()->draw_vertex_color =
             _draw_vertex_color.get();
@@ -1710,7 +1710,7 @@ void MapView::setupViewMenu() {
       }));
 
   ADD_TOGGLE_POST(
-      view_menu, "Baked Shadows", Qt::SHIFT | Qt::Key_F4, _draw_baked_shadows,
+      view_menu, "Baked Shadows", Qt::SHIFT + Qt::Key_F4, _draw_baked_shadows,
       ([=, this] {
         _world->renderer()->getTerrainParamsUniformBlock()->draw_shadows =
             _draw_baked_shadows.get();
@@ -4946,7 +4946,7 @@ void MapView::ShowContextMenu(QPoint pos) {
   // Redo
   QAction action_redo("Redo", this);
   menu->addAction(&action_redo);
-  action_redo.setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Z));
+  action_redo.setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Z));
   QObject::connect(&action_redo, &QAction::triggered,
                    [=, this]() { NOGGIT_ACTION_MGR->redo(); });
 
@@ -5000,7 +5000,7 @@ void MapView::ShowContextMenu(QPoint pos) {
     menu->addAction(&action_11);
     action_11.setEnabled(has_copied_objects);
     action_11.setShortcut(
-        QKeySequence(Qt::CTRL | Qt::Key_B)); // (Qt::CTRL | Qt::Key_P)
+        QKeySequence(Qt::CTRL + Qt::Key_B)); // (Qt::CTRL | Qt::Key_P)
     QObject::connect(&action_11, &QAction::triggered, [=, this]() {
       if (terrainMode == editing_mode::object && !NOGGIT_CUR_ACTION) {
         NOGGIT_ACTION_MGR->beginAction(this,
