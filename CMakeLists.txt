@@ -6,7 +6,7 @@
 # ░███  ░░█████ ░░███     ███ ░░███  ░░███ ░░███  ░░███  ░███     ░███        ░███    ░███  ░███ ░   █ ░███    ███
 # █████  ░░█████ ░░░███████░   ░░█████████  ░░█████████  █████    █████       █████   █████ ██████████ ██████████
 #░░░░░    ░░░░░    ░░░░░░░      ░░░░░░░░░    ░░░░░░░░░  ░░░░░    ░░░░░       ░░░░░   ░░░░░ ░░░░░░░░░░ ░░░░░░░░░░
-CMAKE_MINIMUM_REQUIRED(VERSION 3.3)
+cmake_minimum_required(VERSION 3.10...4.0)
 CMAKE_POLICY(SET CMP0057 NEW) # "Support new IN_LIST if() operator."
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -100,6 +100,7 @@ FIND_PACKAGE(Lua REQUIRED)
 FIND_PACKAGE(StormLib REQUIRED)
 FIND_PACKAGE(CascLib REQUIRED)
 #External packages
+set(OpenGL_GL_PREFERENCE GLVND)
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(Json REQUIRED)
 FIND_PACKAGE(lodepng REQUIRED)

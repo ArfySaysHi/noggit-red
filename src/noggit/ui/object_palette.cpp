@@ -93,9 +93,9 @@ ObjectPalette::ObjectPalette(
   _preview_renderer->renderToPixmap();
 
   connect(_object_list, &QListWidget::itemClicked, this,
-          [=](QListWidgetItem *item) {
+          ([=, this](QListWidgetItem *item) {
             _map_view->getObjectEditor()->copy(item->toolTip().toStdString());
-          });
+          }));
 
   QVBoxLayout *button_layout = new QVBoxLayout(this);
 

@@ -6,20 +6,19 @@
 #include <noggit/Misc.h>
 #include <noggit/application/NoggitApplication.hpp>
 
-#include <QListWidget>
 #include <QMediaPlayer>
 #include <QSound>
 #include <QStandardItemModel>
 #include <QTableWidgetItem>
 #include <QTemporaryFile>
 #include <QToolButton>
+#include <QtWidgets/QCheckBox>
 #include <QtWidgets/QFormLayout>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QTableView>
 #include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/qcheckbox.h>
-#include <QtWidgets/qgroupbox.h>
-#include <QtWidgets/qlineedit.h>
-#include <QtWidgets/qpushbutton.h>
 
 #include <iostream>
 #include <sstream>
@@ -48,6 +47,7 @@ SoundEntryPlayer::SoundEntryPlayer(QWidget *parent) : QWidget(parent) {
   layout->addLayout(controls_layout);
 
   _media_player = new QMediaPlayer(this);
+  _media_player->setVolume(80);
 
   auto btn_play = new QToolButton(this);
   controls_layout->addWidget(btn_play);
@@ -73,7 +73,6 @@ SoundEntryPlayer::SoundEntryPlayer(QWidget *parent) : QWidget(parent) {
   _volume_slider = new QSlider(Qt::Horizontal, this);
   _volume_slider->setRange(0, 100);
   _volume_slider->setValue(80);
-  _media_player->setVolume(80);
 
   // controls_layout->addWidget(new QLabel("Volume:"));
   auto btn_volume = new QToolButton(this);

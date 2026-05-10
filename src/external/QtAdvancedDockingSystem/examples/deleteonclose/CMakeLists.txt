@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10...4.0)
 project(ads_example_deleteonclose VERSION ${VERSION_SHORT}) 
 find_package(Qt5 5.5 COMPONENTS Core Gui Widgets REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
