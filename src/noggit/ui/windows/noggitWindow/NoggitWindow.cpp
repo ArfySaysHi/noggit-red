@@ -433,7 +433,7 @@ void NoggitWindow::buildMenu() {
       connect(_map_creation_wizard,
               &Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard::
                   map_dbc_updated,
-              [=] { _buildMapListComponent->buildMapList(this); });
+              ([=, this] { _buildMapListComponent->buildMapList(this); }));
 
   _right_side->addTab(_map_creation_wizard, "Edit map");
 

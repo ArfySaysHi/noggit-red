@@ -206,13 +206,15 @@ texturing_tool::texturing_tool(const glm::vec3 *camera_pos, MapView *map_view,
   _show_unpaintable_chunks_cb->setChecked(false);
   tool_layout->addWidget(_show_unpaintable_chunks_cb);
 
-  connect(_show_unpaintable_chunks_cb, &QCheckBox::toggled, [=](bool checked) {
-    _map_view->getWorld()
-        ->renderer()
-        ->getTerrainParamsUniformBlock()
-        ->draw_paintability_overlay = checked;
-    _map_view->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
-  });
+  connect(
+      _show_unpaintable_chunks_cb, &QCheckBox::toggled,
+      ([=, this](bool checked) {
+        _map_view->getWorld()
+            ->renderer()
+            ->getTerrainParamsUniformBlock()
+            ->draw_paintability_overlay = checked;
+        _map_view->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
+      }));
 
   // spray
   _spray_mode_group = new QGroupBox("Spray", tool_widget);
@@ -429,11 +431,11 @@ texturing_tool::texturing_tool(const glm::vec3 *camera_pos, MapView *map_view,
   connect(_spray_mode_group, &QGroupBox::toggled,
           [&](bool b) { _spray_content->setEnabled(b); });
 
-  connect(quick_palette_btn, &QPushButton::clicked, [=]() {
-    _map_view->getTexturePalette()->setVisible(
-        _map_view->getTexturePalette()->isHidden());
-    // show_quick_palette->set(!show_quick_palette);
-  });
+  connect(quick_palette_btn, &QPushButton::clicked, ([=, this]() {
+            _map_view->getTexturePalette()->setVisible(
+                _map_view->getTexturePalette()->isHidden());
+            // show_quick_palette->set(!show_quick_palette);
+          }));
 
   connect(_radius_slider,
           &Noggit::Ui::Tools::UiCommon::ExtendedSlider::valueChanged,
