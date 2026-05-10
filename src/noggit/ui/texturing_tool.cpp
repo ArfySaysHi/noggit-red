@@ -1,26 +1,128 @@
 // This file is part of Noggit3, licensed under GNU General Public License
 // (version 3).
 
-#include <noggit/TabletManager.hpp>
-#include <noggit/ui/texturing_tool.hpp>
-#include <noggit/ui/tools/UiCommon/expanderwidget.h>
-
+#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QTabWidget>
+#include <QtWidgets/QVBoxLayout>
+#include <algorithm>
+#include <noggit/DBC.h>
 #include <noggit/MapView.h>
 #include <noggit/Misc.h>
+#include <noggit/TabletManager.hpp>
 #include <noggit/World.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/Checkbox.hpp>
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/texture_swapper.hpp>
-#include <util/qt/overload.hpp>
-
-#include <QtWidgets/QFormLayout>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QTabWidget>
+#include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
+#include <noggit/ui/tools/UiCommon/expanderwidget.h>
+#include <sstream>
+#include <util/qt/overload.hpp>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+
+static const char *terrainTypeName(unsigned int t) {
+  switch (t) {
+  case 0:
+    return "Dirt";
+  case 1:
+    return "Grass";
+  case 2:
+    return "Stone";
+  case 3:
+    return "Snow";
+  case 4:
+    return "Sand";
+  case 5:
+    return "Rock";
+  case 6:
+    return "Grass (sparse)";
+  case 7:
+    return "Cobblestone";
+  case 8:
+    return "Brick";
+  case 9:
+    return "Mud";
+  case 10:
+    return "Sand (fine)";
+  case 11:
+    return "Grass (thick)";
+  case 12:
+    return "Straw";
+  case 13:
+    return "Water";
+  default:
+    return "Unknown";
+  }
+}
+
+std::vector<Noggit::Ui::GroundEffectEntry> Noggit::Ui::buildGroundEffectList() {
+  std::vector<GroundEffectEntry> entries;
+
+  // "None" sentinel — effectID 0xFFFF means no ground clutter.
+  entries.push_back({0xFFFF, 0, "None (no effect)"});
+
+  for (DBCFile::Iterator it = gGroundEffectTextureDB.begin();
+       it != gGroundEffectTextureDB.end(); ++it) {
+    GroundEffectEntry e;
+    e.effectID = it->getUInt(GroundEffectTextureDB::ID);
+    e.terrainType = it->getUInt(GroundEffectTextureDB::TerrainType);
+
+    // Build a label:  "ID 6 [Grass] — Clover (x2), SomeGrass (x1)"
+    QString label = QString("ID %1 [%2]")
+                        .arg(e.effectID)
+                        .arg(terrainTypeName(e.terrainType));
+
+    bool any_doodad = false;
+    for (int i = 0; i < 4; ++i) {
+      unsigned int doodadID = it->getUInt(GroundEffectTextureDB::Doodads + i);
+      unsigned int weight = it->getUInt(GroundEffectTextureDB::Weights + i);
+
+      if (doodadID == 0 || weight == 0)
+        continue;
+
+      try {
+        const char *path = gGroundEffectDoodadDB.getByID(doodadID).getString(
+            GroundEffectDoodadDB::Filename);
+
+        // Extract just the model stem from the full archive path.
+        // Paths use both '/' and '\' in WoW data.
+        QString full(path);
+        QString stem = full.section('\\', -1).section('/', -1);
+        // Strip extension (.mdx / .m2)
+        stem = stem.left(stem.lastIndexOf('.'));
+
+        label +=
+            (any_doodad ? ", " : " — ") + stem + QString(" (x%1)").arg(weight);
+        any_doodad = true;
+      } catch (...) {
+        // getByID throws if the doodad row doesn't exist; skip it.
+      }
+    }
+
+    if (!any_doodad)
+      label += " — (no doodads)";
+
+    e.label = label;
+    entries.push_back(e);
+  }
+
+  // Sort: None first, then by terrainType, then by effectID.
+  std::sort(entries.begin() + 1, entries.end(),
+            [](const GroundEffectEntry &a, const GroundEffectEntry &b) {
+              if (a.terrainType != b.terrainType)
+                return a.terrainType < b.terrainType;
+              return a.effectID < b.effectID;
+            });
+
+  return entries;
+}
 
 namespace Noggit {
 namespace Ui {
@@ -204,15 +306,48 @@ texturing_tool::texturing_tool(const glm::vec3 *camera_pos, MapView *map_view,
       new CheckBox("Overbright", &_overbright_prop, anim_widget);
   anim_layout->addRow(overbright_cb);
 
+  // Build the master entry list once.  This reads gGroundEffectTextureDB
+  // and gGroundEffectDoodadDB, so it must run after OpenDBs().
+  _effect_entries = buildGroundEffectList();
+
   _ground_effect_group = new QGroupBox("Auto Ground Effect", tool_widget);
   _ground_effect_group->setCheckable(true);
   _ground_effect_group->setChecked(false);
-  auto effect_layout = new QFormLayout(_ground_effect_group);
-  _effect_id_spinner = new QSpinBox(_ground_effect_group);
-  _effect_id_spinner->setRange(-1, 0xFFFE);
-  _effect_id_spinner->setValue(-1);
-  _effect_id_spinner->setSpecialValueText("None (0xFFFF)");
-  effect_layout->addRow("Effect ID:", _effect_id_spinner);
+
+  // The group box uses a vertical layout so the search box sits above the list.
+  auto *effect_vlayout = new QVBoxLayout(_ground_effect_group);
+  effect_vlayout->setContentsMargins(4, 4, 4, 4);
+  effect_vlayout->setSpacing(3);
+
+  // Search / filter box
+  _effect_filter = new QLineEdit(_ground_effect_group);
+  _effect_filter->setPlaceholderText("Filter effects…");
+  _effect_filter->setClearButtonEnabled(true);
+  effect_vlayout->addWidget(_effect_filter);
+
+  _effect_list = new QListWidget(_ground_effect_group);
+  _effect_list->setSelectionMode(QAbstractItemView::SingleSelection);
+  _effect_list->setMaximumHeight(180);
+  _effect_list->setMinimumHeight(100);
+  effect_vlayout->addWidget(_effect_list);
+
+  for (const auto &entry : _effect_entries) {
+    auto *item = new QListWidgetItem(entry.label, _effect_list);
+    item->setData(Qt::UserRole, static_cast<unsigned int>(entry.effectID));
+
+    // Light background tint by terrain type so related effects visually
+    if (entry.effectID != 0xFFFF) {
+      int hue = static_cast<int>(entry.terrainType * 25) % 360;
+      item->setBackground(QColor::fromHsl(hue, 40, 240));
+    }
+  }
+
+  if (_effect_list->count() > 0)
+    _effect_list->setCurrentRow(0);
+
+  connect(_effect_filter, &QLineEdit::textChanged,
+          [this](const QString &text) { filterEffectList(text); });
+
   tool_layout->addWidget(_ground_effect_group);
 
   tabs->addTab(tool_widget, "Paint");
@@ -492,35 +627,30 @@ void texturing_tool::paint(World *world, glm::vec3 const &pos, float dt,
                           _spray_pressure, texture);
 
       if (_inner_radius_cb->isChecked()) {
-        if (!_image_mask_group->isEnabled()) {
+        if (!_image_mask_group->isEnabled())
           world->paintTexture(pos, &_inner_brush, alpha_target(), strength,
                               texture);
-        } else {
+        else
           world->stampTexture(pos, &_inner_brush, alpha_target(), strength,
                               texture, &_mask_image,
                               _image_mask_group->getBrushMode());
-        }
       }
     } else {
-      if (!_image_mask_group->isEnabled()) {
+      if (!_image_mask_group->isEnabled())
         world->paintTexture(pos, &_texture_brush, alpha_target(), strength,
                             texture);
-      } else {
+      else
         world->stampTexture(pos, &_texture_brush, alpha_target(), strength,
                             texture, &_mask_image,
                             _image_mask_group->getBrushMode());
-      }
     }
-
-    Brush *active_brush =
-        _spray_mode_group->isChecked() ? &_spray_brush : &_texture_brush;
 
     if (_ground_effect_group->isChecked()) {
-      int effectID = _effect_id_spinner->value() < 0
-                         ? 0xFFFF
-                         : _effect_id_spinner->value();
-      world->set_texture_effect(pos, active_brush, texture, effectID);
+      Brush *active_brush =
+          _spray_mode_group->isChecked() ? &_spray_brush : &_texture_brush;
+      world->set_texture_effect(pos, active_brush, texture, selectedEffectID());
     }
+
   } else if (_texturing_mode == texturing_mode::anim) {
     change_tex_flag(world, pos, _anim_prop.get(), texture);
   }
@@ -625,6 +755,34 @@ void texturing_tool::fromJSON(QJsonObject const &json) {
 
   if (!tex_to_swap_path.isEmpty())
     _texture_switcher->set_texture(tex_to_swap_path.toStdString());
+}
+
+unsigned int texturing_tool::selectedEffectID() const {
+  QListWidgetItem *item = _effect_list->currentItem();
+  if (!item)
+    return 0xFFFF;
+
+  return item->data(Qt::UserRole).toUInt();
+}
+
+void texturing_tool::filterEffectList(const QString &filter) {
+  _effect_list->clear();
+
+  for (const auto &entry : _effect_entries) {
+    if (!filter.isEmpty() && !entry.label.contains(filter, Qt::CaseInsensitive))
+      continue;
+
+    auto *item = new QListWidgetItem(entry.label, _effect_list);
+    item->setData(Qt::UserRole, static_cast<unsigned int>(entry.effectID));
+
+    if (entry.effectID != 0xFFFF) {
+      int hue = static_cast<int>(entry.terrainType * 25) % 360;
+      item->setBackground(QColor::fromHsl(hue, 40, 240));
+    }
+  }
+
+  if (_effect_list->count() > 0)
+    _effect_list->setCurrentRow(0);
 }
 } // namespace Ui
 } // namespace Noggit

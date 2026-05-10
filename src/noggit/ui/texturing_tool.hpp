@@ -11,9 +11,12 @@
 
 #include <QJsonObject>
 #include <QtWidgets/QCheckBox>
+#include <QtWidgets/QComboBox>
 #include <QtWidgets/QDial>
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QGroupBox>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QListWidget>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
 
@@ -27,6 +30,14 @@ class current_texture;
 class texture_swapper;
 
 enum class texturing_mode { paint, swap, anim };
+
+struct GroundEffectEntry {
+  unsigned int effectID;
+  unsigned int terrainType;
+  QString label;
+};
+
+std::vector<GroundEffectEntry> buildGroundEffectList();
 
 class texturing_tool : public QWidget {
 public:
@@ -70,7 +81,6 @@ public:
              scoped_blp_texture_reference texture);
 
   QGroupBox *_ground_effect_group;
-  QSpinBox *_effect_id_spinner;
 
   Brush const &texture_brush() const { return _texture_brush; }
 
@@ -96,7 +106,10 @@ private:
   void change_tex_flag(World *world, glm::vec3 const &pos, bool add,
                        scoped_blp_texture_reference texture);
 
-  // slider functions
+  unsigned int selectedEffectID() const;
+
+  void filterEffectList(const QString &filter);
+
   void update_brush_hardness();
   void set_radius(float radius);
   void update_spray_brush();
@@ -117,6 +130,8 @@ private:
   BoolToggleProperty _overbright_prop;
 
   texturing_mode _texturing_mode;
+
+  std::vector<GroundEffectEntry> _effect_entries;
 
 private:
   QSlider *_brush_level_slider;
@@ -145,6 +160,9 @@ private:
 
   QImage _mask_image;
   MapView *_map_view;
+
+  QLineEdit *_effect_filter;
+  QListWidget *_effect_list;
 };
 } // namespace Ui
 } // namespace Noggit
