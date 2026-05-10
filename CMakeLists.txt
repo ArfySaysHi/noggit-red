@@ -100,7 +100,11 @@ FIND_PACKAGE(Lua REQUIRED)
 FIND_PACKAGE(StormLib REQUIRED)
 FIND_PACKAGE(CascLib REQUIRED)
 #External packages
-set(OpenGL_GL_PREFERENCE GLVND)
+# Prefer GLVND (modern OpenGL dispatch) over legacy libGL on Linux
+if(UNIX AND NOT APPLE)
+  cmake_policy(SET CMP0072 NEW)
+  set(OpenGL_GL_PREFERENCE GLVND)
+endif()
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(Json REQUIRED)
 FIND_PACKAGE(lodepng REQUIRED)
