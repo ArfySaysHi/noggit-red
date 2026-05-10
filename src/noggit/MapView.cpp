@@ -572,7 +572,7 @@ void MapView::setupTexturePainterUi()
   // Connects
   connect( texturingTool->texture_swap_tool()->texture_display()
     , &Noggit::Ui::current_texture::texture_dropped
-    , [=] (std::string const& filename)
+    , [=, this] (std::string const& filename)
            {
              makeCurrent();
              OpenGL::context::scoped_setter const _(::gl, context());
@@ -583,7 +583,7 @@ void MapView::setupTexturePainterUi()
 
   connect( texturingTool->_current_texture
     , &Noggit::Ui::current_texture::texture_dropped
-    , [=] (std::string const& filename)
+    , [=, this] (std::string const& filename)
            {
              makeCurrent();
              OpenGL::context::scoped_setter const _(::gl, context());
@@ -593,7 +593,7 @@ void MapView::setupTexturePainterUi()
   );
 
   connect(texturingTool->_current_texture, &Noggit::Ui::current_texture::clicked
-    , [=]
+    , [=, this]
           {
             _texture_browser_dock->setVisible(!_texture_browser_dock->isVisible());
           }
@@ -613,7 +613,7 @@ void MapView::setupTexturePainterUi()
   _texture_browser_dock->hide();
 
   connect(_texture_browser_dock, &QDockWidget::visibilityChanged,
-          [=](bool visible)
+          [=, this](bool visible)
           {
             if (ui_hidden)
               return;
@@ -630,7 +630,7 @@ void MapView::setupTexturePainterUi()
   connect(this, &QObject::destroyed, TexturePalette, &QObject::deleteLater);
 
   connect(TexturePalette, &Noggit::Ui::tileset_chooser::selected
-    , [=](std::string const& filename)
+    , [=, this](std::string const& filename)
           {
             makeCurrent();
             OpenGL::context::scoped_setter const _(::gl, context());
@@ -679,7 +679,7 @@ void MapView::setupTexturePainterUi()
   // End Dock
 
   connect(_texture_palette_dock, &QDockWidget::visibilityChanged,
-          [=](bool visible)
+          [=, this](bool visible)
           {
             if (ui_hidden)
               return;
@@ -689,7 +689,7 @@ void MapView::setupTexturePainterUi()
           });
 
   connect(_texture_palette_small, &Noggit::Ui::texture_palette_small::selected
-    , [=](std::string const& filename)
+    , [=, this](std::string const& filename)
           {
             makeCurrent();
             OpenGL::context::scoped_setter const _(::gl, context());
@@ -719,7 +719,7 @@ void MapView::setupTexturePainterUi()
   );
 
   connect(texturingTool->_current_texture, &Noggit::Ui::current_texture::texture_updated
-          , [=]()
+          , [=, this]()
       {
        _world->notifyTileRendererOnSelectedTextureChange();
       }
@@ -745,7 +745,7 @@ void MapView::setupTexturePainterUi()
 
   connect( TexturePicker
     , &Noggit::Ui::texture_picker::set_texture
-    , [=] (scoped_blp_texture_reference texture)
+    , [=, this] (scoped_blp_texture_reference texture)
            {
              makeCurrent();
              OpenGL::context::scoped_setter const _(::gl, context());
@@ -753,7 +753,7 @@ void MapView::setupTexturePainterUi()
            }
   );
   connect(TexturePicker, &Noggit::Ui::texture_picker::shift_left
-    , [=]
+    , [=, this]
           {
             makeCurrent();
             OpenGL::context::scoped_setter const _(::gl, context());
@@ -761,7 +761,7 @@ void MapView::setupTexturePainterUi()
           }
   );
   connect(TexturePicker, &Noggit::Ui::texture_picker::shift_right
-    , [=]
+    , [=, this]
           {
             makeCurrent();
             OpenGL::context::scoped_setter const _(::gl, context());
@@ -873,7 +873,7 @@ void MapView::setupObjectEditorUi()
   // End Dock
 
   connect(_object_palette_dock, &QDockWidget::visibilityChanged,
-          [=](bool visible)
+          [=, this](bool visible)
           {
             if (ui_hidden)
               return;
@@ -921,7 +921,7 @@ void MapView::setupNodeEditor()
   _node_editor_dock->setVisible(_settings->value ("map_view/node_editor", false).toBool());
 
   connect(_node_editor_dock, &QDockWidget::visibilityChanged,
-          [=](bool visible)
+          [=, this](bool visible)
           {
             if (ui_hidden)
               return;
@@ -970,7 +970,7 @@ void MapView::setupAssetBrowser()
     Qt::WindowStaysOnTopHint);
 
   connect(_asset_browser_dock, &QDockWidget::visibilityChanged,
-          [=](bool visible)
+          [=, this](bool visible)
           {
             if (ui_hidden)
               return;
@@ -1279,7 +1279,7 @@ void MapView::setupAssistMenu()
 
   ADD_ACTION_NS ( assist_menu
   , "Ensure 4 texture layers"
-  , [=]
+  , [=, this]
     {
       makeCurrent();
       OpenGL::context::scoped_setter const _(::gl, context());
@@ -1430,7 +1430,7 @@ void MapView::setupAssistMenu()
   heightmap_export_params_layout->addWidget(heightmap_export_okay);
 
   connect(heightmap_export_min, qOverload<double>(&QDoubleSpinBox::valueChanged),
-          [=](double value)
+          [=, this](double value)
           {
             if (!(heightmap_export_max->value() > value))
               heightmap_export_max->setValue(value + 1.0);
@@ -1438,7 +1438,7 @@ void MapView::setupAssistMenu()
           });
 
   connect(heightmap_export_max, qOverload<double>(&QDoubleSpinBox::valueChanged),
-          [=](double value)
+          [=, this](double value)
           {
             if (!(heightmap_export_min->value() < value))
               heightmap_export_min->setValue(value - 1.0);
@@ -1446,7 +1446,7 @@ void MapView::setupAssistMenu()
           });
 
   connect(heightmap_export_okay, &QPushButton::clicked
-    ,[=]()
+    ,[=, this]()
     {
       heightmap_export_params->accept();
 
@@ -1456,7 +1456,7 @@ void MapView::setupAssistMenu()
 
   ADD_ACTION_NS ( cur_adt_export_menu
   , "Export heightmap"
-  , [=]
+  , [=, this]
               {
                 QPoint new_pos = QCursor::pos();
 
@@ -1503,7 +1503,7 @@ void MapView::setupAssistMenu()
   adt_import_params_layout->addWidget(adt_import_params_okay);
 
   connect(adt_import_params_okay, &QPushButton::clicked
-    ,[=]()
+    ,[=, this]()
     {
       adt_import_params->accept();
 
@@ -1511,7 +1511,7 @@ void MapView::setupAssistMenu()
 
   ADD_ACTION_NS ( cur_adt_import_menu
   , "Import alphamap (file)"
-  , [=]
+  , [=, this]
                   {
                     QPoint new_pos = QCursor::pos();
 
@@ -1548,7 +1548,7 @@ void MapView::setupAssistMenu()
 
   ADD_ACTION_NS ( cur_adt_import_menu
   , "Import alphamap"
-  , [=]
+  , [=, this]
     {
 
         makeCurrent();
@@ -1582,7 +1582,7 @@ void MapView::setupAssistMenu()
   adt_import_height_params_layout->addWidget(adt_import_height_params_okay);
 
   connect(adt_import_height_params_okay, &QPushButton::clicked
-    ,[=]()
+    ,[=, this]()
           {
             adt_import_height_params->accept();
 
@@ -1590,7 +1590,7 @@ void MapView::setupAssistMenu()
 
   ADD_ACTION_NS ( cur_adt_import_menu
   , "Import heightmap (file)"
-  , [=]
+  , [=, this]
       {
         if (adt_import_height_params->exec() == QDialog::Accepted)
         {
@@ -1620,7 +1620,7 @@ void MapView::setupAssistMenu()
 
   ADD_ACTION_NS ( cur_adt_import_menu
   , "Import heightmap"
-  , [=]
+  , [=, this]
       {
         if (adt_import_height_params->exec() == QDialog::Accepted)
         {
@@ -1652,7 +1652,7 @@ void MapView::setupAssistMenu()
   adt_import_vcol_params_layout->addWidget(adt_import_vcol_params_okay);
 
   connect(adt_import_vcol_params_okay, &QPushButton::clicked
-    ,[=]()
+    ,[=, this]()
           {
             adt_import_vcol_params->accept();
 
@@ -1661,7 +1661,7 @@ void MapView::setupAssistMenu()
 
   ADD_ACTION_NS ( cur_adt_import_menu
   , "Import vertex color map (file)"
-  , [=]
+  , [=, this]
     {
       if (adt_import_vcol_params->exec() == QDialog::Accepted)
       {
@@ -1690,7 +1690,7 @@ void MapView::setupAssistMenu()
 
   ADD_ACTION_NS ( cur_adt_import_menu
   , "Import vertex color map"
-  , [=]
+  , [=, this]
       {
         if (adt_import_vcol_params->exec() == QDialog::Accepted)
         {
@@ -1752,7 +1752,7 @@ void MapView::setupAssistMenu()
 
   ADD_ACTION_NS ( assist_menu
   , "Ensure 4 texture layers"
-  , [=]
+  , [=, this]
       {
         DESTRUCTIVE_ACTION
         (
@@ -1844,7 +1844,7 @@ void MapView::setupAssistMenu()
 
   ADD_ACTION_NS ( all_adts_import_menu
   , "Import heightmaps"
-  , [=]
+  , [=, this]
     {
       if (adt_import_height_params->exec() == QDialog::Accepted)
       {
@@ -1863,7 +1863,7 @@ void MapView::setupAssistMenu()
 
   ADD_ACTION_NS ( all_adts_import_menu
   , "Import vertex color maps"
-  , [=]
+  , [=, this]
   {
     if (adt_import_vcol_params->exec() == QDialog::Accepted)
     {
@@ -1884,7 +1884,7 @@ void MapView::setupAssistMenu()
 
   ADD_ACTION_NS ( debug_menu
   , "Load all tiles"
-  , [=]
+  , [=, this]
   {
     makeCurrent();
     OpenGL::context::scoped_setter const _(::gl, context());
@@ -1909,21 +1909,21 @@ void MapView::setupViewMenu()
   ADD_TOGGLE (view_menu, "WMOs",        Qt::Key_F6, _draw_wmo);
 
   ADD_TOGGLE_POST (view_menu, "Lines", Qt::Key_F7, _draw_lines,
-                   [=]
+                   [=, this]
                    {
                      _world->renderer()->getTerrainParamsUniformBlock()->draw_lines = _draw_lines.get();
                      _world->renderer()->markTerrainParamsUniformBlockDirty();
                    });
 
   ADD_TOGGLE_POST (view_menu, "Contours", Qt::Key_F9, _draw_contour,
-                   [=]
+                   [=, this]
                    {
                      _world->renderer()->getTerrainParamsUniformBlock()->draw_terrain_height_contour = _draw_contour.get();
                      _world->renderer()->markTerrainParamsUniformBlockDirty();
                    });
 
   ADD_TOGGLE_POST (view_menu, "Wireframe", Qt::Key_F10, _draw_wireframe,
-                   [=]
+                   [=, this]
                    {
                      _world->renderer()->getTerrainParamsUniformBlock()->draw_wireframe = _draw_wireframe.get();
                      _world->renderer()->markTerrainParamsUniformBlockDirty();
@@ -1933,28 +1933,28 @@ void MapView::setupViewMenu()
   ADD_TOGGLE (view_menu, "Draw fog", Qt::Key_F12, _draw_fog);
 
   ADD_TOGGLE_POST (view_menu, "Hole lines", Qt::SHIFT | Qt::Key_F1, _draw_hole_lines,
-                   [=]
+                   [=, this]
                    {
                      _world->renderer()->getTerrainParamsUniformBlock()->draw_hole_lines = _draw_hole_lines.get();
                      _world->renderer()->markTerrainParamsUniformBlockDirty();
                    });
 
   ADD_TOGGLE_POST(view_menu, "Climb", Qt::SHIFT | Qt::Key_F2, _draw_climb,
-                  [=]
+                  [=, this]
                   {
                       _world->renderer()->getTerrainParamsUniformBlock()->draw_impassible_climb = _draw_climb.get();
                       _world->renderer()->markTerrainParamsUniformBlockDirty();
                   });
 
   ADD_TOGGLE_POST(view_menu, "Vertex Color", Qt::SHIFT | Qt::Key_F3, _draw_vertex_color,
-      [=]
+      [=, this]
       {
           _world->renderer()->getTerrainParamsUniformBlock()->draw_vertex_color = _draw_vertex_color.get();
           _world->renderer()->markTerrainParamsUniformBlockDirty();
       });
 
   ADD_TOGGLE_POST(view_menu, "Baked Shadows", Qt::SHIFT | Qt::Key_F4, _draw_baked_shadows,
-      [=]
+      [=, this]
       {
           _world->renderer()->getTerrainParamsUniformBlock()->draw_shadows = _draw_baked_shadows.get();
           _world->renderer()->markTerrainParamsUniformBlockDirty();
@@ -1992,7 +1992,7 @@ void MapView::setupViewMenu()
   view_menu->addAction(createTextSeparator("Windows"));
   view_menu->addSeparator();
 
-  auto hide_widgets = [=]
+  auto hide_widgets = [=, this]
   {
 
     QWidget *widget_list[] =
@@ -2733,43 +2733,43 @@ MapView::MapView( math::degrees camera_yaw0
   connect ( this
           , &QObject::destroyed
           , _main_window
-          , [=] { _main_window->statusBar()->removeWidget (_status_position); }
+          , [=, this] { _main_window->statusBar()->removeWidget (_status_position); }
           );
   _main_window->statusBar()->addWidget (_status_selection);
   connect ( this
           , &QObject::destroyed
           , _main_window
-          , [=] { _main_window->statusBar()->removeWidget (_status_selection); }
+          , [=, this] { _main_window->statusBar()->removeWidget (_status_selection); }
           );
   _main_window->statusBar()->addWidget (_status_area);
   connect ( this
           , &QObject::destroyed
           , _main_window
-          , [=] { _main_window->statusBar()->removeWidget (_status_area); }
+          , [=, this] { _main_window->statusBar()->removeWidget (_status_area); }
           );
   _main_window->statusBar()->addWidget (_status_time);
   connect ( this
           , &QObject::destroyed
           , _main_window
-          , [=] { _main_window->statusBar()->removeWidget (_status_time); }
+          , [=, this] { _main_window->statusBar()->removeWidget (_status_time); }
           );
   _main_window->statusBar()->addWidget (_status_fps);
   connect ( this
           , &QObject::destroyed
           , _main_window
-          , [=] { _main_window->statusBar()->removeWidget (_status_fps); }
+          , [=, this] { _main_window->statusBar()->removeWidget (_status_fps); }
           );
   _main_window->statusBar()->addWidget (_status_culling);
   connect ( this
       , &QObject::destroyed
       , _main_window
-      , [=] { _main_window->statusBar()->removeWidget (_status_culling); }
+      , [=, this] { _main_window->statusBar()->removeWidget (_status_culling); }
   );
   _main_window->statusBar()->addWidget(_status_database);
   connect(this
       , &QObject::destroyed
       , _main_window
-      , [=] { _main_window->statusBar()->removeWidget(_status_database); }
+      , [=, this] { _main_window->statusBar()->removeWidget(_status_database); }
   );
 
   setContextMenuPolicy(Qt::NoContextMenu);
@@ -2793,7 +2793,7 @@ MapView::MapView( math::degrees camera_yaw0
   std::cout << "FPS limit is set to : " << _fps_limit << " (" << _fps_calcul << ")" << std::endl;
 
   _update_every_event_loop.start (_fps_calcul);
-  connect(&_update_every_event_loop, &QTimer::timeout,[=]{ _needs_redraw = true; update(); });
+  connect(&_update_every_event_loop, &QTimer::timeout,[=, this]{ _needs_redraw = true; update(); });
   createGUI();
 }
 
@@ -2992,7 +2992,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
         _main_window->statusBar()->addPermanentWidget(cancel_btn);
 
         connect(this, &MapView::updateProgress,
-                [=](int value)
+                [=, this](int value)
                 {
 
                   progress->setValue(value);
@@ -3102,7 +3102,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
         _main_window->statusBar()->addPermanentWidget(cancel_btn);
 
         connect(this, &MapView::updateProgress,
-                [=](int value)
+                [=, this](int value)
                 {
                   // This weirdness is required due to a bug on Linux when QT repaint crashes due to too many events
                   // being passed through. TODO: this potentially only masks the issue, which may reappear on faster
@@ -5617,7 +5617,7 @@ void MapView::ShowContextMenu(QPoint pos)
     QAction action_undo("Undo", this);
     menu->addAction(&action_undo);
     action_undo.setShortcut(QKeySequence::Undo);
-    QObject::connect(&action_undo, &QAction::triggered, [=]()
+    QObject::connect(&action_undo, &QAction::triggered, [=, this]()
         {
             NOGGIT_ACTION_MGR->undo();
         });
@@ -5625,7 +5625,7 @@ void MapView::ShowContextMenu(QPoint pos)
     QAction action_redo("Redo", this);
     menu->addAction(&action_redo);
     action_redo.setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Z));
-    QObject::connect(&action_redo, &QAction::triggered, [=]()
+    QObject::connect(&action_redo, &QAction::triggered, [=, this]()
         {
             NOGGIT_ACTION_MGR->redo();
         });
@@ -5642,7 +5642,7 @@ void MapView::ShowContextMenu(QPoint pos)
         menu->addAction(&action_8);
         action_8.setEnabled(has_selected_objects);
         action_8.setShortcut(QKeySequence::Copy);
-        QObject::connect(&action_8, &QAction::triggered, [=]()
+        QObject::connect(&action_8, &QAction::triggered, [=, this]()
             {
                 if (terrainMode == editing_mode::object && !NOGGIT_CUR_ACTION)
                     objectEditor->copy_current_selection(_world.get());
@@ -5653,7 +5653,7 @@ void MapView::ShowContextMenu(QPoint pos)
         menu->addAction(&action_9);
         action_9.setEnabled(has_copied_objects);
         action_9.setShortcut(QKeySequence::Paste); // (Qt::CTRL | Qt::Key_P)
-        QObject::connect(&action_9, &QAction::triggered, [=]()
+        QObject::connect(&action_9, &QAction::triggered, [=, this]()
             {
                 if (terrainMode == editing_mode::object && !NOGGIT_CUR_ACTION)
                 {
@@ -5668,7 +5668,7 @@ void MapView::ShowContextMenu(QPoint pos)
         menu->addAction(&action_10);
         action_10.setEnabled(has_selected_objects);
         action_10.setShortcut(QKeySequence::Delete); // (Qt::CTRL | Qt::Key_P)
-        QObject::connect(&action_10, &QAction::triggered, [=]()
+        QObject::connect(&action_10, &QAction::triggered, [=, this]()
             {
                 if (terrainMode == editing_mode::object && !NOGGIT_CUR_ACTION)
                 {
@@ -5683,7 +5683,7 @@ void MapView::ShowContextMenu(QPoint pos)
         menu->addAction(&action_11);
         action_11.setEnabled(has_copied_objects);
         action_11.setShortcut(QKeySequence(Qt::CTRL | Qt::Key_B)); // (Qt::CTRL | Qt::Key_P)
-        QObject::connect(&action_11, &QAction::triggered, [=]()
+        QObject::connect(&action_11, &QAction::triggered, [=, this]()
             {
                 if (terrainMode == editing_mode::object && !NOGGIT_CUR_ACTION)
                 {
@@ -5701,7 +5701,7 @@ void MapView::ShowContextMenu(QPoint pos)
         action_1.setToolTip("Warning : Doing actions on models overlapping unloaded tiles can cause crash");
         menu->addAction(&action_1);
         action_1.setEnabled(_world->get_selected_model_count() == 1);
-        QObject::connect(&action_1, &QAction::triggered, [=]()
+        QObject::connect(&action_1, &QAction::triggered, [=, this]()
             {
                 auto last_entry = _world->get_last_selected_model();
                 if (last_entry)
@@ -5749,7 +5749,7 @@ void MapView::ShowContextMenu(QPoint pos)
         menu->addAction(&action_2);
         action_2.setEnabled(has_selected_objects);
         action_2.setShortcut(Qt::Key_H);
-        QObject::connect(&action_2, &QAction::triggered, [=]()
+        QObject::connect(&action_2, &QAction::triggered, [=, this]()
             {
                 if (_world->has_selection())
                 {
@@ -5771,7 +5771,7 @@ void MapView::ShowContextMenu(QPoint pos)
         QAction action_palette_add("Add Object To Palette", this);
         menu->addAction(&action_palette_add);
         action_palette_add.setEnabled(_world->get_selected_model_count() == 1);
-        QObject::connect(&action_palette_add, &QAction::triggered, [=]()
+        QObject::connect(&action_palette_add, &QAction::triggered, [=, this]()
             {
                 auto last_entry = _world->get_last_selected_model();
                 if (last_entry)
@@ -5794,7 +5794,7 @@ void MapView::ShowContextMenu(QPoint pos)
         menu->addAction(&action_replace);
         action_replace.setEnabled(has_selected_objects && objectEditor->clipboardSize() == 1);
         action_replace.setToolTip("Replace the currently selected objects by the object in the clipboard (There must only be one!). M2s can only be replaced by m2s");
-        QObject::connect(&action_replace, &QAction::triggered, [=]()
+        QObject::connect(&action_replace, &QAction::triggered, [=, this]()
             {
                 if (terrainMode != editing_mode::object && NOGGIT_CUR_ACTION)
                     return;
@@ -5875,7 +5875,7 @@ void MapView::ShowContextMenu(QPoint pos)
         menu->addAction(&action_snap);
         action_snap.setEnabled(has_selected_objects);
         action_snap.setShortcut(Qt::Key_PageDown); // (Qt::CTRL | Qt::Key_P)
-        QObject::connect(&action_snap, &QAction::triggered, [=]()
+        QObject::connect(&action_snap, &QAction::triggered, [=, this]()
             {
                 if (terrainMode == editing_mode::object && !NOGGIT_CUR_ACTION)
                 {
@@ -5888,7 +5888,7 @@ void MapView::ShowContextMenu(QPoint pos)
         QAction action_save_obj_coords("Save objects coords(to file)", this);
         menu->addAction(&action_save_obj_coords);
         action_save_obj_coords.setEnabled(has_selected_objects);
-        QObject::connect(&action_save_obj_coords, &QAction::triggered, [=]()
+        QObject::connect(&action_save_obj_coords, &QAction::triggered, [=, this]()
             {
                 if (terrainMode == editing_mode::object)
                 {
@@ -5964,7 +5964,7 @@ void MapView::ShowContextMenu(QPoint pos)
             }
         }
         action_group.setEnabled(groupable);
-        QObject::connect(&action_group, &QAction::triggered, [=]()
+        QObject::connect(&action_group, &QAction::triggered, [=, this]()
             {
                 // remove all groups the objects are already in and create a new one
                 // for (auto obj : _world->get_selected_objects())
@@ -6001,7 +6001,7 @@ void MapView::ShowContextMenu(QPoint pos)
             }
         }
         action_ungroup.setEnabled(group_selected);
-        QObject::connect(&action_ungroup, &QAction::triggered, [=]()
+        QObject::connect(&action_ungroup, &QAction::triggered, [=, this]()
             {
                 _world->clear_selection_groups();
             });
