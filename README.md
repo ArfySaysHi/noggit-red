@@ -37,7 +37,7 @@ mkdir build && cd build
 Next configure cmake for Ninja and add flags etc:
 
 ```bash
-cmake .. -G Ninja \                                                              3s
+cmake .. -G Ninja \
   -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DUSE_SQL=OFF \
   -DNOGGIT_ENABLE_TRACY_PROFILER=OFF \
