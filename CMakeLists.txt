@@ -142,18 +142,29 @@ endif()
 
 collect_files(resource_files resources FALSE "*.qrc" "")
 
-collect_files(ui_files src TRUE "*.ui" "")
-
 # Libraries
-add_library(blizzard-archive-library STATIC
-${archive_sources}
-${archive_headers}
+add_library(blizzard-archive-library STATIC)
+target_sources(blizzard-archive-library PRIVATE
+    ${CMAKE_SOURCE_DIR}/src/external/blizzard-archive-library/src/CASCArchive.cpp
+    ${CMAKE_SOURCE_DIR}/src/external/blizzard-archive-library/src/BaseArchive.cpp
+    ${CMAKE_SOURCE_DIR}/src/external/blizzard-archive-library/src/ClientData.cpp
 )
+target_include_directories(blizzard-archive-library PUBLIC
+    ${CMAKE_SOURCE_DIR}/src/external/blizzard-archive-library/include
+    ${CMAKE_SOURCE_DIR}/src/external/blizzard-archive-library/src
+)
+target_compile_features(blizzard-archive-library PUBLIC cxx_std_20)
 
-add_library(blizzard-database-library STATIC
-${database_sources}
-${database_headers}
+add_library(blizzard-database-library STATIC)
+file(GLOB_RECURSE DB_SOURCES
+    CONFIGURE_DEPENDS
+    ${CMAKE_SOURCE_DIR}/src/external/blizzard-database-library/src/*.cpp
 )
+target_sources(blizzard-database-library PRIVATE ${DB_SOURCES})
+target_include_directories(blizzard-database-library PUBLIC
+    ${CMAKE_SOURCE_DIR}/src/external/blizzard-database-library/include
+)
+target_compile_features(blizzard-database-library PUBLIC cxx_std_20)
 
 # Main Executable
 if(WIN32)
@@ -189,7 +200,6 @@ ${gradienteditor_headers}
 ${tracy_sources}
 ${tracy_headers}
 ${resource_files}
-${ui_files}
 ${shaders}
 ${os_sources}
 ${os_headers}
@@ -422,6 +432,7 @@ set_target_properties(noggit PROPERTIES
     AUTOMOC ON
     AUTOUIC ON
     AUTORCC ON
+    AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/src/noggit/ui"
 )
 
 # Fast Build Options
