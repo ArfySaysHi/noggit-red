@@ -17,15 +17,15 @@
 #include <map>
 #include <math/frustum.hpp>
 #include <noggit/ActionManager.hpp>
-#include <noggit/Brush.h> // brush
+#include <noggit/Brush.h>
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
-#include <noggit/ModelManager.h> // ModelManager
+#include <noggit/ModelManager.h>
 #include <noggit/TextureManager.h>
-#include <noggit/WMOInstance.h> // WMOInstance
+#include <noggit/WMOInstance.h>
 #include <noggit/application/NoggitApplication.hpp>
 #include <noggit/project/CurrentProject.hpp>
 #include <noggit/texture_set.hpp>
