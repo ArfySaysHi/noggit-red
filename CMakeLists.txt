@@ -154,6 +154,10 @@ target_sources(blizzard-archive-library PRIVATE
     ${CMAKE_SOURCE_DIR}/src/external/blizzard-archive-library/src/CASCArchive.cpp
     ${CMAKE_SOURCE_DIR}/src/external/blizzard-archive-library/src/BaseArchive.cpp
     ${CMAKE_SOURCE_DIR}/src/external/blizzard-archive-library/src/ClientData.cpp
+    ${CMAKE_SOURCE_DIR}/src/external/blizzard-archive-library/src/ClientFile.cpp
+    ${CMAKE_SOURCE_DIR}/src/external/blizzard-archive-library/src/Listfile.cpp
+    ${CMAKE_SOURCE_DIR}/src/external/blizzard-archive-library/src/MPQArchive.cpp
+    ${CMAKE_SOURCE_DIR}/src/external/blizzard-archive-library/src/DirectoryArchive.cpp
 )
 target_include_directories(blizzard-archive-library PUBLIC
     ${CMAKE_SOURCE_DIR}/src/external/blizzard-archive-library/include
