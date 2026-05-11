@@ -37,7 +37,15 @@ mkdir build && cd build
 Next configure cmake for Ninja and add flags etc:
 
 ```bash
-cmake .. -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_SQL=OFF -DNOGGIT_ENABLE_TRACY_PROFILER=OFF -DNOGGIT_LOGTOCONSOLE=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+cmake .. -G Ninja \                                                              3s
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+  -DUSE_SQL=OFF \
+  -DNOGGIT_ENABLE_TRACY_PROFILER=OFF \
+  -DNOGGIT_LOGTOCONSOLE=ON \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+  -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+  -DCMAKE_WARN_DEPRECATED=OFF \
+-Wno-dev
 ```
 
 Build the binary using ninja:
