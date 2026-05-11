@@ -7,7 +7,7 @@
 # █████  ░░█████ ░░░███████░   ░░█████████  ░░█████████  █████    █████       █████   █████ ██████████ ██████████
 #░░░░░    ░░░░░    ░░░░░░░      ░░░░░░░░░    ░░░░░░░░░  ░░░░░    ░░░░░       ░░░░░   ░░░░░ ░░░░░░░░░░ ░░░░░░░░░░
 
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 4.0)
 
 project(Noggit
 VERSION 1.0
@@ -17,17 +17,17 @@ LANGUAGES C CXX
 
 # Global Configuration
 cmake_policy(SET CMP0057 NEW)
-cmake_policy(SET CMP0177 NEW)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
-set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
-set(EXTERNAL_SOURCE_DIR "src/external")
+set(EXTERNAL_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/external")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -58,7 +58,6 @@ option(FAST_BUILD_NOGGIT_JUMBO "Use unity builds for Noggit" OFF)
 includePlatform("prefind")
 
 if(UNIX AND NOT APPLE)
-cmake_policy(SET CMP0072 NEW)
 set(OpenGL_GL_PREFERENCE GLVND)
 endif()
 
@@ -231,9 +230,6 @@ SYSTEM PRIVATE
 
 
 )
-
-# Compile Features
-target_compile_features(noggit PRIVATE cxx_std_20)
 
 # Compiler Definitions
 if(VALIDATE_OPENGL_PROGRAMS)
