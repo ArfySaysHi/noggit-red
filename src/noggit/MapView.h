@@ -1,110 +1,96 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #pragma once
 
+#include <external/qtimgui/QtImGui.h>
 #include <math/ray.hpp>
-#include <noggit/Misc.h>
-#include <noggit/Selection.h>
 #include <noggit/BoolToggleProperty.hpp>
 #include <noggit/Camera.hpp>
+#include <noggit/Misc.h>
+#include <noggit/Selection.h>
+#include <noggit/TabletManager.hpp>
 #include <noggit/tool_enums.hpp>
-#include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/MinimapCreator.hpp>
+#include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/UidFixWindow.hpp>
-#include <noggit/unsigned_int_property.hpp>
 #include <noggit/ui/tools/AssetBrowser/Ui/AssetBrowser.hpp>
+#include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
 #include <noggit/ui/tools/ViewportGizmo/ViewportGizmo.hpp>
 #include <noggit/ui/tools/ViewportManager/ViewportManager.hpp>
-#include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
-#include <noggit/TabletManager.hpp>
-#include <external/qtimgui/QtImGui.h>
-#include <opengl/texture.hpp>
+#include <noggit/unsigned_int_property.hpp>
 #include <opengl/scoped.hpp>
+#include <opengl/texture.hpp>
 #include <optional>
 
+#include <QOpenGLContext>
+#include <QWidgetAction>
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QSettings>
 #include <QtCore/QTimer>
 #include <QtWidgets/QDockWidget>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QOpenGLWidget>
-#include <QWidgetAction>
-#include <QOpenGLContext>
 
+#include <array>
 #include <forward_list>
 #include <map>
+#include <optional>
+#include <thread>
 #include <unordered_map>
 #include <unordered_set>
-#include <thread>
-#include <array>
-#include <optional>
 
 #include <ui_MapViewOverlay.h>
 
-
 class World;
 
-namespace Noggit::Ui::Windows
-{
-    class NoggitWindow;
+namespace Noggit::Ui::Windows {
+class NoggitWindow;
 }
 
-namespace Noggit
-{
+namespace Noggit {
 
-  namespace Ui::Tools::ViewToolbar::Ui
-  {
-    class ViewToolbar;
-  }
-
-  namespace Ui::Tools
-  {
-    class BrushStack;
-    class LightEditor;
-
-    namespace ChunkManipulator
-    {
-      class ChunkManipulatorPanel;
-    }
-  }
-
-  namespace Scripting
-  {
-    class scripting_tool;
-  }
-
-  class Camera;
-
-	
-  namespace Ui
-  {
-    class detail_infos;
-    class flatten_blur_tool;
-    class help;
-    class minimap_widget;
-    class ShaderTool;
-    class TerrainTool;
-    class texture_picker;
-    class texturing_tool;
-    class toolbar;
-    class water;
-    class zone_id_browser;
-    class texture_palette_small;
-    class hole_tool;
-    struct tileset_chooser;
-    class ObjectPalette;
-  }
+namespace Ui::Tools::ViewToolbar::Ui {
+class ViewToolbar;
 }
 
-enum class save_mode
-{
-  current,
-  changed,
-  all
-};
+namespace Ui::Tools {
+class BrushStack;
+class LightEditor;
 
-class MapView : public Noggit::Ui::Tools::ViewportManager::Viewport
-{
+namespace ChunkManipulator {
+class ChunkManipulatorPanel;
+}
+} // namespace Ui::Tools
+
+namespace Scripting {
+class scripting_tool;
+}
+
+class Camera;
+
+namespace Ui {
+class detail_infos;
+class flatten_blur_tool;
+class help;
+class minimap_widget;
+class ShaderTool;
+class TerrainTool;
+class texture_picker;
+class texturing_tool;
+class toolbar;
+class water;
+class zone_id_browser;
+class texture_palette_small;
+class hole_tool;
+struct tileset_chooser;
+class ObjectPalette;
+} // namespace Ui
+} // namespace Noggit
+
+enum class save_mode { current, changed, all };
+
+class MapView : public Noggit::Ui::Tools::ViewportManager::Viewport {
   Q_OBJECT
 public:
   bool _mod_alt_down = false;
@@ -113,15 +99,14 @@ public:
   bool _mod_space_down = false;
   bool _mod_num_down = false;
 
-  bool  leftMouse = false;
-  bool  leftClicked = false;
-  bool  rightMouse = false;
+  bool leftMouse = false;
+  bool leftClicked = false;
+  bool rightMouse = false;
 
   std::unique_ptr<World> _world;
   Noggit::Camera _camera;
 
 private:
-
   float _2d_zoom = 1.f;
   float moving, strafing, updown, mousedir, turn, lookat;
   CursorType _cursorType;
@@ -134,12 +119,13 @@ private:
 
   bool _camera_moved_since_last_draw = true;
 
-  std::array<Qt::Key, 6> _inputs = {Qt::Key_W, Qt::Key_S, Qt::Key_D, Qt::Key_A, Qt::Key_Q, Qt::Key_E};
+  std::array<Qt::Key, 6> _inputs = {Qt::Key_W, Qt::Key_S, Qt::Key_D,
+                                    Qt::Key_A, Qt::Key_Q, Qt::Key_E};
   void checkInputsSettings();
 
 public:
   Noggit::BoolToggleProperty _draw_vertex_color = {true};
-  Noggit::BoolToggleProperty _draw_baked_shadows = { true };
+  Noggit::BoolToggleProperty _draw_baked_shadows = {true};
   Noggit::BoolToggleProperty _draw_climb = {false};
   Noggit::BoolToggleProperty _draw_contour = {false};
   Noggit::BoolToggleProperty _draw_mfbo = {false};
@@ -149,7 +135,7 @@ public:
   Noggit::BoolToggleProperty _draw_wmo = {true};
   Noggit::BoolToggleProperty _draw_water = {true};
   Noggit::BoolToggleProperty _draw_wmo_doodads = {true};
-  Noggit::BoolToggleProperty _draw_wmo_exterior = { true };
+  Noggit::BoolToggleProperty _draw_wmo_exterior = {true};
   Noggit::BoolToggleProperty _draw_models = {true};
   Noggit::BoolToggleProperty _draw_model_animations = {true};
   Noggit::BoolToggleProperty _draw_hole_lines = {false};
@@ -157,12 +143,12 @@ public:
   Noggit::BoolToggleProperty _draw_fog = {false};
   Noggit::BoolToggleProperty _draw_hidden_models = {false};
   Noggit::BoolToggleProperty _draw_occlusion_boxes = {false};
-  Noggit::BoolToggleProperty _game_mode_camera = { false };
-  Noggit::BoolToggleProperty _draw_lights_zones = { false };
-  Noggit::BoolToggleProperty _show_detail_info_window = { false };
-  Noggit::BoolToggleProperty _show_minimap_window = { false };
-private:
+  Noggit::BoolToggleProperty _game_mode_camera = {false};
+  Noggit::BoolToggleProperty _draw_lights_zones = {false};
+  Noggit::BoolToggleProperty _show_detail_info_window = {false};
+  Noggit::BoolToggleProperty _show_minimap_window = {false};
 
+private:
   int _selected_area_id = -1;
 
   [[nodiscard]]
@@ -183,14 +169,14 @@ private:
 
   void createGUI();
 
-  QWidgetAction* createTextSeparator(const QString& text);
+  QWidgetAction *createTextSeparator(const QString &text);
 
   float mTimespeed;
 
   void ResetSelectedObjectRotation();
   void snap_selected_models_to_the_ground();
   void DeleteSelectedObjects();
-  void changeZoneIDValue (int set);
+  void changeZoneIDValue(int set);
 
   QPointF _last_mouse_pos;
   float mh, mv, rh, rv;
@@ -210,17 +196,17 @@ private:
   // view settings when the ground editing mode is switched on to
   // restore them if switch back again
   std::shared_ptr<Noggit::Project::NoggitProject> _project;
-  bool  alloff = true;
-  bool  alloff_models = false;
-  bool  alloff_doodads = false;
-  bool  alloff_contour = false;
-  bool  alloff_wmo = false;
-  bool  alloff_detailselect = false;
-  bool  alloff_fog = false;
-  bool  alloff_terrain = false;
-  bool  alloff_climb = false;
-  bool  alloff_vertex_color = false;
-  bool  alloff_baked_shadows = false;
+  bool alloff = true;
+  bool alloff_models = false;
+  bool alloff_doodads = false;
+  bool alloff_contour = false;
+  bool alloff_wmo = false;
+  bool alloff_detailselect = false;
+  bool alloff_fog = false;
+  bool alloff_terrain = false;
+  bool alloff_climb = false;
+  bool alloff_vertex_color = false;
+  bool alloff_baked_shadows = false;
 
   editing_mode terrainMode = editing_mode::ground;
   editing_mode saveterrainMode = terrainMode;
@@ -235,16 +221,16 @@ private:
 
   bool saving_minimap = false;
 
-  Noggit::Ui::toolbar* _toolbar;
-  Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar* _view_toolbar;
-  Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar* _secondary_toolbar;
-  Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar* _left_sec_toolbar;
+  Noggit::Ui::toolbar *_toolbar;
+  Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar *_view_toolbar;
+  Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar *_secondary_toolbar;
+  Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar *_left_sec_toolbar;
 
   void save(save_mode mode);
 
-  QSettings* _settings;
+  QSettings *_settings;
   Noggit::Ui::Tools::ViewportGizmo::ViewportGizmo _transform_gizmo;
-  ImGuiContext* _imgui_context;
+  ImGuiContext *_imgui_context;
 
 signals:
   void uid_fix_failed();
@@ -258,24 +244,20 @@ public slots:
 public:
   glm::vec4 cursor_color;
 
-  MapView ( math::degrees ah0
-          , math::degrees av0
-          , glm::vec3 camera_pos
-          , Noggit::Ui::Windows::NoggitWindow*
-          , std::shared_ptr<Noggit::Project::NoggitProject> Project
-          , std::unique_ptr<World>
-          , uid_fix_mode uid_fix = uid_fix_mode::none
-          , bool from_bookmark = false
-          );
+  MapView(math::degrees ah0, math::degrees av0, glm::vec3 camera_pos,
+          Noggit::Ui::Windows::NoggitWindow *,
+          std::shared_ptr<Noggit::Project::NoggitProject> Project,
+          std::unique_ptr<World>, uid_fix_mode uid_fix = uid_fix_mode::none,
+          bool from_bookmark = false);
   ~MapView();
 
-  void tick (float dt);
+  void tick(float dt);
   void change_selected_wmo_nameset(int set);
   void change_selected_wmo_doodadset(int set);
-  void saveMinimap(MinimapRenderSettings* settings);
+  void saveMinimap(MinimapRenderSettings *settings);
   void initMinimapSave() { saving_minimap = true; };
-  auto setBrushTexture(QImage const* img) -> void;
-  Noggit::Camera* getCamera() { return &_camera; };
+  auto setBrushTexture(QImage const *img) -> void;
+  Noggit::Camera *getCamera() { return &_camera; };
   void randomizeTerrainRotation();
   void randomizeTexturingRotation();
   void randomizeShaderRotation();
@@ -285,9 +267,11 @@ public:
   void setCameraDirty() { _camera_moved_since_last_draw = true; };
 
   [[nodiscard]]
-  Noggit::Ui::minimap_widget* getMinimapWidget() const { return _minimap;  }
+  Noggit::Ui::minimap_widget *getMinimapWidget() const {
+    return _minimap;
+  }
 
-  void set_editing_mode (editing_mode);
+  void set_editing_mode(editing_mode);
   editing_mode get_editing_mode() { return terrainMode; };
 
   [[nodiscard]]
@@ -297,32 +281,45 @@ public:
   QWidget *getLeftSecondaryToolbar();
 
   [[nodiscard]]
-  QWidget* getActiveStampModeItem();
+  QWidget *getActiveStampModeItem();
 
   [[nodiscard]]
-  Noggit::Ui::flatten_blur_tool* getFlattenTool() { return flattenTool; };
+  Noggit::Ui::flatten_blur_tool *getFlattenTool() {
+    return flattenTool;
+  };
 
   [[nodiscard]]
-  Noggit::NoggitRenderContext getRenderContext() { return _context; };
+  Noggit::NoggitRenderContext getRenderContext() {
+    return _context;
+  };
 
   [[nodiscard]]
-  World* getWorld() { return _world.get(); };
+  World *getWorld() {
+    return _world.get();
+  };
 
   [[nodiscard]]
-  QDockWidget* getAssetBrowser() {return _asset_browser_dock; };
+  QDockWidget *getAssetBrowser() {
+    return _asset_browser_dock;
+  };
 
   [[nodiscard]]
-  Noggit::Ui::object_editor* getObjectEditor() { return objectEditor; };
+  Noggit::Ui::object_editor *getObjectEditor() {
+    return objectEditor;
+  };
 
   [[nodiscard]]
-  QDockWidget* getObjectPalette() { return _object_palette_dock; };
+  QDockWidget *getObjectPalette() {
+    return _object_palette_dock;
+  };
 
   [[nodiscard]]
-  QDockWidget* getTexturePalette() { return   _texture_palette_dock; };
+  QDockWidget *getTexturePalette() {
+    return _texture_palette_dock;
+  };
 
 private:
-  enum Modifier
-  {
+  enum Modifier {
     MOD_shift = 0x01,
     MOD_ctrl = 0x02,
     MOD_alt = 0x04,
@@ -331,19 +328,21 @@ private:
     MOD_num = 0x20,
     MOD_none = 0x00
   };
-  struct HotKey
-  {
+  struct HotKey {
     Qt::Key key;
     size_t modifiers;
     std::function<void()> function;
     std::function<bool()> condition;
-    HotKey (Qt::Key k, size_t m, std::function<void()> f, std::function<bool()> c)
-      : key (k), modifiers (m), function (f), condition (c) {}
+    HotKey(Qt::Key k, size_t m, std::function<void()> f,
+           std::function<bool()> c)
+        : key(k), modifiers(m), function(f), condition(c) {}
   };
 
   std::forward_list<HotKey> hotkeys;
 
-  void addHotkey(Qt::Key key, size_t modifiers, std::function<void()> function, std::function<bool()> condition = [] { return true; });
+  void addHotkey(
+      Qt::Key key, size_t modifiers, std::function<void()> function,
+      std::function<bool()> condition = [] { return true; });
 
   QElapsedTimer _startup_time;
   qreal _last_update = 0.f;
@@ -353,45 +352,45 @@ private:
 
   QTimer _update_every_event_loop;
 
-  QOpenGLContext* _last_opengl_context;
+  QOpenGLContext *_last_opengl_context;
 
-  virtual void tabletEvent(QTabletEvent* event) override;
+  virtual void tabletEvent(QTabletEvent *event) override;
   virtual void initializeGL() override;
   virtual void paintGL() override;
-  virtual void resizeGL (int w, int h) override;
-  virtual void mouseMoveEvent (QMouseEvent*) override;
-  virtual void mousePressEvent (QMouseEvent*) override;
-  virtual void mouseReleaseEvent (QMouseEvent*) override;
-  virtual void wheelEvent (QWheelEvent*) override;
-  virtual void keyReleaseEvent (QKeyEvent*) override;
-  virtual void keyPressEvent (QKeyEvent*) override;
-  virtual void focusOutEvent (QFocusEvent*) override;
-  virtual void enterEvent(QEvent*) override;
+  virtual void resizeGL(int w, int h) override;
+  virtual void mouseMoveEvent(QMouseEvent *) override;
+  virtual void mousePressEvent(QMouseEvent *) override;
+  virtual void mouseReleaseEvent(QMouseEvent *) override;
+  virtual void wheelEvent(QWheelEvent *) override;
+  virtual void keyReleaseEvent(QKeyEvent *) override;
+  virtual void keyPressEvent(QKeyEvent *) override;
+  virtual void focusOutEvent(QFocusEvent *) override;
+  virtual void enterEvent(QEvent *) override;
 
-  Noggit::Ui::Windows::NoggitWindow* _main_window;
+  Noggit::Ui::Windows::NoggitWindow *_main_window;
 
-  glm::vec4 normalized_device_coords (int x, int y) const;
+  glm::vec4 normalized_device_coords(int x, int y) const;
   float aspect_ratio() const;
 
-  Noggit::TabletManager* _tablet_manager;
+  Noggit::TabletManager *_tablet_manager;
 
-  QLabel* _status_position;
-  QLabel* _status_selection;
-  QLabel* _status_area;
-  QLabel* _status_time;
-  QLabel* _status_fps;
-  QLabel* _status_culling;
-  QLabel* _status_database;
+  QLabel *_status_position;
+  QLabel *_status_selection;
+  QLabel *_status_area;
+  QLabel *_status_time;
+  QLabel *_status_fps;
+  QLabel *_status_culling;
+  QLabel *_status_database;
 
   Noggit::BoolToggleProperty _locked_cursor_mode = {false};
   Noggit::BoolToggleProperty _move_model_to_cursor_position = {true};
-  Noggit::BoolToggleProperty _move_model_snap_to_objects = { true };
+  Noggit::BoolToggleProperty _move_model_snap_to_objects = {true};
   Noggit::BoolToggleProperty _snap_multi_selection_to_ground = {false};
-  Noggit::BoolToggleProperty _rotate_along_ground = {true };
-  Noggit::BoolToggleProperty _rotate_doodads_along_doodads = { false };
-  Noggit::BoolToggleProperty _rotate_doodads_along_wmos = { false };
-  Noggit::BoolToggleProperty _rotate_along_ground_smooth = {true };
-  Noggit::BoolToggleProperty _rotate_along_ground_random = {false };
+  Noggit::BoolToggleProperty _rotate_along_ground = {true};
+  Noggit::BoolToggleProperty _rotate_doodads_along_doodads = {false};
+  Noggit::BoolToggleProperty _rotate_doodads_along_wmos = {false};
+  Noggit::BoolToggleProperty _rotate_along_ground_smooth = {true};
+  Noggit::BoolToggleProperty _rotate_along_ground_random = {false};
   Noggit::BoolToggleProperty _use_median_pivot_point = {true};
   Noggit::BoolToggleProperty _display_all_water_layers = {true};
   Noggit::unsigned_int_property _displayed_water_layer = {0};
@@ -405,50 +404,51 @@ private:
   Noggit::BoolToggleProperty _show_texture_palette_small_window = {false};
   Noggit::BoolToggleProperty _showStampPalette{false};
 
-  Noggit::Ui::minimap_widget* _minimap;
-  QDockWidget* _minimap_dock;
-  QDockWidget* _texture_palette_dock;
-  QDockWidget* _object_palette_dock;
+  Noggit::Ui::minimap_widget *_minimap;
+  QDockWidget *_minimap_dock;
+  QDockWidget *_texture_palette_dock;
+  QDockWidget *_object_palette_dock;
 
-  void move_camera_with_auto_height (glm::vec3 const&);
+  void move_camera_with_auto_height(glm::vec3 const &);
 
   void setToolPropertyWidgetVisibility(editing_mode mode);
 
   void unloadOpenglData() override;
 
-  Noggit::Ui::help* _keybindings;
-  Noggit::Ui::tileset_chooser* TexturePalette;
-  Noggit::Ui::detail_infos* guidetailInfos;
-  Noggit::Ui::zone_id_browser* ZoneIDBrowser;
-  Noggit::Ui::texture_palette_small* _texture_palette_small;
-  Noggit::Ui::ObjectPalette* _object_palette;
-  Noggit::Ui::texture_picker* TexturePicker;
-  Noggit::Ui::water* guiWater;
-  Noggit::Ui::object_editor* objectEditor;
-  Noggit::Ui::flatten_blur_tool* flattenTool;
-  Noggit::Ui::TerrainTool* terrainTool;
-  Noggit::Ui::ShaderTool* shaderTool;
-  Noggit::Ui::texturing_tool* texturingTool;
-  Noggit::Ui::hole_tool* holeTool;
-  Noggit::Ui::MinimapCreator* minimapTool;
-  Noggit::Ui::Tools::BrushStack* stampTool;
-  Noggit::Ui::Tools::LightEditor* lightEditor;
-  Noggit::Ui::Tools::ChunkManipulator::ChunkManipulatorPanel* _chunk_manipulator;
-  Noggit::Scripting::scripting_tool* scriptingTool;
+  Noggit::Ui::help *_keybindings;
+  Noggit::Ui::tileset_chooser *TexturePalette;
+  Noggit::Ui::detail_infos *guidetailInfos;
+  Noggit::Ui::zone_id_browser *ZoneIDBrowser;
+  Noggit::Ui::texture_palette_small *_texture_palette_small;
+  Noggit::Ui::ObjectPalette *_object_palette;
+  Noggit::Ui::texture_picker *TexturePicker;
+  Noggit::Ui::water *guiWater;
+  Noggit::Ui::object_editor *objectEditor;
+  Noggit::Ui::flatten_blur_tool *flattenTool;
+  Noggit::Ui::TerrainTool *terrainTool;
+  Noggit::Ui::ShaderTool *shaderTool;
+  Noggit::Ui::texturing_tool *texturingTool;
+  Noggit::Ui::hole_tool *holeTool;
+  Noggit::Ui::MinimapCreator *minimapTool;
+  Noggit::Ui::Tools::BrushStack *stampTool;
+  Noggit::Ui::Tools::LightEditor *lightEditor;
+  Noggit::Ui::Tools::ChunkManipulator::ChunkManipulatorPanel
+      *_chunk_manipulator;
+  Noggit::Scripting::scripting_tool *scriptingTool;
 
-  OpenGL::texture* const _texBrush;
+  OpenGL::texture *const _texBrush;
 
-  Noggit::Ui::Tools::AssetBrowser::Ui::AssetBrowserWidget* _asset_browser;
+  Noggit::Ui::Tools::AssetBrowser::Ui::AssetBrowserWidget *_asset_browser;
 
-  QDockWidget* _asset_browser_dock;
-  QDockWidget* _node_editor_dock;
-  QDockWidget* _texture_browser_dock;
-  QDockWidget* _texture_picker_dock;
-  QDockWidget* _detail_infos_dock;
+  QDockWidget *_asset_browser_dock;
+  QDockWidget *_node_editor_dock;
+  QDockWidget *_texture_browser_dock;
+  QDockWidget *_texture_picker_dock;
+  QDockWidget *_detail_infos_dock;
 
-  Noggit::Ui::Tools::ToolPanel* _tool_panel_dock;
+  Noggit::Ui::Tools::ToolPanel *_tool_panel_dock;
 
-  ::Ui::MapViewOverlay* _viewport_overlay_ui;
+  ::Ui::MapViewOverlay *_viewport_overlay_ui;
   ImGuizmo::MODE _gizmo_mode = ImGuizmo::MODE::WORLD;
   ImGuizmo::OPERATION _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
   Noggit::BoolToggleProperty _gizmo_on = {true};
@@ -466,12 +466,10 @@ private:
 
   OpenGL::Scoped::deferred_upload_buffers<2> _buffers;
 
-  QRubberBand* _area_selection;
+  QRubberBand *_area_selection;
 
 public:
-
 private:
-
   void setupViewportOverlay();
   void setupRaiseLowerUi();
   void setupFlattenBlurUi();
@@ -501,5 +499,88 @@ private:
   void setupHelpMenu();
   void setupHotkeys();
 
-  QWidget* _overlay_widget;
+  QWidget *_overlay_widget;
+
+#define DESTRUCTIVE_ACTION(ACTION_CODE)                                        \
+  QMessageBox::StandardButton reply;                                           \
+  reply = QMessageBox::question(this, "Destructive action",                    \
+                                "This action cannot be undone. Current "       \
+                                "change history will be lost. Continue?",      \
+                                QMessageBox::Yes | QMessageBox::No);           \
+  if (reply == QMessageBox::Yes) {                                             \
+    NOGGIT_ACTION_MGR->purge();                                                \
+    ACTION_CODE                                                                \
+  }
+
+#define ADD_ACTION_NS(menu, name, on_action)                                   \
+  {                                                                            \
+    auto action(menu->addAction(name));                                        \
+    connect(action, &QAction::triggered, on_action);                           \
+  }
+
+#define ADD_TOGGLE(menu_, name_, shortcut_, property_)                         \
+  do {                                                                         \
+    QAction *action(new QAction(name_, this));                                 \
+    action->setShortcut(QKeySequence(shortcut_));                              \
+    action->setCheckable(true);                                                \
+    action->setChecked(property_.get());                                       \
+    menu_->addAction(action);                                                  \
+    connect(action, &QAction::toggled, &property_,                             \
+            &Noggit::BoolToggleProperty::set);                                 \
+    connect(&property_, &Noggit::BoolToggleProperty::changed, action,          \
+            &QAction::setChecked);                                             \
+  } while (false)
+
+#define ADD_TOGGLE_NS(menu_, name_, property_)                                 \
+  do {                                                                         \
+    QAction *action(new QAction(name_, this));                                 \
+    action->setCheckable(true);                                                \
+    action->setChecked(property_.get());                                       \
+    menu_->addAction(action);                                                  \
+    connect(action, &QAction::toggled, &property_,                             \
+            &Noggit::BoolToggleProperty::set);                                 \
+    connect(&property_, &Noggit::BoolToggleProperty::changed, action,          \
+            &QAction::setChecked);                                             \
+  } while (false)
+
+#define ADD_TOGGLE_POST(menu_, name_, shortcut_, property_, post_)             \
+  do {                                                                         \
+    QAction *action(new QAction(name_, this));                                 \
+    action->setShortcut(QKeySequence(shortcut_));                              \
+    action->setCheckable(true);                                                \
+    action->setChecked(property_.get());                                       \
+    menu_->addAction(action);                                                  \
+    connect(action, &QAction::toggled, &property_,                             \
+            &Noggit::BoolToggleProperty::set);                                 \
+    connect(&property_, &Noggit::BoolToggleProperty::changed, action,          \
+            &QAction::setChecked);                                             \
+    connect(action, &QAction::toggled, post_);                                 \
+    connect(&property_, &Noggit::BoolToggleProperty::changed, post_);          \
+  } while (false)
+
+#define ADD_TOGGLE_NS_POST(menu_, name_, property_, code_)                     \
+  do {                                                                         \
+    QAction *action(new QAction(name_, this));                                 \
+    action->setCheckable(true);                                                \
+    action->setChecked(property_.get());                                       \
+    menu_->addAction(action);                                                  \
+    connect(action, &QAction::toggled, &property_,                             \
+            &Noggit::bool_toggle_property::set);                               \
+    connect(&property_, &Noggit::bool_toggle_property::changed, action,        \
+            &QAction::setChecked);                                             \
+    connect(action, &QAction::toggled, code_);                                 \
+    connect(&property_, &Noggit::bool_toggle_property::changed, code_);        \
+  } while (false)
+
+#define ADD_ACTION(menu, name, shortcut, on_action)                            \
+  {                                                                            \
+    auto action(menu->addAction(name));                                        \
+    action->setShortcut(QKeySequence(shortcut));                               \
+    auto callback = on_action;                                                 \
+    connect(action, &QAction::triggered, [this, callback]() {                  \
+      if (NOGGIT_CUR_ACTION)                                                   \
+        return;                                                                \
+      callback();                                                              \
+    });                                                                        \
+  }
 };
