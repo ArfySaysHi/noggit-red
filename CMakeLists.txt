@@ -80,6 +80,7 @@ Multimedia
 )
 
 set(FASTNOISE2_NOISETOOL OFF CACHE BOOL "")
+option(BUILD_LIBNOISE_EXAMPLES "Build libnoise examples" OFF)
 
 # External Libraries
 add_subdirectory("${EXTERNAL_SOURCE_DIR}/qt-color-widgets")
@@ -87,13 +88,19 @@ add_subdirectory("${EXTERNAL_SOURCE_DIR}/qtimgui")
 add_subdirectory("${EXTERNAL_SOURCE_DIR}/QtAdvancedDockingSystem")
 add_subdirectory("${EXTERNAL_SOURCE_DIR}/NodeEditor")
 add_subdirectory("${EXTERNAL_SOURCE_DIR}/libnoise")
+if(TARGET noise-static)
+target_include_directories(noise-static
+    PUBLIC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/external/libnoise/src
+)
+endif()
+
 add_subdirectory("${EXTERNAL_SOURCE_DIR}/glm")
 
 if(WIN32)
 add_subdirectory("${EXTERNAL_SOURCE_DIR}/framelesshelper")
 endif()
 
-option(BUILD_LIBNOISE_EXAMPLES "Build libnoise examples" OFF)
 
 # Source Collection
 collect_files(math_sources src/math FALSE "*.cpp" "")
@@ -204,6 +211,14 @@ ${os_sources}
 ${os_headers}
 )
 
+set(_noggit_revision_output_dir "${CMAKE_BINARY_DIR}/revision_output")
+set(_noggit_revision_output_file "${_noggit_revision_output_dir}/revision.h")
+
+set_source_files_properties(
+    "${_noggit_revision_output_file}"
+    PROPERTIES GENERATED TRUE
+)
+
 # Includes
 target_include_directories(noggit
 PRIVATE
@@ -211,6 +226,7 @@ src
 include
 ${CMAKE_CURRENT_BINARY_DIR}
 ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
+${_noggit_revision_output_dir}
 
 
 SYSTEM PRIVATE
@@ -265,7 +281,7 @@ endif()
 # Compiler Options
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 target_compile_options(noggit PRIVATE
--Wno-old-style-definition
+$<$<COMPILE_LANGUAGE:C>:-Wno-old-style-definition>
 -Wno-variadic-macros
 -Wno-vla
 -Wno-date-time
@@ -424,11 +440,19 @@ add_dependencies(noggit update_git_revision)
 endif()
 
 # QT Build Options
+file(GLOB_RECURSE UI_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/noggit/ui/*.ui")
+set(UI_DIRS "")
+foreach(UI_FILE ${UI_FILES})
+    get_filename_component(UI_DIR ${UI_FILE} DIRECTORY)
+    list(APPEND UI_DIRS ${UI_DIR})
+endforeach()
+list(REMOVE_DUPLICATES UI_DIRS)
+
 set_target_properties(noggit PROPERTIES
     AUTOMOC ON
     AUTOUIC ON
     AUTORCC ON
-    AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/src/noggit/ui"
+    AUTOUIC_SEARCH_PATHS "${UI_DIRS}"
 )
 
 # Fast Build Options

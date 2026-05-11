@@ -221,9 +221,9 @@ public:
     return T();
   }
 
-  void ADD_ACTION(QWidgetAction *_act) { _actions.push_back(_act); };
-  void SETUP_WIDGET(bool forceSpacer,
-                    Qt::Orientation orientation = Qt::Horizontal) {
+  void addAction(QWidgetAction *_act) { _actions.push_back(_act); };
+  void setupWidget(bool forceSpacer,
+                   Qt::Orientation orientation = Qt::Horizontal) {
     _toolbar->clear();
     for (int i = 0; i < _actions.size(); ++i) {
       _toolbar->addAction(_actions[i]);

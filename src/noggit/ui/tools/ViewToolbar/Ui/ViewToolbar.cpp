@@ -89,9 +89,9 @@ ViewToolbar::ViewToolbar(MapView *mapView) : _tool_group(this) {
 
   _time_secondary_tool.push_back(time_icon);
   /*
-  ADD_ACTION(view_menu, "Increase time speed", Qt::Key_N, [this] { mTimespeed
-  += 90.0f; }); ADD_ACTION(view_menu, "Decrease time speed", Qt::Key_B, [this] {
-  mTimespeed = std::max(0.0f, mTimespeed - 90.0f); }); ADD_ACTION(view_menu,
+  addAction(view_menu, "Increase time speed", Qt::Key_N, [this] { mTimespeed
+  += 90.0f; }); addAction(view_menu, "Decrease time speed", Qt::Key_B, [this] {
+  mTimespeed = std::max(0.0f, mTimespeed - 90.0f); }); addAction(view_menu,
   "Pause time", Qt::Key_J, [this] { mTimespeed = 0.0f; });
   */
 }
@@ -250,12 +250,12 @@ ViewToolbar::ViewToolbar(MapView *mapView, editing_mode mode)
                 mapView->getFlattenTool()->_flatten_mode.lower = state;
               });
 
-      _toolbar->ADD_ACTION(_icon);
-      _toolbar->ADD_ACTION(_raise);
+      _toolbar->addAction(_icon);
+      _toolbar->addAction(_raise);
       raise_index = 1;
-      _toolbar->ADD_ACTION(_lower);
+      _toolbar->addAction(_lower);
       lower_index = 2;
-      _toolbar->SETUP_WIDGET(false);
+      _toolbar->setupWidget(false);
     }
 
     _flatten_secondary_tool.push_back(_toolbar);
@@ -285,10 +285,10 @@ ViewToolbar::ViewToolbar(MapView *mapView, editing_mode mode)
                     ->markTerrainParamsUniformBlockDirty();
               });
 
-      _toolbar->ADD_ACTION(_icon);
-      _toolbar->ADD_ACTION(_unpaintable_chunk);
+      _toolbar->addAction(_icon);
+      _toolbar->addAction(_unpaintable_chunk);
       unpaintable_chunk_index = 1;
-      _toolbar->SETUP_WIDGET(false);
+      _toolbar->setupWidget(false);
     }
 
     _texture_secondary_tool.push_back(_toolbar);
@@ -315,12 +315,12 @@ ViewToolbar::ViewToolbar(MapView *mapView, editing_mode mode)
       CheckBoxAction *_magnetic_to_ground =
           new CheckBoxAction(tr("Magnetic to ground when dragging"));
 
-      _up_toolbar->ADD_ACTION(_icon);
-      _up_toolbar->ADD_ACTION(_rotate_follow_cursor);
-      _up_toolbar->ADD_ACTION(_smooth_follow_rotation);
-      _up_toolbar->ADD_ACTION(_random_all_on_rotation);
-      _up_toolbar->ADD_ACTION(_magnetic_to_ground);
-      _up_toolbar->SETUP_WIDGET(false);
+      _up_toolbar->addAction(_icon);
+      _up_toolbar->addAction(_rotate_follow_cursor);
+      _up_toolbar->addAction(_smooth_follow_rotation);
+      _up_toolbar->addAction(_random_all_on_rotation);
+      _up_toolbar->addAction(_magnetic_to_ground);
+      _up_toolbar->setupWidget(false);
     }
 
     SubToolBarAction *_down_toolbar = new SubToolBarAction();
@@ -333,9 +333,9 @@ ViewToolbar::ViewToolbar(MapView *mapView, editing_mode mode)
       CheckBoxAction *_rotation_around_pivot =
           new CheckBoxAction(tr("Rotate around pivot"), true);
 
-      _down_toolbar->ADD_ACTION(_magnetic_to_ground);
-      _down_toolbar->ADD_ACTION(_rotation_around_pivot);
-      _down_toolbar->SETUP_WIDGET(true);
+      _down_toolbar->addAction(_magnetic_to_ground);
+      _down_toolbar->addAction(_rotation_around_pivot);
+      _down_toolbar->setupWidget(true);
     }
 
     _object_secondary_tool.push_back(_up_toolbar);
@@ -360,14 +360,14 @@ ViewToolbar::ViewToolbar(MapView *mapView, editing_mode mode)
           tr("Alpha"), 0, 100, 30, "",
           std::function<float(float v)>() = [&](float v) { return v / 100.f; });
 
-      _toolbar->ADD_ACTION(_icon);
-      _toolbar->ADD_ACTION(_draw_only_inside);
+      _toolbar->addAction(_icon);
+      _toolbar->addAction(_draw_only_inside);
       sphere_light_inside_index = 1;
-      _toolbar->ADD_ACTION(_draw_wireframe);
+      _toolbar->addAction(_draw_wireframe);
       sphere_light_wireframe_index = 2;
-      _toolbar->ADD_ACTION(_alpha_value);
+      _toolbar->addAction(_alpha_value);
       sphere_light_alpha_index = 3;
-      _toolbar->SETUP_WIDGET(false);
+      _toolbar->setupWidget(false);
     }
 
     _light_secondary_tool.push_back(_toolbar);

@@ -3,14 +3,21 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMenuBar>
+#include <QStatusBar>
 #include <noggit/Action.hpp>
 #include <noggit/ActionManager.hpp>
 #include <noggit/DBC.h>
 #include <noggit/MapView.h>
 #include <noggit/ui/Help.h>
+#include <noggit/ui/HelperModels.h>
+#include <noggit/ui/ModelImport.h>
+#include <noggit/ui/ObjectEditor.h>
+#include <noggit/ui/RotationEditor.h>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/ui/Toolbar.h>
+#include <noggit/ui/texture_palette_small.hpp>
 #include <noggit/ui/texturing_tool.hpp>
+#include <noggit/ui/tools/ViewToolbar/Ui/ViewToolbar.hpp>
 #include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
 
 void MapView::setupFileMenu() {
