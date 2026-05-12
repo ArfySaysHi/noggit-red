@@ -5,9 +5,9 @@
 
 #include <math/trig.hpp>
 
-#include <QtWidgets/QMainWindow>
-#include <QWidget>
 #include <QMetaObject>
+#include <QWidget>
+#include <QtWidgets/QMainWindow>
 
 #include <memory>
 #include <string>
@@ -19,117 +19,110 @@ class World;
 
 class QListWidget;
 
-namespace Noggit::Application
-{
-  struct NoggitApplicationConfiguration;
+namespace Noggit::Application {
+struct NoggitApplicationConfiguration;
 }
 
-namespace Noggit::Ui::Component
-{
-  class BuildMapListComponent;
+namespace Noggit::Ui::Component {
+class BuildMapListComponent;
 }
 
-namespace Noggit::Project
-{
-  class NoggitProject;
+namespace Noggit::Project {
+class NoggitProject;
 }
 
-namespace Noggit::Ui::Tools::MapCreationWizard::Ui
-{
-  class MapCreationWizard;
+namespace Noggit::Ui::Tools::MapCreationWizard::Ui {
+class MapCreationWizard;
 }
 
-namespace Noggit::Ui
-{
-    class minimap_widget;
-    class settings;
-    class about;
+namespace Noggit::Ui {
+class minimap_widget;
+class settings;
+class about;
 
-    namespace Tools::MapCreationWizard::Ui
-    {
-      class MapCreationWizard;
-    }
+namespace Tools::MapCreationWizard::Ui {
+class MapCreationWizard;
 }
+} // namespace Noggit::Ui
 
-namespace Noggit::Ui::Windows
-{
-    class NoggitWindow : public QMainWindow
-    {
-      Q_OBJECT
+namespace Noggit::Ui::Windows {
+class NoggitWindow : public QMainWindow {
+  Q_OBJECT
 
-      friend class Noggit::Ui::Component::BuildMapListComponent;
+  friend class Noggit::Ui::Component::BuildMapListComponent;
 
-    public:
-      NoggitWindow(std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> application,
-          std::shared_ptr<Noggit::Project::NoggitProject> project);
+public:
+  NoggitWindow(
+      std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration>
+          application,
+      std::shared_ptr<Noggit::Project::NoggitProject> project);
 
-      void promptExit(QCloseEvent* event);
-      void promptUidFixFailure();
+  void promptExit(QCloseEvent *event);
+  void promptUidFixFailure();
 
-      // TODO, better location for those utils that need to be above mapview?
-      void startWowClient();
+  // TODO, better location for those utils that need to be above mapview?
+  void startWowClient();
 
-      void patchWowClient();
+  void patchWowClient();
 
+  QMenuBar *_menuBar;
 
-      QMenuBar* _menuBar;
+  QToolBar *_app_toolbar;
 
-      QToolBar* _app_toolbar;
+  // std::unique_ptr<World> _world;
 
-      // std::unique_ptr<World> _world;
+  ~NoggitWindow();
 
-      std::unordered_set<QWidget*> displayed_widgets;
-      void buildMenu();
-    signals:
-      void exitPromptOpened();
-      void mapSelected(int map_id);
+  std::unordered_set<QWidget *> displayed_widgets;
+  void buildMenu();
+signals:
+  void exitPromptOpened();
+  void mapSelected(int map_id);
 
-    private:
-    	std::unique_ptr<Component::BuildMapListComponent> _buildMapListComponent;
-      std::shared_ptr<Application::NoggitApplicationConfiguration> _applicationConfiguration;
-      std::shared_ptr<Project::NoggitProject> _project;
+private:
+  std::unique_ptr<Component::BuildMapListComponent> _buildMapListComponent;
+  std::shared_ptr<Application::NoggitApplicationConfiguration>
+      _applicationConfiguration;
+  std::shared_ptr<Project::NoggitProject> _project;
 
+  void handleEventMapListContextMenuPinMap(int mapId, std::string MapName);
+  void handleEventMapListContextMenuUnpinMap(int mapId);
 
-      void handleEventMapListContextMenuPinMap(int mapId, std::string MapName);
-      void handleEventMapListContextMenuUnpinMap(int mapId);
+  World *getWorld();
 
-      World* getWorld();
+  void loadMap(int map_id);
 
-      void loadMap (int map_id);
+  void check_uid_then_enter_map(glm::vec3 pos, math::degrees camera_pitch,
+                                math::degrees camera_yaw,
+                                bool from_bookmark = false);
 
-      void check_uid_then_enter_map ( glm::vec3 pos
-                                    , math::degrees camera_pitch
-                                    , math::degrees camera_yaw
-                                    , bool from_bookmark = false
-                                    );
+  void enterMapAt(glm::vec3 pos, math::degrees camera_pitch,
+                  math::degrees camera_yaw,
+                  uid_fix_mode uid_fix = uid_fix_mode::none,
+                  bool from_bookmark = false);
 
-      void enterMapAt ( glm::vec3 pos
-                      , math::degrees camera_pitch
-                      , math::degrees camera_yaw
-                      , uid_fix_mode uid_fix = uid_fix_mode::none
-                      , bool from_bookmark = false
-                      );
+  minimap_widget *_minimap;
+  settings *_settings;
+  about *_about;
+  QWidget *_null_widget;
+  MapView *_map_view;
+  StackedWidget *_stack_widget;
 
-      minimap_widget* _minimap;
-      settings* _settings;
-      about* _about;
-      QWidget* _null_widget;
-      MapView* _map_view;
-      StackedWidget* _stack_widget;
+  Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard
+      *_map_creation_wizard;
+  QMetaObject::Connection _map_wizard_connection;
 
-      Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard* _map_creation_wizard;
-      QMetaObject::Connection _map_wizard_connection;
+  QListWidget *_continents_table;
+  QString _filter_name;
+  QTabWidget *_right_side;
 
-      QListWidget* _continents_table;
-      QString _filter_name;
-      QTabWidget* _right_side;
+  void applyFilterSearch(const QString &name, int type, int expansion,
+                         bool wmo_maps);
 
-      void applyFilterSearch(const QString& name, int type, int expansion, bool wmo_maps);
+  bool map_loaded = false;
+  bool exit_to_project_selection = false;
 
-      bool map_loaded = false;
-      bool exit_to_project_selection = false;
-
-      virtual void closeEvent (QCloseEvent*) override;
-    };
-}
+  virtual void closeEvent(QCloseEvent *) override;
+};
+} // namespace Noggit::Ui::Windows
 #endif // NOGGIT_WINDOW_NOGGIT_HPP

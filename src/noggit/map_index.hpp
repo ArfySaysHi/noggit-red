@@ -200,9 +200,6 @@ public:
 private:
   uint32_t getHighestGUIDFromFile(const std::string &pFilename) const;
 
-  std::unordered_map<std::string, std::unordered_map<std::string, std::string>>
-      _minimap_md5translate;
-
   bool _uid_fix_all_in_progress = false;
 
   std::string basename;
@@ -211,6 +208,9 @@ public:
   int const _map_id;
   std::string globalWMOName;
   ENTRY_MODF wmoEntry;
+
+  std::unordered_map<std::string, std::unordered_map<std::string, std::string>>
+      _minimap_md5translate;
 
 public:
   // reloadable settings

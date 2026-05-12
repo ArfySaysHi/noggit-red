@@ -3259,7 +3259,7 @@ void MapView::draw_map() {
   renderParams.use_ref_pos = use_ref_pos;
   renderParams.angled_mode = angled_mode;
   renderParams.draw_paintability_overlay = terrainMode == editing_mode::paint;
-  renderParams.editing_mode = terrainMode;
+  renderParams.mode = terrainMode;
   renderParams.camera_moved = debug_cam ? false : _camera_moved_since_last_draw;
   renderParams.draw_mfbo = _draw_mfbo.get();
   renderParams.draw_terrain = _draw_terrain.get();
@@ -3275,7 +3275,7 @@ void MapView::draw_map() {
   renderParams.draw_fog = _draw_fog.get();
   renderParams.ground_editing_brush = terrainType;
   renderParams.water_layer = displayed_water_layer;
-  renderParams.display_mode = _display_mode;
+  renderParams.display = _display_mode;
   renderParams.draw_occlusion_boxes = _draw_occlusion_boxes.get();
   renderParams.minimap_render = false;
   renderParams.draw_wmo_exterior = _draw_wmo_exterior.get();
