@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #ifndef NOGGIT_WORLDRENDER_HPP
 #define NOGGIT_WORLDRENDER_HPP
@@ -7,28 +8,25 @@
 
 #include <external/glm/glm.hpp>
 
-#include <noggit/tool_enums.hpp>
+#include <noggit/Sky.h>
+#include <noggit/map_horizon.h>
 #include <noggit/rendering/CursorRender.hpp>
 #include <noggit/rendering/LiquidTextureManager.hpp>
-#include <noggit/map_horizon.h>
-#include <noggit/Sky.h>
+#include <noggit/tool_enums.hpp>
 
 #include <noggit/rendering/Primitives.hpp>
 
 #include <memory>
 
-namespace OpenGL
-{
-  struct program;
+namespace OpenGL {
+struct program;
 }
 
 struct TileIndex;
 class World;
 struct MinimapRenderSettings;
 
-
-struct WorldRenderParams 
-{
+struct WorldRenderParams {
   float cursorRotation;
   CursorType cursor_type;
   float brush_radius;
@@ -42,7 +40,7 @@ struct WorldRenderParams
   bool use_ref_pos;
   bool angled_mode;
   bool draw_paintability_overlay;
-  editing_mode editing_mode;
+  editing_mode mode;
   bool camera_moved;
   bool draw_mfbo;
   bool draw_terrain;
@@ -58,7 +56,7 @@ struct WorldRenderParams
   bool draw_fog;
   eTerrainType ground_editing_brush;
   int water_layer;
-  display_mode display_mode;
+  display_mode display;
   bool draw_occlusion_boxes;
   bool minimap_render;
   bool draw_wmo_exterior;
@@ -69,119 +67,113 @@ struct WorldRenderParams
   bool render_select_wmo_groups_bounds;
 };
 
-namespace Noggit::Rendering
-{
-  class WorldRender : public BaseRender
-  {
-  public:
-    WorldRender(World* world);
+namespace Noggit::Rendering {
+class WorldRender : public BaseRender {
+public:
+  WorldRender(World *world);
 
-    void upload() override;
-    void unload() override;
+  void upload() override;
+  void unload() override;
 
-    void draw (glm::mat4x4 const& model_view
-        , glm::mat4x4 const& projection
-        , glm::vec3 const& cursor_pos
-        , glm::vec4 const& cursor_color
-        , glm::vec3 const& ref_pos
-        , glm::vec3 const& camera_pos
-        , MinimapRenderSettings* minimap_render_settings
-        , WorldRenderParams const& render_settings
-    );
+  void draw(glm::mat4x4 const &model_view, glm::mat4x4 const &projection,
+            glm::vec3 const &cursor_pos, glm::vec4 const &cursor_color,
+            glm::vec3 const &ref_pos, glm::vec3 const &camera_pos,
+            MinimapRenderSettings *minimap_render_settings,
+            WorldRenderParams const &render_settings);
 
-    bool saveMinimap (TileIndex const& tile_idx
-                      , MinimapRenderSettings* settings
-                      , std::optional<QImage>& combined_image);
+  bool saveMinimap(TileIndex const &tile_idx, MinimapRenderSettings *settings,
+                   std::optional<QImage> &combined_image);
 
-    [[nodiscard]]
-    OpenGL::TerrainParamsUniformBlock* getTerrainParamsUniformBlock();;
+  [[nodiscard]]
+  OpenGL::TerrainParamsUniformBlock *getTerrainParamsUniformBlock();
+  ;
 
-    void updateTerrainParamsUniformBlock();
-    void markTerrainParamsUniformBlockDirty();;
+  void updateTerrainParamsUniformBlock();
+  void markTerrainParamsUniformBlockDirty();
+  ;
 
-    [[nodiscard]] std::unique_ptr<Skies>& skies();;
+  [[nodiscard]] std::unique_ptr<Skies> &skies();
+  ;
 
-    float _view_distance;
-    float cullDistance() const;
+  float _view_distance;
+  float cullDistance() const;
 
-    unsigned int _frame_max_chunk_updates = 256;
+  unsigned int _frame_max_chunk_updates = 256;
 
-    bool directional_lightning;
-    bool local_lightning;
+  bool directional_lightning;
+  bool local_lightning;
 
-  private:
+private:
+  void drawMinimap(MapTile *tile, glm::mat4x4 const &model_view,
+                   glm::mat4x4 const &projection, glm::vec3 const &camera_pos,
+                   MinimapRenderSettings *settings);
 
-    void drawMinimap ( MapTile *tile
-        , glm::mat4x4 const& model_view
-        , glm::mat4x4 const& projection
-        , glm::vec3 const& camera_pos
-        , MinimapRenderSettings* settings
-    );
+  void updateMVPUniformBlock(const glm::mat4x4 &model_view,
+                             const glm::mat4x4 &projection);
+  void updateLightingUniformBlock(bool draw_fog, glm::vec3 const &camera_pos);
+  void updateLightingUniformBlockMinimap(MinimapRenderSettings *settings);
 
-    void updateMVPUniformBlock(const glm::mat4x4& model_view, const glm::mat4x4& projection);
-    void updateLightingUniformBlock(bool draw_fog, glm::vec3 const& camera_pos);
-    void updateLightingUniformBlockMinimap(MinimapRenderSettings* settings);
+  void setupChunkVAO(OpenGL::Scoped::use_program &mcnk_shader);
+  void setupLiquidChunkVAO(OpenGL::Scoped::use_program &water_shader);
+  void setupOccluderBuffers();
+  void setupChunkBuffers();
+  void setupLiquidChunkBuffers();
 
-    void setupChunkVAO(OpenGL::Scoped::use_program& mcnk_shader);
-    void setupLiquidChunkVAO(OpenGL::Scoped::use_program& water_shader);
-    void setupOccluderBuffers();
-    void setupChunkBuffers();
-    void setupLiquidChunkBuffers();
+  World *_world;
+  float _cull_distance;
 
-    World* _world;
-    float _cull_distance;
+  // shaders
+  std::unique_ptr<OpenGL::program> _mcnk_program;
+  ;
+  std::unique_ptr<OpenGL::program> _mfbo_program;
+  std::unique_ptr<OpenGL::program> _m2_program;
+  std::unique_ptr<OpenGL::program> _m2_instanced_program;
+  std::unique_ptr<OpenGL::program> _m2_particles_program;
+  std::unique_ptr<OpenGL::program> _m2_ribbons_program;
+  std::unique_ptr<OpenGL::program> _m2_box_program;
+  std::unique_ptr<OpenGL::program> _wmo_program;
+  std::unique_ptr<OpenGL::program> _liquid_program;
+  std::unique_ptr<OpenGL::program> _occluder_program;
 
-    // shaders
-    std::unique_ptr<OpenGL::program> _mcnk_program;;
-    std::unique_ptr<OpenGL::program> _mfbo_program;
-    std::unique_ptr<OpenGL::program> _m2_program;
-    std::unique_ptr<OpenGL::program> _m2_instanced_program;
-    std::unique_ptr<OpenGL::program> _m2_particles_program;
-    std::unique_ptr<OpenGL::program> _m2_ribbons_program;
-    std::unique_ptr<OpenGL::program> _m2_box_program;
-    std::unique_ptr<OpenGL::program> _wmo_program;
-    std::unique_ptr<OpenGL::program> _liquid_program;
-    std::unique_ptr<OpenGL::program> _occluder_program;
+  // horizon && skies && lighting
+  std::unique_ptr<Noggit::map_horizon::render> _horizon_render;
+  std::unique_ptr<OutdoorLighting> _outdoor_lighting;
+  OutdoorLightStats _outdoor_light_stats;
+  std::unique_ptr<Skies> _skies;
 
-    // horizon && skies && lighting
-    std::unique_ptr<Noggit::map_horizon::render> _horizon_render;
-    std::unique_ptr<OutdoorLighting> _outdoor_lighting;
-    OutdoorLightStats _outdoor_light_stats;
-    std::unique_ptr<Skies> _skies;
+  // cursor
+  Noggit::CursorRender _cursor_render;
+  Noggit::Rendering::Primitives::Sphere _sphere_render;
+  Noggit::Rendering::Primitives::Square _square_render;
+  Noggit::Rendering::Primitives::Line _line_render;
+  Noggit::Rendering::Primitives::WireBox _wirebox_render;
 
-    // cursor
-    Noggit::CursorRender _cursor_render;
-    Noggit::Rendering::Primitives::Sphere _sphere_render;
-    Noggit::Rendering::Primitives::Square _square_render;
-    Noggit::Rendering::Primitives::Line _line_render;
-    Noggit::Rendering::Primitives::WireBox _wirebox_render;
+  // buffers
+  OpenGL::Scoped::deferred_upload_buffers<8> _buffers;
+  GLuint const &_mvp_ubo = _buffers[0];
+  GLuint const &_lighting_ubo = _buffers[1];
+  GLuint const &_terrain_params_ubo = _buffers[2];
+  GLuint const &_mapchunk_vertex = _buffers[3];
+  GLuint const &_mapchunk_index = _buffers[4];
+  GLuint const &_mapchunk_texcoord = _buffers[5];
+  GLuint const &_liquid_chunk_vertex = _buffers[6];
+  GLuint const &_occluder_index = _buffers[7];
 
-    // buffers
-    OpenGL::Scoped::deferred_upload_buffers<8> _buffers;
-    GLuint const& _mvp_ubo = _buffers[0];
-    GLuint const& _lighting_ubo = _buffers[1];
-    GLuint const& _terrain_params_ubo = _buffers[2];
-    GLuint const& _mapchunk_vertex = _buffers[3];
-    GLuint const& _mapchunk_index = _buffers[4];
-    GLuint const& _mapchunk_texcoord = _buffers[5];
-    GLuint const& _liquid_chunk_vertex = _buffers[6];
-    GLuint const& _occluder_index = _buffers[7];
+  // uniform blocks
+  OpenGL::MVPUniformBlock _mvp_ubo_data;
+  OpenGL::LightingUniformBlock _lighting_ubo_data;
+  OpenGL::TerrainParamsUniformBlock _terrain_params_ubo_data;
 
-    // uniform blocks
-    OpenGL::MVPUniformBlock _mvp_ubo_data;
-    OpenGL::LightingUniformBlock _lighting_ubo_data;
-    OpenGL::TerrainParamsUniformBlock _terrain_params_ubo_data;
+  // VAOs
+  OpenGL::Scoped::deferred_upload_vertex_arrays<3> _vertex_arrays;
+  GLuint const &_mapchunk_vao = _vertex_arrays[0];
+  GLuint const &_liquid_chunk_vao = _vertex_arrays[1];
+  GLuint const &_occluder_vao = _vertex_arrays[2];
 
-    // VAOs
-    OpenGL::Scoped::deferred_upload_vertex_arrays<3> _vertex_arrays;
-    GLuint const& _mapchunk_vao = _vertex_arrays[0];
-    GLuint const& _liquid_chunk_vao = _vertex_arrays[1];
-    GLuint const& _occluder_vao = _vertex_arrays[2];
+  LiquidTextureManager _liquid_texture_manager;
 
-    LiquidTextureManager _liquid_texture_manager;
+  bool _need_terrain_params_ubo_update = false;
+};
+} // namespace Noggit::Rendering
 
-    bool _need_terrain_params_ubo_update = false;
-  };
-}
-
-#endif //NOGGIT_WORLDRENDER_HPP
+#endif // NOGGIT_WORLDRENDER_HPP

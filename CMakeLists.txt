@@ -77,6 +77,7 @@ OpenGLExtensions
 Network
 Xml
 Multimedia
+Sql
 )
 
 set(FASTNOISE2_NOISETOOL OFF CACHE BOOL "")
@@ -247,8 +248,7 @@ SYSTEM PRIVATE
     src/external/tracy
     src/external/blizzard-database-library/include
     src/external/blizzard-archive-library/include
-
-
+    src/external/rapidfuzz-cpp
 )
 
 # Compiler Definitions
@@ -340,6 +340,7 @@ Qt5::OpenGLExtensions
 Qt5::Xml
 Qt5::Network
 Qt5::Multimedia
+Qt5::Sql
 
 ColorWidgets-qt5
 qt_imgui_widgets

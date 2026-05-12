@@ -3,7 +3,8 @@
 #include <noggit/MinimapRenderSettings.hpp>
 #include <noggit/World.h>
 
-#include <external/QtImGui/QtImGui.h>
+#include <external/qtimgui/QtImGui.h>
+#include <external/qtimgui/imgui/imgui.h>
 
 #include <QMouseEvent>
 #include <QSettings>
@@ -13,17 +14,16 @@
 using namespace Noggit::Ui::Tools::PresetEditor;
 
 ModelViewer::ModelViewer(QWidget *parent)
-: AssetBrowser::ModelViewer(parent, Noggit::NoggitRenderContext::PRESET_EDITOR)
-, _world(nullptr)
-, _world_camera(_camera.position, _camera.yaw(), _camera.pitch())
-, _transform_gizmo(Noggit::Ui::Tools::ViewportGizmo::GizmoContext::PRESET_EDITOR)
-{
-}
+    : AssetBrowser::ModelViewer(parent,
+                                Noggit::NoggitRenderContext::PRESET_EDITOR),
+      _world(nullptr),
+      _world_camera(_camera.position, _camera.yaw(), _camera.pitch()),
+      _transform_gizmo(
+          Noggit::Ui::Tools::ViewportGizmo::GizmoContext::PRESET_EDITOR) {}
 
-void ModelViewer::paintGL()
-{
+void ModelViewer::paintGL() {
   const qreal now(_startup_time.elapsed() / 1000.0);
-  OpenGL::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _(::gl, context());
   makeCurrent();
 
   gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -49,7 +49,7 @@ void ModelViewer::paintGL()
   renderParams.use_ref_pos = false;
   renderParams.angled_mode = false;
   renderParams.draw_paintability_overlay = false;
-  renderParams.editing_mode = editing_mode::ground;
+  renderParams.mode = editing_mode::ground;
   renderParams.camera_moved = true;
   renderParams.draw_mfbo = false;
   renderParams.draw_terrain = true;
@@ -65,7 +65,7 @@ void ModelViewer::paintGL()
   renderParams.draw_fog = false;
   renderParams.ground_editing_brush = eTerrainType::eTerrainType_Flat;
   renderParams.water_layer = 0;
-  renderParams.display_mode = display_mode::in_3D;
+  renderParams.display = display_mode::in_3D;
   renderParams.draw_occlusion_boxes = false;
   renderParams.minimap_render = false;
   renderParams.draw_wmo_exterior = true;
@@ -74,36 +74,30 @@ void ModelViewer::paintGL()
   renderParams.render_select_wmo_aabb = false;
   renderParams.render_select_wmo_groups_bounds = false;
 
-
-  if (_world)
-  {
-    _world->renderer()->draw(world_model_view()
-        , world_projection()
-        , glm::vec3(0.f, 0.f, 0.f)
-        , glm::vec4(1.f, 1.f, 1.f, 1.f)
-        , glm::vec3(0.f, 0.f, 0.f)
-        , _world_camera.position
-        , &_settings_unused
-        , renderParams
+  if (_world) {
+    _world->renderer()->draw(
+        world_model_view(), world_projection(), glm::vec3(0.f, 0.f, 0.f),
+        glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec3(0.f, 0.f, 0.f),
+        _world_camera.position, &_settings_unused, renderParams
 
     );
   }
 
-  // Sorting issues may naturally occur here due to draw order. But we can't avoid them if we want world as an underlay.
-  // It is just a preview after all.
+  // Sorting issues may naturally occur here due to draw order. But we can't
+  // avoid them if we want world as an underlay. It is just a preview after all.
 
   draw();
 
-  if (_gizmo_on.get())
-  {
+  if (_gizmo_on.get()) {
     ImGui::SetCurrentContext(_imgui_context);
     QtImGui::newFrame();
 
     static bool is_open = false;
     ImGui::SetNextWindowBgAlpha(0.0f);
     ImGui::SetNextWindowPos(ImVec2(-100.f, -100.f));
-    ImGui::Begin("Gizmo", &is_open, ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar
-                                        | ImGuiWindowFlags_::ImGuiWindowFlags_NoBackground);
+    ImGui::Begin("Gizmo", &is_open,
+                 ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar |
+                     ImGuiWindowFlags_::ImGuiWindowFlags_NoBackground);
 
     auto mv = model_view();
     auto proj = projection();
@@ -123,110 +117,85 @@ void ModelViewer::paintGL()
 
     ImGui::End();
     ImGui::Render();
-
   }
 }
 
-void ModelViewer::loadWorldUnderlay(const std::string& internal_name, int map_id)
-{
-  OpenGL::context::scoped_setter const _ (::gl, context());
+void ModelViewer::loadWorldUnderlay(const std::string &internal_name,
+                                    int map_id) {
+  OpenGL::context::scoped_setter const _(::gl, context());
   makeCurrent();
 
-  if (map_id < 0)
-  {
+  if (map_id < 0) {
     _world = nullptr;
+  } else {
+    _world = std::make_unique<World>(
+        internal_name, map_id, Noggit::NoggitRenderContext::PRESET_EDITOR);
   }
-  else
-  {
-    _world = std::make_unique<World> (internal_name, map_id,
-                                      Noggit::NoggitRenderContext::PRESET_EDITOR);
-  }
-
 }
 
-World* Noggit::Ui::Tools::PresetEditor::ModelViewer::getWorld()
-{
+World *Noggit::Ui::Tools::PresetEditor::ModelViewer::getWorld() {
   return _world.get();
 }
 
-Noggit::Camera* Noggit::Ui::Tools::PresetEditor::ModelViewer::getCamera()
-{
+Noggit::Camera *Noggit::Ui::Tools::PresetEditor::ModelViewer::getCamera() {
   return &_camera;
 }
 
-Noggit::Camera* Noggit::Ui::Tools::PresetEditor::ModelViewer::getWorldCamera()
-{
+Noggit::Camera *Noggit::Ui::Tools::PresetEditor::ModelViewer::getWorldCamera() {
   return &_world_camera;
 }
 
-glm::mat4x4 ModelViewer::world_model_view() const
-{
+glm::mat4x4 ModelViewer::world_model_view() const {
   return _world_camera.look_at_matrix();
 }
 
-glm::mat4x4 ModelViewer::world_projection() const
-{
+glm::mat4x4 ModelViewer::world_projection() const {
   float far_z = _settings->value("view_distance", 2000.f).toFloat();
   return glm::perspective(_camera.fov()._, aspect_ratio(), 1.f, far_z);
 }
 
-void ModelViewer::tick(float dt)
-{
-  if (_world)
-  {
-    _world->mapIndex.enterTile (TileIndex (_world_camera.position));
-    _world->mapIndex.unloadTiles (TileIndex (_world_camera.position));
+void ModelViewer::tick(float dt) {
+  if (_world) {
+    _world->mapIndex.enterTile(TileIndex(_world_camera.position));
+    _world->mapIndex.unloadTiles(TileIndex(_world_camera.position));
   }
 
   AssetBrowser::ModelViewer::tick(dt);
 
-  if (turn)
-  {
+  if (turn) {
     _world_camera.add_to_yaw(math::degrees(turn));
   }
-  if (lookat)
-  {
+  if (lookat) {
     _world_camera.add_to_pitch(math::degrees(lookat));
   }
-  if (moving)
-  {
+  if (moving) {
     _world_camera.move_forward(moving, dt);
   }
-  if (strafing)
-  {
+  if (strafing) {
     _world_camera.move_horizontal(strafing, dt);
   }
-  if (updown)
-  {
+  if (updown) {
     _world_camera.move_vertical(updown, dt);
   }
-
 }
 
-void ModelViewer::mouseMoveEvent(QMouseEvent *event)
-{
+void ModelViewer::mouseMoveEvent(QMouseEvent *event) {
 
-  QLineF const relative_movement (_last_mouse_pos, event->pos());
+  QLineF const relative_movement(_last_mouse_pos, event->pos());
 
-  if (look)
-  {
+  if (look) {
     _world_camera.add_to_yaw(math::degrees(relative_movement.dx() / 20.0f));
-    _world_camera.add_to_pitch(math::degrees(mousedir * relative_movement.dy() / 20.0f));
+    _world_camera.add_to_pitch(
+        math::degrees(mousedir * relative_movement.dy() / 20.0f));
   }
 
   AssetBrowser::ModelViewer::mouseMoveEvent(event);
 }
 
-void ModelViewer::initializeGL()
-{
+void ModelViewer::initializeGL() {
   AssetBrowser::ModelViewer::initializeGL();
   _imgui_context = QtImGui::initialize(this);
 
-  connect(context(), &QOpenGLContext::aboutToBeDestroyed, [=]()
-  {
-    emit aboutToLooseContext();
-  });
-
+  connect(context(), &QOpenGLContext::aboutToBeDestroyed,
+          [=]() { emit aboutToLooseContext(); });
 }
-
-
