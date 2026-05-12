@@ -1,14 +1,16 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "ImageInvertNode.hpp"
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <external/NodeEditor/include/nodes/Node>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-ImageInvertNode::ImageInvertNode() : LogicNodeBase() {
+ImageInvertNode::ImageInvertNode()
+: LogicNodeBase()
+{
   setName("Image :: Invert");
   setCaption("Image :: Invert");
   _validation_state = NodeValidationState::Valid;
@@ -20,9 +22,9 @@ ImageInvertNode::ImageInvertNode() : LogicNodeBase() {
   addPort<ImageData>(PortType::Out, "Image", true);
 }
 
-void ImageInvertNode::compute() {
-  QImage image =
-      static_cast<ImageData *>(_in_ports[1].in_value.lock().get())->value();
+void ImageInvertNode::compute()
+{
+  QImage image = static_cast<ImageData*>(_in_ports[1].in_value.lock().get())->value();
 
   image.invertPixels();
 
@@ -31,14 +33,17 @@ void ImageInvertNode::compute() {
 
   _out_ports[1].out_value = _in_ports[1].in_value.lock();
   _node->onDataUpdated(1);
+
 }
 
-NodeValidationState ImageInvertNode::validate() {
-  if (!static_cast<ImageData *>(_in_ports[1].in_value.lock().get())) {
+NodeValidationState ImageInvertNode::validate()
+{
+  if (!static_cast<ImageData*>(_in_ports[1].in_value.lock().get()))
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate image input.");
     return _validation_state;
   }
 
-  return LogicNodeBase::validate();
+   return LogicNodeBase::validate();
 }

@@ -1,5 +1,4 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "LogicContinueNode.hpp"
 
@@ -8,7 +7,9 @@
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-LogicContinueNode::LogicContinueNode() : LogicNodeBase() {
+LogicContinueNode::LogicContinueNode()
+: LogicNodeBase()
+{
   setName("Logic :: Continue");
   setCaption("Logic :: Continue");
   _validation_state = NodeValidationState::Valid;
@@ -17,17 +18,20 @@ LogicContinueNode::LogicContinueNode() : LogicNodeBase() {
   addPort<LogicData>(PortType::In, "Logic", true);
 }
 
-void LogicContinueNode::compute() {
-  auto logic = static_cast<LogicData *>(_in_ports[0].in_value.lock().get());
+void LogicContinueNode::compute()
+{
+  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
 
   setDoContinue(logic->value());
 }
 
-NodeValidationState LogicContinueNode::validate() {
+NodeValidationState LogicContinueNode::validate()
+{
   setValidationState(NodeValidationState::Valid);
-  auto logic = static_cast<LogicData *>(_in_ports[0].in_value.lock().get());
+  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
 
-  if (!logic) {
+  if (!logic)
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Failed to evaluate logic input");
   }

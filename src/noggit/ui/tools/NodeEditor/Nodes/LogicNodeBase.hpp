@@ -1,65 +1,53 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #ifndef NOGGIT_LOGICNODEBASE_HPP
 #define NOGGIT_LOGICNODEBASE_HPP
 
 #include "BaseNode.hpp"
-#include <external/NodeEditor/include/nodes/Node>
-#include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 
+using QtNodes::PortType;
+using QtNodes::PortIndex;
 using QtNodes::Node;
 using QtNodes::NodeData;
-using QtNodes::NodeDataModel;
 using QtNodes::NodeDataType;
+using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
-using QtNodes::PortIndex;
-using QtNodes::PortType;
 
-namespace Noggit {
-namespace Ui::Tools::NodeEditor::Nodes {
-class LogicNodeBase : public BaseNode {
-  Q_OBJECT
 
-public:
-  LogicNodeBase() {};
-  void resetInterationIndex() { _iteration_index = 0; };
-  unsigned getIterationindex() { return _iteration_index; };
+namespace Noggit
+{
+    namespace Ui::Tools::NodeEditor::Nodes
+    {
+        class LogicNodeBase : public BaseNode
+        {
+        Q_OBJECT
 
-  virtual bool isLogicNode() override { return true; };
+        public:
+            LogicNodeBase();
+            void resetInterationIndex();
+            unsigned getIterationindex() const;
 
-  bool isIterable() { return _is_iterable; };
+            virtual bool isLogicNode() override;
 
-  void setNIterations(unsigned n_iterations) { _n_iterations = n_iterations; };
-  unsigned getNIteraitons() { return _n_iterations; };
-  void setIterationIndex(unsigned index) { _iteration_index = index; };
+            bool isIterable() const;
 
-  NodeValidationState validate() override {
-    setValidationState(NodeValidationState::Valid);
-    auto logic = static_cast<LogicData *>(_in_ports[0].in_value.lock().get());
+            void setNIterations(unsigned n_iterations);
+            unsigned getNIteraitons() const;
+            void setIterationIndex(unsigned index);
 
-    if (!logic) {
-      setValidationState(NodeValidationState::Error);
-      setValidationMessage("Error: Failed to evaluate logic input");
+            NodeValidationState validate() override;
 
-      _out_ports[0].out_value = std::make_shared<LogicData>(false);
-      _node->onDataUpdated(0);
+        protected:
+            void setIsIterable(bool is_iterable);
+
+            unsigned _iteration_index = 0;
+            unsigned _n_iterations = 0;
+
+            bool _is_iterable = false;
+        };
+
     }
 
-    return _validation_state;
-  };
+}
 
-protected:
-  void setIsIterable(bool is_iterable) { _is_iterable = is_iterable; };
-
-  unsigned _iteration_index = 0;
-  unsigned _n_iterations = 0;
-
-  bool _is_iterable = false;
-};
-
-} // namespace Ui::Tools::NodeEditor::Nodes
-
-} // namespace Noggit
-
-#endif // NOGGIT_LOGICNODEBASE_HPP
+#endif //NOGGIT_LOGICNODEBASE_HPP

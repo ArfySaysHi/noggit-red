@@ -1,25 +1,36 @@
 #include "ConditionNode.hpp"
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <external/NodeEditor/include/nodes/Node>
 
 #include <cmath>
 #include <limits>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-ConditionNode::ConditionNode() : BaseNode() {
+ConditionNode::ConditionNode()
+: BaseNode()
+{
   setName("Logic :: Condition");
   setCaption("Equal");
   _validation_state = NodeValidationState::Valid;
 
   _operation = new QComboBox(&_embedded_widget);
-  _operation->addItems(
-      {"Equal", "Not equal", "Less", "Greater", "And", "Or", "Xor"});
+  _operation->addItems({"Equal",
+                        "Not equal",
+                        "Less",
+                        "Greater",
+                        "And",
+                        "Or",
+                        "Xor"});
   addWidgetTop(_operation);
 
-  QComboBox::connect(
-      _operation, qOverload<int>(&QComboBox::currentIndexChanged),
-      [this](int index) { setCaption(_operation->currentText()); });
+  QComboBox::connect(_operation, qOverload<int>(&QComboBox::currentIndexChanged)
+      ,[this](int index)
+                     {
+                         setCaption(_operation->currentText());
+                     }
+  );
 
   addPort<DecimalData>(PortType::In, "Value", true);
   _first = new QDoubleSpinBox(&_embedded_widget);
@@ -32,9 +43,10 @@ ConditionNode::ConditionNode() : BaseNode() {
   addPort<BooleanData>(PortType::Out, "Boolean", true);
 }
 
-void ConditionNode::compute() {
-  auto first = static_cast<DecimalData *>(_in_ports[0].in_value.lock().get());
-  auto second = static_cast<DecimalData *>(_in_ports[1].in_value.lock().get());
+void ConditionNode::compute()
+{
+  auto first = static_cast<DecimalData*>(_in_ports[0].in_value.lock().get());
+  auto second = static_cast<DecimalData*>( _in_ports[1].in_value.lock().get());
 
   // handle defaults
   double first_number = first ? first->value() : _first->value();
@@ -44,31 +56,29 @@ void ConditionNode::compute() {
 
   bool result = false;
 
-  switch (_operation->currentIndex()) {
-  case 0:
-    result = std::fabs(std::fabs(first_number) - std::fabs(second_number)) <
-             std::numeric_limits<double>::epsilon();
-    break;
-  case 1:
-    result = first_number != second_number;
-    break;
-  case 2:
-    result = first_number < second_number;
-    break;
-  case 3:
-    result = first_number > second_number;
-    break;
-  case 4:
-    result =
-        static_cast<bool>(first_number) && static_cast<bool>(second_number);
-    break;
-  case 5:
-    result =
-        static_cast<bool>(first_number) || static_cast<bool>(second_number);
-    break;
-  case 6:
-    result = static_cast<bool>(first_number) ^ static_cast<bool>(second_number);
-    break;
+  switch (_operation->currentIndex())
+  {
+    case 0:
+      result = std::fabs(std::fabs(first_number) - std::fabs(second_number)) < std::numeric_limits<double>::epsilon();
+      break;
+    case 1:
+      result = first_number != second_number;
+      break;
+    case 2:
+      result = first_number < second_number;
+      break;
+    case 3:
+      result = first_number > second_number;
+      break;
+    case 4:
+      result = static_cast<bool>(first_number) && static_cast<bool>(second_number);
+      break;
+    case 5:
+      result = static_cast<bool>(first_number) || static_cast<bool>(second_number);
+      break;
+    case 6:
+      result = static_cast<bool>(first_number) ^ static_cast<bool>(second_number);
+      break;
   }
 
   _out_ports[0].out_value = std::make_shared<BooleanData>(result);
@@ -78,7 +88,8 @@ void ConditionNode::compute() {
   _node->onDataUpdated(0);
 }
 
-QJsonObject ConditionNode::save() const {
+QJsonObject ConditionNode::save() const
+{
   QJsonObject json_obj;
 
   json_obj["name"] = name();
@@ -90,7 +101,8 @@ QJsonObject ConditionNode::save() const {
   return json_obj;
 }
 
-void ConditionNode::restore(const QJsonObject &json_obj) {
+void ConditionNode::restore(const QJsonObject& json_obj)
+{
   setName(json_obj["name"].toString());
   setCaption(json_obj["caption"].toString());
   _first->setValue(json_obj["default_first"].toDouble());

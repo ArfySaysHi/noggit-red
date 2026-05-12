@@ -1,49 +1,51 @@
-#ifndef NOGGIT_MODELVIEW_HPP
-#define NOGGIT_MODELVIEW_HPP
+#ifndef NOGGIT_BROWSER_MODELVIEW_HPP
+#define NOGGIT_BROWSER_MODELVIEW_HPP
 
+#include <noggit/ui/tools/AssetBrowser/BrowserModelView.hpp>
 #include <external/qtimgui/imgui/imgui.h>
-
 #include <external/imguizmo/ImGuizmo.h>
-#include <external/qtimgui/QtImGui.h>
-#include <noggit/Camera.hpp>
-#include <noggit/World.h>
-#include <noggit/ui/tools/AssetBrowser/ModelView.hpp>
 #include <noggit/ui/tools/ViewportGizmo/ViewportGizmo.hpp>
+#include <noggit/Camera.hpp>
 
-namespace Noggit {
-namespace Ui::Tools::PresetEditor {
-class ModelViewer : public Ui::Tools::AssetBrowser::ModelViewer {
-public:
-  explicit ModelViewer(QWidget *parent = nullptr);
+class World;
 
-  void loadWorldUnderlay(std::string const &internal_name, int map_id);
-  World *getWorld() { return _world.get(); };
-  Noggit::Camera *getCamera() { return &_camera; };
-  Noggit::Camera *getWorldCamera() { return &_world_camera; };
+namespace Noggit
+{
+  namespace Ui::Tools::PresetEditor
+  {
+    class ModelViewer : public Noggit::Ui::Tools::AssetBrowser::ModelViewer
+    {
+    public:
+        explicit ModelViewer(QWidget* parent = nullptr);
 
-private:
-  std::unique_ptr<World> _world;
+        void loadWorldUnderlay(std::string const& internal_name, int map_id);
+        World* getWorld();;
+        Noggit::Camera* getCamera();;
+        Noggit::Camera* getWorldCamera();;
 
-  Noggit::Camera _world_camera;
+    private:
+        std::unique_ptr<World> _world;
 
-  void paintGL() override;
-  void initializeGL() override;
+        Noggit::Camera _world_camera;
 
-  void tick(float dt) override;
+        void paintGL() override;
+        void initializeGL() override;
 
-  glm::mat4x4 world_model_view() const;
-  glm::mat4x4 world_projection() const;
+        void tick(float dt) override;
 
-  void mouseMoveEvent(QMouseEvent *event) override;
+        glm::mat4x4 world_model_view() const;
+        glm::mat4x4 world_projection() const;
 
-  ViewportGizmo::ViewportGizmo _transform_gizmo;
-  ImGuiContext *_imgui_context;
-  ImGuizmo::MODE _gizmo_mode = ImGuizmo::MODE::WORLD;
-  ImGuizmo::OPERATION _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
-  Noggit::BoolToggleProperty _gizmo_on = {true};
-};
+        void mouseMoveEvent(QMouseEvent* event) override;
 
-} // namespace Ui::Tools::PresetEditor
-} // namespace Noggit
+        ViewportGizmo::ViewportGizmo _transform_gizmo;
+        ImGuiContext* _imgui_context;
+        ImGuizmo::MODE _gizmo_mode = ImGuizmo::MODE::WORLD;
+        ImGuizmo::OPERATION _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
+        Noggit::BoolToggleProperty _gizmo_on = {true};
+    };
+  }
+}
 
-#endif // NOGGIT_MODELVIEW_HPP
+
+#endif //NOGGIT_MODELVIEW_HPP

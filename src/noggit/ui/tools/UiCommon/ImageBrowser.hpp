@@ -1,41 +1,44 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #ifndef NOGGIT_IMAGEBROWSER_HPP
 #define NOGGIT_IMAGEBROWSER_HPP
 
-#include <QFileSystemModel>
-#include <QSortFilterProxyModel>
 #include <QWidget>
+#include <QFileSystemModel>
 #include <ui_ImageBrowser.h>
 
-namespace Noggit::Ui::Tools {
-class ImageBrowserFilesystemModel : public QFileSystemModel {
-  Q_OBJECT
-public:
-  ImageBrowserFilesystemModel(QObject *parent = nullptr);
+class QSortFilterProxyModel;
 
-  QVariant data(const QModelIndex &index, int role) const override;
+namespace Noggit::Ui::Tools
+{
+  class ImageBrowserFilesystemModel : public QFileSystemModel
+  {
+    Q_OBJECT
+  public:
+    ImageBrowserFilesystemModel(QObject* parent = nullptr);
 
-public slots:
-  void onDirectoryLoaded(const QString &path);
-};
+    QVariant data(const QModelIndex& index, int role) const override;
 
-class ImageBrowser : public QWidget {
-  Q_OBJECT
-public:
-  ImageBrowser(QWidget *parent = nullptr);
+  public slots:
+    void onDirectoryLoaded(const QString& path);
+  };
 
-  void keyPressEvent(QKeyEvent *event) override;
+  class ImageBrowser : public QWidget
+  {
+    Q_OBJECT
+  public:
+    ImageBrowser(QWidget* parent = nullptr);
 
-signals:
-  void imageSelected(QString name);
+    void keyPressEvent(QKeyEvent* event) override;
 
-private:
-  ::Ui::imageBrowserTree _ui;
-  ImageBrowserFilesystemModel *_model;
-  QSortFilterProxyModel *_dir_proxy_model;
-};
-} // namespace Noggit::Ui::Tools
+  signals:
+    void imageSelected(QString name);
 
-#endif // NOGGIT_IMAGEBROWSER_HPP
+  private:
+    ::Ui::imageBrowserTree _ui;
+    ImageBrowserFilesystemModel* _model;
+    QSortFilterProxyModel* _dir_proxy_model;
+  };
+}
+
+#endif //NOGGIT_IMAGEBROWSER_HPP

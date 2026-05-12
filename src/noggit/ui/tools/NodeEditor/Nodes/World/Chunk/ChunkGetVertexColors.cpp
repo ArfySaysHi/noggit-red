@@ -1,15 +1,19 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "ChunkGetVertexColors.hpp"
 
-#include <noggit/ToolEnums.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
+#include <noggit/tool_enums.hpp>
+
+#include <external/NodeEditor/include/nodes/Node>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-ChunkGetVertexColorsNode::ChunkGetVertexColorsNode() : ContextLogicNodeBase() {
+ChunkGetVertexColorsNode::ChunkGetVertexColorsNode()
+: ContextLogicNodeBase()
+{
   setName("Chunk :: GetVertexColors");
   setCaption("Chunk :: GetVertexColors");
   _validation_state = NodeValidationState::Valid;
@@ -22,22 +26,22 @@ ChunkGetVertexColorsNode::ChunkGetVertexColorsNode() : ContextLogicNodeBase() {
   _out_ports[1].data_type->set_parameter_type("color");
 }
 
-void ChunkGetVertexColorsNode::compute() {
-  World *world = gCurrentContext->getWorld();
+void ChunkGetVertexColorsNode::compute()
+{
+  World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _(
-      ::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
-  MapChunk *chunk = defaultPortData<ChunkData>(PortType::In, 1)->value();
-  glm::vec3 *colors = chunk->getVertexColors();
+  MapChunk* chunk = defaultPortData<ChunkData>(PortType::In, 1)->value();
+  glm::vec3* colors = chunk->getVertexColors();
 
   _colors.clear();
   _colors.resize(mapbufsize);
 
-  for (int i = 0; i < mapbufsize; ++i) {
-    glm::vec3 &color = colors[i];
-    _colors[i] =
-        std::make_shared<ColorData>(glm::vec4(color.x, color.y, color.z, 1.0));
+  for (int i = 0; i < mapbufsize; ++i)
+  {
+    glm::vec3& color = colors[i];
+    _colors[i] = std::make_shared<ColorData>(glm::vec4(color.x, color.y, color.z, 1.0));
   }
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
@@ -48,10 +52,14 @@ void ChunkGetVertexColorsNode::compute() {
 
   _out_ports[1].out_value = std::move(list);
   _node->onDataUpdated(1);
+
 }
 
-NodeValidationState ChunkGetVertexColorsNode::validate() {
-  if (!static_cast<ChunkData *>(_in_ports[1].in_value.lock().get())) {
+
+NodeValidationState ChunkGetVertexColorsNode::validate()
+{
+  if (!static_cast<ChunkData*>(_in_ports[1].in_value.lock().get()))
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate chunk input.");
     return _validation_state;

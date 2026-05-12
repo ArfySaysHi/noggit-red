@@ -1,15 +1,19 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "TileGetAlphaLayer.hpp"
 
-#include <noggit/ToolEnums.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
+#include <noggit/tool_enums.hpp>
+
+#include <external/NodeEditor/include/nodes/Node>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-TileGetAlphaLayerNode::TileGetAlphaLayerNode() : ContextLogicNodeBase() {
+TileGetAlphaLayerNode::TileGetAlphaLayerNode()
+: ContextLogicNodeBase()
+{
   setName("Tile :: GetAlphaLayer");
   setCaption("Tile :: GetAlphaLayer");
   _validation_state = NodeValidationState::Valid;
@@ -17,24 +21,24 @@ TileGetAlphaLayerNode::TileGetAlphaLayerNode() : ContextLogicNodeBase() {
   addPortDefault<LogicData>(PortType::In, "Logic", true);
   addPortDefault<TileData>(PortType::In, "Tile", true);
   addPortDefault<UnsignedIntegerData>(PortType::In, "Layer<UInteger>", true);
-  auto layer = static_cast<QSpinBox *>(_in_ports[2].default_widget);
+  auto layer = static_cast<QSpinBox*>(_in_ports[2].default_widget);
   layer->setRange(1, 3);
 
   addPort<LogicData>(PortType::Out, "Logic", true);
   addPort<ImageData>(PortType::Out, "Image", true);
 }
 
-void TileGetAlphaLayerNode::compute() {
-  World *world = gCurrentContext->getWorld();
+void TileGetAlphaLayerNode::compute()
+{
+  World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _(
-      ::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
-  MapTile *tile = defaultPortData<TileData>(PortType::In, 1)->value();
-  unsigned layer =
-      defaultPortData<UnsignedIntegerData>(PortType::In, 2)->value();
+  MapTile* tile = defaultPortData<TileData>(PortType::In, 1)->value();
+  unsigned layer = defaultPortData<UnsignedIntegerData>(PortType::In, 2)->value();
 
-  if (layer < 1 || layer > 3) {
+  if (layer < 1 || layer > 3)
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: layer is out of range.");
     return;
@@ -43,17 +47,22 @@ void TileGetAlphaLayerNode::compute() {
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
 
-  _out_ports[1].out_value =
-      std::make_shared<ImageData>(tile->getAlphamapImage(layer));
+  _out_ports[1].out_value = std::make_shared<ImageData>(tile->getAlphamapImage(layer));
   _node->onDataUpdated(1);
+
 }
 
-NodeValidationState TileGetAlphaLayerNode::validate() {
-  if (!static_cast<TileData *>(_in_ports[1].in_value.lock().get())) {
-    setValidationState(NodeValidationState::Error);
-    setValidationMessage("Error: failed to evaluate tile input.");
-    return _validation_state;
+
+NodeValidationState TileGetAlphaLayerNode::validate()
+{
+  if (!static_cast<TileData*>(_in_ports[1].in_value.lock().get()))
+  {
+   setValidationState(NodeValidationState::Error);
+   setValidationMessage("Error: failed to evaluate tile input.");
+   return _validation_state;
   }
 
   return ContextLogicNodeBase::validate();
 }
+
+

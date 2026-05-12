@@ -1,159 +1,194 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
+
+#include <noggit/DBCFile.h>
+#include <noggit/MapHeaders.h>
+#include <noggit/ui/widget.hpp>
+
+#include <QWidget>
 
 #include <memory>
 #include <unordered_map>
 #include <vector>
 
-#include <QCheckBox>
-#include <QComboBox>
-#include <QDoubleSpinBox>
-#include <QGroupBox>
-#include <QHBoxLayout>
-#include <QLineEdit>
-#include <QSpinBox>
-#include <QStackedWidget>
-#include <QWidget>
+namespace BlizzardDatabaseLib::Structures
+{
+  struct BlizzardDatabaseRow;
+}
 
-#include <noggit/DBC.h>
-#include <noggit/DBCFile.h>
+class WMOInstance;
+class World;
 
-#include <noggit/World.h>
-#include <noggit/ui/minimap_widget.hpp>
-#include <noggit/ui/widget.hpp>
+class QLineEdit;
+class QDoubleSpinBox;
+class QComboBox;
+class QGroupBox;
+class QSpinBox;
+class QCheckBox;
+class QStackedWidget;
+class QTabWidget;
 
-namespace Noggit {
-
-namespace Ui::Tools::MapCreationWizard::Ui {
-
-class LocaleDBCEntry : public QWidget {
-public:
-  LocaleDBCEntry(QWidget *parent = nullptr);
-
-  void setCurrentLocale(const std::string &locale);
-
-  void setValue(const std::string &val, int locale) {
-    _widget_map.at(_locale_names[locale])->setText(QString::fromStdString(val));
+namespace Noggit
+{
+  namespace Project
+  {
+    class NoggitProject;
   }
 
-  std::string getValue(int locale) {
-    return _widget_map.at(_locale_names[locale])->text().toStdString();
-  };
+  namespace Ui
+  {
+    class Vector3fWidget;
+    class minimap_widget;
+  }
 
-  void fill(DBCFile::Record &record, size_t field);
-  void fill(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow &record,
-            std::string columnName);
-  void clear();
-  void toRecord(DBCFile::Record &record, size_t field);
+  namespace Ui::Tools::MapCreationWizard::Ui
+  {
 
-private:
-  QComboBox *_current_locale;
-  QStackedWidget *_show_entry;
+    class LocaleDBCEntry : public QWidget
+    {
+      public:
+        LocaleDBCEntry(QWidget *parent = nullptr);
 
-  std::unordered_map<std::string, QLineEdit *> _widget_map;
-  std::vector<std::string> _locale_names = {
-      "enUS",      "koKR",      "frFR",      "deDE",     "zhCN", "zhTW",
-      "esES",      "esMX",      "ruRU",      "jaJP",     "ptPT", "itIT",
-      "Unknown 1", "Unknown 2", "Unknown 3", "Unknown 4"};
+        void setCurrentLocale(const std::string& locale);
 
-  QLineEdit *_en;
-  QLineEdit *_kr;
-  QLineEdit *_fr;
-  QLineEdit *_de;
-  QLineEdit *_cn; // + nCN
-  QLineEdit *_tw;
-  QLineEdit *_es;
-  QLineEdit *_mx;
-  QLineEdit *_ru;
-  QLineEdit *_jp;
-  QLineEdit *_pt;
-  QLineEdit *_it;
-  QLineEdit *_unk1;
-  QLineEdit *_unk2;
-  QLineEdit *_unk3;
-  QLineEdit *_unk4;
-  QSpinBox *_flags;
-};
+        void setValue(const std::string& val, int locale);
 
-class MapCreationWizard : public Noggit::Ui::widget {
-  Q_OBJECT
+        std::string getValue(int locale);;
 
-public:
-  MapCreationWizard(std::shared_ptr<Project::NoggitProject> project,
-                    QWidget *parent = nullptr);
-  ~MapCreationWizard();
+        void fill(DBCFile::Record& record, size_t field);
+        void fill(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record, std::string columnName);
+        void clear();
+        void toRecord(DBCFile::Record& record, size_t field);
+        void setDefaultLocValue(const std::string& text);
 
-  void wheelEvent(QWheelEvent *event) override;
-  void destroyFakeWorld() {
-    if (_world)
-      delete _world;
-    _world = nullptr;
-    _minimap_widget->world(nullptr);
-  };
-  void addNewMap();
-signals:
-  void map_dbc_updated();
+      private:
+        QComboBox* _current_locale;
+        QStackedWidget* _show_entry;
 
-private:
-  std::shared_ptr<Project::NoggitProject> _project;
-  Noggit::Ui::minimap_widget *_minimap_widget;
-  int _selected_map;
-  QGroupBox *_map_settings;
+        std::unordered_map<std::string, QLineEdit*> _widget_map;
+        std::vector<std::string> _locale_names = {"enUS", "koKR", "frFR", "deDE", "zhCN",
+                                                  "zhTW", "esES", "esMX", "ruRU", "jaJP", "ptPT", "itIT",
+                                                  "Unknown 1", "Unknown 2", "Unknown 3", "Unknown 4"};
 
-  QTabWidget *_tabs;
+        QLineEdit* _en;
+        QLineEdit* _kr;
+        QLineEdit* _fr;
+        QLineEdit* _de;
+        QLineEdit* _cn; // + nCN
+        QLineEdit* _tw;
+        QLineEdit* _es;
+        QLineEdit* _mx;
+        QLineEdit* _ru;
+        QLineEdit* _jp;
+        QLineEdit* _pt;
+        QLineEdit* _it;
+        QLineEdit* _unk1;
+        QLineEdit* _unk2;
+        QLineEdit* _unk3;
+        QLineEdit* _unk4;
+        QSpinBox* _flags;
+    };
 
-  // Map settings
-  QLineEdit *_directory;
+  class MapCreationWizard : public Noggit::Ui::widget
+    {
+      Q_OBJECT
 
-  QCheckBox *_is_big_alpha;
-  QCheckBox *_sort_by_size_cat;
+    public:
+      MapCreationWizard(std::shared_ptr<Project::NoggitProject> project, QWidget *parent = nullptr);
+      ~MapCreationWizard();
 
-  QComboBox *_instance_type;
+      void wheelEvent(QWheelEvent *event) override;
+      // void destroyFakeWorld() { if(_world) _world.reset(); _world = nullptr; _minimap_widget->world (nullptr); };
+      void addNewMap();
 
-  LocaleDBCEntry *_map_name;
+      World* getWorld() const;;
+      std::unique_ptr<World> _world;
 
-  QSpinBox *_area_table_id;
+    signals:
+      void map_dbc_updated(int new_map = 0);
 
-  LocaleDBCEntry *_map_desc_alliance;
-  LocaleDBCEntry *_map_desc_horde;
+    private:
+      struct WmoEntryTab
+      {
+          QCheckBox* disableTerrain = nullptr;
+          QLineEdit* wmoPath = nullptr;
+          QSpinBox* nameId = nullptr;
+          QSpinBox* uniqueId = nullptr;
+          Vector3fWidget* position = nullptr;
+          Vector3fWidget* rotation = nullptr;
+          QSpinBox* flags = nullptr;
+          QComboBox* doodadSet = nullptr;
+          QComboBox* nameSet = nullptr;
 
-  QSpinBox *_loading_screen;
-  QDoubleSpinBox *_minimap_icon_scale;
-  QComboBox *_corpse_map_id;
+          ENTRY_MODF wmoEntry;
+      };
 
-  QDoubleSpinBox *_corpse_x;
-  QDoubleSpinBox *_corpse_y;
+      std::shared_ptr<Project::NoggitProject> _project;
+      Noggit::Ui::minimap_widget* _minimap_widget;
+      int _selected_map;
+      QGroupBox* _map_settings;
 
-  QSpinBox *_time_of_day_override;
-  QComboBox *_expansion_id;
-  QSpinBox *_raid_offset;
-  QSpinBox *_max_players;
+      QTabWidget* _tabs;
 
-  // map difficulty settings
-  QComboBox *_difficulty_type;
-  LocaleDBCEntry *_difficulty_req_message;
-  QSpinBox *_difficulty_raid_duration;
-  QSpinBox *_difficulty_max_players;
-  QLineEdit *_difficulty_string;
+      // Map settings
+      QLineEdit* _directory;
 
-  World *_world = nullptr;
+      QCheckBox* _is_big_alpha;
+      QCheckBox* _sort_by_size_cat;
 
-  bool _is_new_record = false;
-  int _cur_map_id = -1;
+      QComboBox* _instance_type;
 
-  QMetaObject::Connection _connection;
+      LocaleDBCEntry* _map_name;
 
-  std::string getDifficultyString();
+      QSpinBox* _area_table_id;
 
-  void selectMap(int map_id);
-  void selectMapDifficulty();
+      LocaleDBCEntry* _map_desc_alliance;
+      LocaleDBCEntry* _map_desc_horde;
 
-  void saveCurrentEntry();
-  void discardChanges();
+      QSpinBox* _loading_screen;
+      QDoubleSpinBox* _minimap_icon_scale;
+      QComboBox *_corpse_map_id;
 
-  void removeMap();
-};
-} // namespace Ui::Tools::MapCreationWizard::Ui
-} // namespace Noggit
+      QDoubleSpinBox* _corpse_x;
+      QDoubleSpinBox* _corpse_y;
+
+      QSpinBox* _time_of_day_override;
+      QComboBox* _expansion_id;
+      QSpinBox* _raid_offset;
+      QSpinBox* _max_players;
+
+      // map difficulty settings
+      QComboBox* _difficulty_type;
+      LocaleDBCEntry* _difficulty_req_message;
+      QSpinBox* _difficulty_raid_duration;
+      QSpinBox* _difficulty_max_players;
+      QLineEdit* _difficulty_string;
+
+      WmoEntryTab _wmoEntryTab;
+
+      bool _is_new_record = false;
+      int _cur_map_id = -1;
+
+      QMetaObject::Connection _connection;
+
+      std::string getDifficultyString();
+
+      void selectMap(int map_id);
+      void selectMapDifficulty();
+
+      void saveCurrentEntry();
+      void discardChanges();
+
+      void removeMap();
+
+      void createMapSettingsTab();
+      void createDifficultyTab();
+      void createWmoEntryTab();
+
+      void populateWmoEntryTab();
+      void populateDoodadSet(WMOInstance& instance);
+      void populateNameSet(WMOInstance& instance);
+    };
+  }
+}

@@ -1,39 +1,44 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #ifndef NOGGIT_LOADIMAGENODE_HPP
 #define NOGGIT_LOADIMAGENODE_HPP
 
 #include <noggit/ui/tools/NodeEditor/Nodes/LogicNodeBase.hpp>
 
-using QtNodes::NodeData;
-using QtNodes::NodeDataModel;
-using QtNodes::NodeDataType;
-using QtNodes::NodeValidationState;
-using QtNodes::PortIndex;
 using QtNodes::PortType;
+using QtNodes::PortIndex;
+using QtNodes::NodeData;
+using QtNodes::NodeDataType;
+using QtNodes::NodeDataModel;
+using QtNodes::NodeValidationState;
 
-namespace Noggit {
-namespace Ui::Tools::NodeEditor::Nodes {
-class LoadImageNode : public LogicNodeBase {
-  Q_OBJECT
+class QPushButton;
 
-public:
-  LoadImageNode();
-  void compute() override;
-  QJsonObject save() const override;
-  void restore(QJsonObject const &json_obj) override;
 
-public Q_SLOTS:
-  void inputConnectionCreated(Connection const &connection) override;
-  void inputConnectionDeleted(Connection const &connection) override;
+namespace Noggit
+{
+    namespace Ui::Tools::NodeEditor::Nodes
+    {
+        class LoadImageNode : public LogicNodeBase
+        {
+        Q_OBJECT
 
-private:
-  QPushButton *_load_button;
-};
+        public:
+            LoadImageNode();
+            void compute() override;
+            QJsonObject save() const override;
+            void restore(QJsonObject const& json_obj) override;
 
-} // namespace Ui::Tools::NodeEditor::Nodes
+        public Q_SLOTS:
+            void inputConnectionCreated(Connection const& connection) override;
+            void inputConnectionDeleted(Connection const& connection) override;
 
-} // namespace Noggit
+        private:
+            QPushButton* _load_button;
+        };
 
-#endif // NOGGIT_LOADIMAGENODE_HPP
+    }
+
+}
+
+#endif //NOGGIT_LOADIMAGENODE_HPP

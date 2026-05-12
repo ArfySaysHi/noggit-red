@@ -1,37 +1,38 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #ifndef NOGGIT_NOISEVIEWERNODE_HPP
 #define NOGGIT_NOISEVIEWERNODE_HPP
 
-#include <QLabel>
-#include <QPushButton>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp>
 
-using QtNodes::NodeData;
-using QtNodes::NodeDataModel;
-using QtNodes::NodeDataType;
-using QtNodes::NodeValidationState;
-using QtNodes::PortIndex;
 using QtNodes::PortType;
+using QtNodes::PortIndex;
+using QtNodes::NodeData;
+using QtNodes::NodeDataType;
+using QtNodes::NodeDataModel;
+using QtNodes::NodeValidationState;
 
-namespace Noggit {
-namespace Ui::Tools::NodeEditor::Nodes {
-class NoiseViewerNode : public BaseNode {
-  Q_OBJECT
+class QLabel;
+class QPushButton;
 
-public:
-  NoiseViewerNode();
-  NodeValidationState validate() override;
-  void compute() override;
+namespace Noggit
+{
+    namespace Ui::Tools::NodeEditor::Nodes
+    {
+        class NoiseViewerNode : public BaseNode
+        {
+        Q_OBJECT
 
-private:
-  QPushButton *_update_btn;
-  QLabel *_image;
-};
+        public:
+            NoiseViewerNode();
+            NodeValidationState validate() override;
+            void compute() override;
 
-} // namespace Ui::Tools::NodeEditor::Nodes
+        private:
+          QPushButton* _update_btn;
+          QLabel* _image;
+        };
+    }
+}
 
-} // namespace Noggit
-
-#endif // NOGGIT_NOISEVIEWERNODE_HPP
+#endif //NOGGIT_NOISEVIEWERNODE_HPP

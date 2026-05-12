@@ -1,14 +1,16 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "NoiseClampNode.hpp"
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <external/NodeEditor/include/nodes/Node>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-NoiseClampNode::NoiseClampNode() : BaseNode() {
+NoiseClampNode::NoiseClampNode()
+: BaseNode()
+{
   setName("Noise :: Clamp");
   setCaption("Noise :: Clamp");
   _validation_state = NodeValidationState::Valid;
@@ -18,16 +20,16 @@ NoiseClampNode::NoiseClampNode() : BaseNode() {
   addPort<NoiseData>(PortType::Out, "Noise", true);
 }
 
-void NoiseClampNode::compute() {
-  _module.SetSourceModule(
-      0,
-      *static_cast<NoiseData *>(_in_ports[0].in_value.lock().get())->value());
+void NoiseClampNode::compute()
+{
+  _module.SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value());
 
   auto bounds_data = defaultPortData<Vector2DData>(PortType::In, 1);
 
-  glm::vec2 const &bounds = bounds_data->value();
+  glm::vec2 const& bounds = bounds_data->value();
 
-  if (bounds.x >= bounds.y) {
+  if (bounds.x >= bounds.y)
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: incorrect bounds.");
     return;
@@ -40,8 +42,10 @@ void NoiseClampNode::compute() {
   _node->onDataUpdated(0);
 }
 
-NodeValidationState NoiseClampNode::validate() {
-  if (!static_cast<NoiseData *>(_in_ports[0].in_value.lock().get())) {
+NodeValidationState NoiseClampNode::validate()
+{
+  if (!static_cast<NoiseData*>(_in_ports[0].in_value.lock().get()))
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate noise input.");
     return _validation_state;
@@ -50,7 +54,9 @@ NodeValidationState NoiseClampNode::validate() {
   return _validation_state;
 }
 
-QJsonObject NoiseClampNode::save() const {
+
+QJsonObject NoiseClampNode::save() const
+{
   QJsonObject json_obj = BaseNode::save();
 
   defaultWidgetToJson(PortType::In, 1, json_obj, "bounds");
@@ -58,7 +64,8 @@ QJsonObject NoiseClampNode::save() const {
   return json_obj;
 }
 
-void NoiseClampNode::restore(const QJsonObject &json_obj) {
+void NoiseClampNode::restore(const QJsonObject& json_obj)
+{
   BaseNode::restore(json_obj);
 
   defaultWidgetFromJson(PortType::In, 1, json_obj, "bounds");

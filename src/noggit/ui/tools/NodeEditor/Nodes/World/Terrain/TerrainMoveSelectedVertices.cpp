@@ -1,16 +1,20 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "TerrainMoveSelectedVertices.hpp"
 
-#include <noggit/ToolEnums.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
+#include <noggit/tool_enums.hpp>
+#include <noggit/World.h>
+
+#include <external/NodeEditor/include/nodes/Node>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 TerrainMoveSelectedVerticesNode::TerrainMoveSelectedVerticesNode()
-    : ContextLogicNodeBase() {
+: ContextLogicNodeBase()
+{
   setName("Terrain :: MoveSelectedVertices");
   setCaption("Terrain :: MoveSelectedVertices");
   _validation_state = NodeValidationState::Valid;
@@ -21,14 +25,15 @@ TerrainMoveSelectedVerticesNode::TerrainMoveSelectedVerticesNode()
   addPort<LogicData>(PortType::Out, "Logic", true);
 }
 
-void TerrainMoveSelectedVerticesNode::compute() {
-  World *world = gCurrentContext->getWorld();
+void TerrainMoveSelectedVerticesNode::compute()
+{
+  World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _(
-      ::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   world->moveVertices(defaultPortData<DecimalData>(PortType::In, 1)->value());
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
+
 }

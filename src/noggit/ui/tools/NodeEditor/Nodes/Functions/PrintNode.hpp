@@ -2,33 +2,35 @@
 #define NOGGIT_PRINTNODE_HPP
 
 #include "noggit/ui/tools/NodeEditor/Nodes/LogicNodeBase.hpp"
-#include <QLineEdit>
 
-using QtNodes::NodeData;
-using QtNodes::NodeDataModel;
-using QtNodes::NodeDataType;
-using QtNodes::NodeValidationState;
-using QtNodes::PortIndex;
 using QtNodes::PortType;
+using QtNodes::PortIndex;
+using QtNodes::NodeData;
+using QtNodes::NodeDataType;
+using QtNodes::NodeDataModel;
+using QtNodes::NodeValidationState;
 
-namespace Noggit {
-namespace Ui::Tools::NodeEditor::Nodes {
-class PrintNode : public LogicNodeBase {
-  Q_OBJECT
+class QLineEdit;
 
-public:
-  PrintNode();
-  void compute() override;
-  NodeValidationState validate() override;
-  QJsonObject save() const override;
-  void restore(QJsonObject const &json_obj) override;
+namespace Noggit
+{
+    namespace Ui::Tools::NodeEditor::Nodes
+    {
+        class PrintNode : public LogicNodeBase
+        {
+        Q_OBJECT
 
-private:
-  QLineEdit *_text;
-};
+        public:
+            PrintNode();
+            void compute() override;
+            NodeValidationState validate() override;
+            QJsonObject save() const override;
+            void restore(QJsonObject const& json_obj) override;
 
-} // namespace Ui::Tools::NodeEditor::Nodes
+        private:
+            QLineEdit* _text;
+        };
+    }
+}
 
-} // namespace Noggit
-
-#endif // NOGGIT_PRINTNODE_HPP
+#endif //NOGGIT_PRINTNODE_HPP

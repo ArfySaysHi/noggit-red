@@ -1,122 +1,123 @@
 #ifndef NOGGIT_PREVIEWRENDERER_HPP
 #define NOGGIT_PREVIEWRENDERER_HPP
 
-#include "noggit/rendering/LiquidTextureManager.hpp"
-#include <noggit/BoolToggleProperty.hpp>
 #include <noggit/Camera.hpp>
 #include <noggit/ContextObject.hpp>
-#include <noggit/Model.h>
-#include <noggit/ModelInstance.h>
-#include <noggit/WMO.h>
-#include <noggit/WMOInstance.h>
-#include <noggit/rendering/Primitives.hpp>
+#include <noggit/BoolToggleProperty.hpp>
 #include <noggit/ui/tools/ViewportManager/ViewportManager.hpp>
+#include <noggit/rendering/Primitives.hpp>
+#include "noggit/rendering/LiquidTextureManager.hpp"
 
-#include <QOffscreenSurface>
 #include <QOpenGLContext>
 #include <QOpenGLFramebufferObjectFormat>
-#include <QOpenGLWidget>
+#include <QOffscreenSurface>
 #include <QPixmap>
-#include <QSettings>
 
 #include <vector>
 
-namespace Noggit::Ui::Tools {
+class ModelInstance;
+class WMOInstance;
 
-class PreviewRenderer : public Noggit::Ui::Tools::ViewportManager::Viewport {
-  Q_OBJECT
+class QSettings;
 
-public:
-  explicit PreviewRenderer(int width, int height,
-                           Noggit::NoggitRenderContext context,
-                           QWidget *parent = nullptr);
+namespace Noggit::Ui::Tools
+{
 
-  void resetCamera(float x = 0.f, float y = 0.f, float z = 0.f,
-                   float roll = 0.f, float yaw = 120.f, float pitch = 20.f);
-  QPixmap *renderToPixmap();
+class PreviewRenderer : public Noggit::Ui::Tools::ViewportManager::Viewport
+  {
+    Q_OBJECT
 
-  virtual void setModel(std::string const &filename);
-  void setModelOffscreen(std::string const &filename);
-  virtual void setPrefab(std::string const &filename) {};
+  public:
+    explicit PreviewRenderer(int width, int height, Noggit::NoggitRenderContext context, QWidget* parent = nullptr);
+    ~PreviewRenderer() override;
 
-  void setLightDirection(float y, float z);
+    void resetCamera(float x = 0.f, float y = 0.f, float z = 0.f, float roll = 0.f, float yaw = 120.f, float pitch = 20.f);
+    QPixmap* renderToPixmap();
 
-  BoolToggleProperty _draw_models = {true};
-  BoolToggleProperty _draw_wmo = {true};
-  BoolToggleProperty _draw_particles = {true};
-  BoolToggleProperty _draw_animated = {true};
-  BoolToggleProperty _draw_boxes = {false};
-  BoolToggleProperty _draw_grid = {false};
+    virtual void setModel(std::string const& filename);
+    void setModelOffscreen(std::string const& filename);
+    virtual void setPrefab(std::string const& filename) {};
 
-  void unloadOpenglData() override;
+    void setLightDirection(float y, float z);
 
-protected:
-  bool _offscreen_mode = true;
-  Noggit::Camera _camera;
-  QSettings *_settings;
-  std::string _filename;
+    BoolToggleProperty _draw_models = {true};
+    BoolToggleProperty _draw_wmo = {true};
+    BoolToggleProperty _draw_particles = {true};
+    BoolToggleProperty _draw_animated = {true};
+    BoolToggleProperty _draw_boxes = {false};
+    BoolToggleProperty _draw_grid = {false};
 
-  std::unique_ptr<OpenGL::program> _m2_program;
-  std::unique_ptr<OpenGL::program> _m2_instanced_program;
-  std::unique_ptr<OpenGL::program> _m2_particles_program;
-  std::unique_ptr<OpenGL::program> _m2_ribbons_program;
-  std::unique_ptr<OpenGL::program> _m2_box_program;
-  std::unique_ptr<OpenGL::program> _wmo_program;
-  std::unique_ptr<OpenGL::program> _liquid_program;
+    void unloadOpenglData() override;
 
-  std::vector<ModelInstance> _model_instances;
-  std::vector<WMOInstance> _wmo_instances;
+  protected:
 
-  Noggit::Rendering::Primitives::Grid _grid;
+    bool _offscreen_mode = true;
+    Noggit::Camera _camera;
+    QSettings* _settings;
+    std::string _filename;
 
-  float _animtime = 0.f;
+    std::unique_ptr<OpenGL::program> _m2_program;
+    std::unique_ptr<OpenGL::program> _m2_instanced_program;
+    std::unique_ptr<OpenGL::program> _m2_particles_program;
+    std::unique_ptr<OpenGL::program> _m2_ribbons_program;
+    std::unique_ptr<OpenGL::program> _m2_box_program;
+    std::unique_ptr<OpenGL::program> _wmo_program;
+    std::unique_ptr<OpenGL::program> _liquid_program;
 
-  std::vector<glm::vec3> calcSceneExtents();
-  virtual void draw();
-  virtual void tick(float dt);
-  virtual glm::mat4x4 model_view() const;
-  virtual glm::mat4x4 projection() const;
-  virtual float aspect_ratio() const;
+    std::vector<ModelInstance> _model_instances;
+    std::vector<WMOInstance> _wmo_instances;
 
-  void update_emitters(float dt);
+    Noggit::Rendering::Primitives::Grid _grid;
 
-  void upload();
+    float _animtime = 0.f;
 
-  void unload();
+    std::vector<glm::vec3> calcSceneExtents();
+    virtual void draw();
+    virtual void tick(float dt);
+    virtual glm::mat4x4 model_view() const;
+    virtual glm::mat4x4 projection() const;
+    virtual float aspect_ratio() const;
 
-  void updateLightingUniformBlock();
+    void update_emitters(float dt);
 
-  void updateMVPUniformBlock(const glm::mat4x4 &model_view,
-                             const glm::mat4x4 &projection);
+    void upload();
 
-private:
-  int _width;
-  int _height;
+    void unload();
 
-  std::map<std::tuple<std::string, int, int>, QPixmap> _cache;
+    void updateLightingUniformBlock();
 
-  QOpenGLContext _offscreen_context;
-  QOpenGLFramebufferObjectFormat _fmt;
-  QOffscreenSurface _offscreen_surface;
+    void updateMVPUniformBlock(const glm::mat4x4& model_view, const glm::mat4x4& projection);
 
-  glm::vec3 _background_color;
-  glm::vec3 _diffuse_light;
-  glm::vec3 _ambient_light;
-  glm::vec3 _light_dir;
+  private:
+    int _width;
+    int _height;
 
-  OpenGL::Scoped::deferred_upload_buffers<2> _buffers;
-  GLuint const &_mvp_ubo = _buffers[0];
-  GLuint const &_lighting_ubo = _buffers[1];
+    std::map<std::tuple<std::string, int, int>, QPixmap> _cache;
 
-  OpenGL::MVPUniformBlock _mvp_ubo_data;
-  OpenGL::LightingUniformBlock _lighting_ubo_data;
+    QOpenGLContext _offscreen_context;
+    QOpenGLFramebufferObjectFormat _fmt;
+    QOffscreenSurface _offscreen_surface;
 
-  Noggit::Rendering::LiquidTextureManager _liquid_texture_manager;
+    glm::vec3 _background_color;
+    glm::vec3 _diffuse_light;
+    glm::vec3 _ambient_light;
+    glm::vec3 _light_dir;
 
-  bool _uploaded = false;
-  bool _lighting_needs_update = true;
-};
+    OpenGL::Scoped::deferred_upload_buffers<2> _buffers;
+    GLuint const& _mvp_ubo = _buffers[0];
+    GLuint const& _lighting_ubo = _buffers[1];
 
-} // namespace Noggit::Ui::Tools
+    OpenGL::MVPUniformBlock _mvp_ubo_data;
+    OpenGL::LightingUniformBlock _lighting_ubo_data;
 
-#endif // NOGGIT_PREVIEWRENDERER_HPP
+    Noggit::Rendering::LiquidTextureManager _liquid_texture_manager;
+
+    bool _uploaded = false;
+    bool _lighting_needs_update = true;
+
+  };
+
+}
+
+
+#endif //NOGGIT_PREVIEWRENDERER_HPP

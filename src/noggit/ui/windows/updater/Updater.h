@@ -1,62 +1,63 @@
 #pragma once
 
-#include <QProcess>
-#include <QtNetwork/qnetworkaccessmanager.h>
-#include <QtNetwork/qnetworkreply.h>
-#include <QtNetwork/qnetworkrequest.h>
-#include <QtWidgets/QDialog>
-#include <qdir.h>
-#include <qdiriterator.h>
-#include <qfile.h>
-#include <qpushbutton.h>
+#include <QByteArray>
+#include <QCryptographicHash>
+#include <QDialog>
+#include <QMap>
+#include <QString>
+#include <QUrl>
+#include <QVector>
 
-#include "ui_Updater.h"
+namespace Ui
+{
+  class Updater;
+}
 
-namespace Noggit {
-namespace Ui {
-class CUpdater : public QDialog {
-  Q_OBJECT
-  ::Ui::Updater *ui;
+namespace Noggit
+{
+	namespace Ui
+    {
+        class CUpdater : public QDialog
+        {
+            Q_OBJECT
+            ::Ui::Updater* ui = nullptr;
 
-public:
-  CUpdater(QWidget *parent = nullptr);
+        public:
+            CUpdater(QWidget* parent = nullptr);
 
-private:
-  QByteArray FileMD5(const QString &filename,
-                     QCryptographicHash::Algorithm algo);
-  QString ToHashFile(const QString &name, const QString &hash);
-  QUrl GenerateLink(const QString &name);
+        private:
+            QByteArray FileMD5(const QString& filename, QCryptographicHash::Algorithm algo);
+            QString ToHashFile(const QString& name, const QString& hash);
+            QUrl GenerateLink(const QString& name);
 
-  void GenerateLocalMD5();
-  void CompareMD5();
-  void DownloadUpdate();
-  void StartExternalUpdater();
+            void GenerateLocalMD5();
+            void CompareMD5();
+            void DownloadUpdate();
+            void StartExternalUpdater();
 
-private slots:
-  void GenerateOnlineMD5();
-  void GetOnlineFile();
+        private slots:
+            void GenerateOnlineMD5();
+            void GetOnlineFile();
 
-signals:
-  void OpenUpdater();
+        signals:
+            void OpenUpdater();
 
-private:
-  const QString TemporaryFolder = "/temp";
-  const QString StorageURL =
-      "https://raw.githubusercontent.com/Intemporel/NoggitRedBinaries/main/%1";
-  const QString FileURL = "%1%2/%3";
-  const QString ExternalProcess = "/noggit-updater.exe";
+        private:
+            const QString TemporaryFolder = "/temp";
+            const QString StorageURL = "https://raw.githubusercontent.com/Intemporel/NoggitRedBinaries/main/%1";
+            const QString FileURL = "%1%2/%3";
+            const QString ExternalProcess = "/noggit-updater.exe";
 
-  int FileNeededCount;
-  int FileMissingCount;
+            int FileNeededCount = 0;
+            int FileMissingCount = 0;
 
-  bool NeedUpdate;
-  bool LocalCheck, OnlineCheck;
+            bool NeedUpdate = false;
+            bool LocalCheck = false, OnlineCheck = false;
 
-  QMap<QString, QString> LocalMD5;
-  QMap<QString, QString> OnlineMD5;
+            QMap<QString, QString> LocalMD5;
+            QMap<QString, QString> OnlineMD5;
 
-  QVector<QString> FileNeeded;
-};
-} // namespace Ui
-
-} // namespace Noggit
+            QVector<QString> FileNeeded;
+        };
+    }
+}

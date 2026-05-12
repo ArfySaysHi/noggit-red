@@ -1,69 +1,72 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #ifndef NOGGIT_GETVARIABLENODE_HPP
 #define NOGGIT_GETVARIABLENODE_HPP
 
-#include <external/tsl/robin_map.h>
 #include <noggit/ui/tools/NodeEditor/Nodes/LogicNodeBase.hpp>
+#include <external/tsl/robin_map.h>
 
-using QtNodes::NodeData;
-using QtNodes::NodeDataModel;
-using QtNodes::NodeDataType;
-using QtNodes::NodeValidationState;
-using QtNodes::PortIndex;
 using QtNodes::PortType;
+using QtNodes::PortIndex;
+using QtNodes::NodeData;
+using QtNodes::NodeDataType;
+using QtNodes::NodeDataModel;
+using QtNodes::NodeValidationState;
 
-namespace Noggit {
-namespace Ui::Tools::NodeEditor::Nodes {
-using VariableMap =
-    tsl::robin_map<std::string,
-                   std::pair<std::string, std::shared_ptr<NodeData>>>;
 
-class GetVariableNodeBase : public LogicNodeBase {
-  Q_OBJECT
+namespace Noggit
+{
+    namespace Ui::Tools::NodeEditor::Nodes
+    {
+        using VariableMap = tsl::robin_map<std::string, std::pair<std::string, std::shared_ptr<NodeData>>>;
 
-public:
-  GetVariableNodeBase();
-  void compute() override;
-  NodeValidationState validate() override;
-  QJsonObject save() const override;
-  void restore(QJsonObject const &json_obj) override;
+        class GetVariableNodeBase : public LogicNodeBase
+        {
+        Q_OBJECT
 
-public Q_SLOTS:
-  void outputConnectionCreated(const Connection &connection) override;
-  void outputConnectionDeleted(const Connection &connection) override;
+        public:
+            GetVariableNodeBase();
+            void compute() override;
+            NodeValidationState validate() override;
+            QJsonObject save() const override;
+            void restore(QJsonObject const& json_obj) override;
 
-protected:
-  virtual VariableMap *getVariableMap() = 0;
-};
+        public Q_SLOTS:
+            void outputConnectionCreated(const Connection& connection) override;
+            void outputConnectionDeleted(const Connection& connection) override;
 
-// Scene scope
+        protected:
+            virtual VariableMap* getVariableMap() = 0;
+        };
 
-class GetVariableNode : public GetVariableNodeBase {
-  Q_OBJECT
+        // Scene scope
 
-public:
-  GetVariableNode();
+        class GetVariableNode : public GetVariableNodeBase
+        {
+            Q_OBJECT
 
-protected:
-  VariableMap *getVariableMap() override;
-};
+        public:
+            GetVariableNode();
 
-// Context scope
+        protected:
+            VariableMap* getVariableMap() override;
+        };
 
-class GetContextVariableNode : public GetVariableNodeBase {
-  Q_OBJECT
+        // Context scope
 
-public:
-  GetContextVariableNode();
+        class GetContextVariableNode : public GetVariableNodeBase
+        {
+        Q_OBJECT
 
-protected:
-  VariableMap *getVariableMap() override;
-};
+        public:
+            GetContextVariableNode();
 
-} // namespace Ui::Tools::NodeEditor::Nodes
+        protected:
+            VariableMap* getVariableMap() override;
+        };
 
-} // namespace Noggit
+    }
 
-#endif // NOGGIT_GETVARIABLENODE_HPP
+}
+
+#endif //NOGGIT_GETVARIABLENODE_HPP

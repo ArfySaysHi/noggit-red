@@ -1,73 +1,81 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #ifndef NOGGITQT_ACTIONMANAGER_HPP
 #define NOGGITQT_ACTIONMANAGER_HPP
 
 #include <QObject>
 #include <deque>
+#include <stdexcept>
 #include <noggit/Action.hpp>
 
 class MapView;
 
-namespace Noggit {
 
-class ActionManager : public QObject {
-  Q_OBJECT
-public:
-  static ActionManager *instance() {
-    static ActionManager inst;
-    return &inst;
-  }
+namespace Noggit
+{
 
-  [[nodiscard]]
-  std::deque<Action *> *getActionStack();
+    class ActionManager : public QObject
+    {
+    Q_OBJECT
+    public:
+        static ActionManager* instance()
+        {
+          static ActionManager inst;
+          return &inst;
+        }
 
-  [[nodiscard]]
-  Action *getCurrentAction() const;
+        [[nodiscard]]
+        std::deque<Action*>* getActionStack();
 
-  void setCurrentAction(unsigned index);
+        [[nodiscard]]
+        Action* getCurrentAction() const;
 
-  Action *beginAction(MapView *map_view, int flags = ActionFlags::eNO_FLAG,
-                      int modality_controls = ActionModalityControllers::eNONE);
+        void setCurrentAction(unsigned index);
 
-  void endAction();
+        Action* beginAction(MapView* map_view
+                            , int flags = ActionFlags::eNO_FLAG
+                            , int modality_controls = ActionModalityControllers::eNONE);
 
-  void endActionOnModalityMismatch(unsigned modality_controls);
+        void endAction();
 
-  void setLimit(unsigned limit);
+        void endActionOnModalityMismatch(unsigned modality_controls);
 
-  void purge();
+        void setLimit(unsigned limit);
 
-  [[nodiscard]]
-  unsigned limit() const;
+        void purge();
 
-  void undo();
-  void redo();
+        [[nodiscard]]
+        unsigned limit() const;
 
-  ~ActionManager() override;
+        void undo();
+        void redo();
 
-signals:
-  void popBack();
-  void popFront();
-  void addedAction(Action *action);
-  void purged();
-  void currentActionChanged(unsigned index);
-  void onActionBegin(Action *action);
-  void onActionEnd(Action *action);
+        ~ActionManager() override;
 
-private:
-  ActionManager() : QObject() {}
+    signals:
+      void popBack();
+      void popFront();
+      void addedAction(Action* action);
+      void purged();
+      void currentActionChanged(unsigned index);
+      void onActionBegin(Action* action);
+      void onActionEnd(Action* action);
 
-  std::deque<Action *> _action_stack;
-  unsigned _limit = 30;
-  Action *_cur_action = nullptr;
-  unsigned _undo_index = 0;
-};
 
-} // namespace Noggit
+    private:
+        ActionManager() : QObject() {}
+
+        std::deque<Action*> _action_stack;
+        unsigned _limit = 30;
+        Action* _cur_action = nullptr;
+        unsigned _undo_index = 0;
+
+    };
+
+}
 
 #define NOGGIT_CUR_ACTION Noggit::ActionManager::instance()->getCurrentAction()
 #define NOGGIT_ACTION_MGR Noggit::ActionManager::instance()
 
-#endif // NOGGITQT_ACTIONMANAGER_HPP
+#endif //NOGGITQT_ACTIONMANAGER_HPP
+

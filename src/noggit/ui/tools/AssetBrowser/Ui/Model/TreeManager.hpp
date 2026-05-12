@@ -3,32 +3,36 @@
 
 #include <external/tsl/robin_map.h>
 
-#include <QStandardItemModel>
+#include <QMap>
 #include <QWidget>
 
-namespace Noggit {
-namespace Ui::Tools::AssetBrowser::Ui::Model {
-class TreeManager {
-  Q_DISABLE_COPY(TreeManager)
+class QStandardItemModel;
+class QStandardItem;
 
-public:
-  explicit TreeManager(QStandardItem *root)
-      : root(root), sep(QLatin1Char('/')) {}
-  explicit TreeManager(QStandardItemModel *model)
-      : root(model->invisibleRootItem()), sep(QLatin1Char('/')) {}
+namespace Noggit
+{
+  namespace Ui::Tools::AssetBrowser::Ui::Model
+  {
+    class TreeManager
+    {
+      Q_DISABLE_COPY(TreeManager)
 
-  QStandardItem *addItem(QString path);
+    public:
+      explicit TreeManager(QStandardItem* root);
+      explicit  TreeManager(QStandardItemModel* model);
 
-private:
-  QChar const sep;
-  QMap<QString, QStandardItem *> items;
-  tsl::robin_map<QString, QStandardItem *> layered_items;
-  QStandardItem *root;
+      QStandardItem* addItem(QString path);
 
-  QStandardItem *find(QString path);
-};
-} // namespace Ui::Tools::AssetBrowser::Ui::Model
+    private:
 
-} // namespace Noggit
+      QChar const sep;
+      QMap<QString, QStandardItem*> items;
+      tsl::robin_map<QString, QStandardItem*> layered_items;
+      QStandardItem* root;
 
-#endif // NOGGIT_TREEMANAGER_HPP
+      QStandardItem* find(QString path);
+    };
+  }
+}
+
+#endif //NOGGIT_TREEMANAGER_HPP

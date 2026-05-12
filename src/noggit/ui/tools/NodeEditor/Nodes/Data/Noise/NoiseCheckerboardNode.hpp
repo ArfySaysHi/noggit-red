@@ -1,5 +1,4 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #ifndef NOGGIT_NOISECHECKERBOARDNODE_HPP
 #define NOGGIT_NOISECHECKERBOARDNODE_HPP
@@ -7,28 +6,32 @@
 #include "NoiseGeneratorBase.hpp"
 #include <external/libnoise/src/noise/noise.h>
 
-using QtNodes::NodeData;
-using QtNodes::NodeDataModel;
-using QtNodes::NodeDataType;
-using QtNodes::NodeValidationState;
-using QtNodes::PortIndex;
 using QtNodes::PortType;
+using QtNodes::PortIndex;
+using QtNodes::NodeData;
+using QtNodes::NodeDataType;
+using QtNodes::NodeDataModel;
+using QtNodes::NodeValidationState;
 
-namespace Noggit {
-namespace Ui::Tools::NodeEditor::Nodes {
-class NoiseCheckerboardNode : public NoiseGeneratorBase {
-  Q_OBJECT
 
-public:
-  NoiseCheckerboardNode();
-  void compute() override;
+namespace Noggit
+{
+    namespace Ui::Tools::NodeEditor::Nodes
+    {
+        class NoiseCheckerboardNode : public NoiseGeneratorBase
+        {
+        Q_OBJECT
 
-private:
-  noise::module::Checkerboard _module;
-};
+        public:
+            NoiseCheckerboardNode();
+            void compute() override;
 
-} // namespace Ui::Tools::NodeEditor::Nodes
+        private:
+            noise::module::Checkerboard _module;
+        };
 
-} // namespace Noggit
+    }
 
-#endif // NOGGIT_NOISECHECKERBOARDNODE_HPP
+}
+
+#endif //NOGGIT_NOISECHECKERBOARDNODE_HPP

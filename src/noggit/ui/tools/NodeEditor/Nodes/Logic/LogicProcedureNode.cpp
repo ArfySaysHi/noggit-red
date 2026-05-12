@@ -1,23 +1,25 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "LogicProcedureNode.hpp"
 
+#include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include "LogicBeginNode.hpp"
 #include "LogicReturnNode.hpp"
-#include "noggit/ui/tools/NodeEditor/Nodes/Widgets/ProcedureSelector.hpp"
-#include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-
+#include "noggit/ui/tools/NodeEditor/Nodes/Widgets/ProcedureSelector.hpp"
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodeScene.hpp>
 #include <noggit/ui/tools/NodeEditor/NodeRegistry.hpp>
-#include <sstream>
 
 #include <QComboBox>
 #include <QDir>
 
+#include <sstream>
+
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-LogicProcedureNode::LogicProcedureNode() : LogicNodeBase() {
+LogicProcedureNode::LogicProcedureNode()
+: LogicNodeBase()
+{
   setName("Logic :: Procedure");
   setCaption("Logic :: Procedure");
   setValidationState(NodeValidationState::Valid);
@@ -26,28 +28,30 @@ LogicProcedureNode::LogicProcedureNode() : LogicNodeBase() {
   addDefaultWidget(new QLabel(&_embedded_widget), PortType::In, 0);
 
   addPort<ProcedureData>(PortType::In, "Procedure", true);
-  _procedure_default =
-      _in_ports[1].data_type->default_widget(&_embedded_widget);
+  _procedure_default = _in_ports[1].data_type->default_widget(&_embedded_widget);
   addDefaultWidget(_procedure_default, PortType::In, 1);
 
   // handle switching of procedure in the UI
-  connect(static_cast<ProcedureSelector *>(_procedure_default),
-          &ProcedureSelector::entry_updated,
-          [this](QString const &path) { setProcedure(path); });
+  connect(static_cast<ProcedureSelector*>(_procedure_default), &ProcedureSelector::entry_updated
+          ,[this](QString const& path)
+          {
+              setProcedure(path);
+          });
 
   addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
 }
 
-void LogicProcedureNode::compute() {
-  auto logic = static_cast<LogicData *>(_in_ports[0].in_value.lock().get());
+void LogicProcedureNode::compute()
+{
+  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
 
   if (!logic->value())
     return;
 
-  _scene = gCurrentContext->getScene(
-      QDir("./scripts/").absoluteFilePath(_scene_path), this);
+  _scene = gCurrentContext->getScene(QDir("./scripts/").absoluteFilePath(_scene_path), this);
 
-  if (!_scene) {
+  if (!_scene)
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Scene loading failed.");
     _out_ports[0].out_value = std::make_shared<LogicData>(false);
@@ -60,7 +64,8 @@ void LogicProcedureNode::compute() {
   // handle in signature
   auto begin_node = _scene->getBeginNode();
 
-  if (!begin_node) {
+  if (!begin_node)
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: No entry point found. (Begin node missing)");
     _out_ports[0].out_value = std::make_shared<LogicData>(false);
@@ -70,13 +75,12 @@ void LogicProcedureNode::compute() {
     return;
   }
 
-  auto in_signature = static_cast<LogicBeginNode *>(begin_node->nodeDataModel())
-                          ->getInSignature();
+  auto in_signature = static_cast<LogicBeginNode*>(begin_node->nodeDataModel())->getInSignature();
 
   int sig_index = 1;
-  for (int i = 2; i < _in_ports.size(); ++i) {
-    while (!(*in_signature)[sig_index].connected &&
-           sig_index < in_signature->size())
+  for (int i = 2; i < _in_ports.size(); ++i)
+  {
+    while(!(*in_signature)[sig_index].connected && sig_index < in_signature->size())
       sig_index++;
 
     if (sig_index >= in_signature->size())
@@ -87,10 +91,10 @@ void LogicProcedureNode::compute() {
     sig_index++;
   }
 
-  if (!_scene->execute()) {
+  if (!_scene->execute())
+  {
     setValidationState(NodeValidationState::Error);
-    setValidationMessage(
-        "Error: Some error occured while executing procedure.");
+    setValidationMessage("Error: Some error occured while executing procedure.");
     delete _scene;
     _scene = nullptr;
     return;
@@ -98,15 +102,14 @@ void LogicProcedureNode::compute() {
 
   auto return_node = _scene->getReturnNode();
 
-  if (return_node) {
-    auto out_signature =
-        static_cast<LogicReturnNode *>(return_node->nodeDataModel())
-            ->getOutSignature();
+  if (return_node)
+  {
+    auto out_signature = static_cast<LogicReturnNode*>(return_node->nodeDataModel())->getOutSignature();
 
     int sig_index_ret = 1;
-    for (int i = 1; i < _out_ports.size(); ++i) {
-      while (!(*out_signature)[sig_index_ret].connected &&
-             sig_index_ret < out_signature->size())
+    for (int i = 1; i < _out_ports.size(); ++i)
+    {
+      while(!(*out_signature)[sig_index_ret].connected && sig_index_ret < out_signature->size())
         sig_index_ret++;
 
       if (sig_index_ret >= out_signature->size())
@@ -114,13 +117,12 @@ void LogicProcedureNode::compute() {
 
       auto data_shared = (*out_signature)[sig_index_ret].in_value.lock();
 
-      if (!data_shared) {
+      if (!data_shared)
+      {
         setValidationState(NodeValidationState::Error);
 
         auto sstream = std::stringstream();
-        sstream << "Error: Value of type <"
-                << _out_ports[i].data_type->type().name.toStdString()
-                << "> at port " << i << " was not returned by a function.";
+        sstream << "Error: Value of type <" << _out_ports[i].data_type->type().name.toStdString() << "> at port " << i << " was not returned by a function.";
 
         setValidationMessage(sstream.str().c_str());
         delete _scene;
@@ -137,6 +139,7 @@ void LogicProcedureNode::compute() {
 
       _node->onDataUpdated(i);
     }
+
   }
 
   delete _scene;
@@ -144,85 +147,73 @@ void LogicProcedureNode::compute() {
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
+
 }
 
-QJsonObject LogicProcedureNode::save() const {
+QJsonObject LogicProcedureNode::save() const
+{
   QJsonObject json_obj = BaseNode::save();
 
-  json_obj["procedure"] =
-      static_cast<ProcedureSelector *>(_procedure_default)->getPath();
+  json_obj["procedure"] = static_cast<ProcedureSelector*>(_procedure_default)->getPath();
 
   json_obj["n_dynamic_in_ports"] = static_cast<int>(_in_ports.size() - 2);
   json_obj["n_dynamic_out_ports"] = static_cast<int>(_out_ports.size() - 1);
 
-  for (int i = 2; i < _in_ports.size(); ++i) {
-    json_obj[("in_port_" + std::to_string(i)).c_str()] =
-        _in_ports[i].data_type->type().id;
-    json_obj[("in_port_" + std::to_string(i) + "_caption").c_str()] =
-        _in_ports[i].caption;
+  for (int i = 2; i < _in_ports.size(); ++i)
+  {
+    json_obj[("in_port_" + std::to_string(i)).c_str()] = _in_ports[i].data_type->type().id;
+    json_obj[("in_port_" + std::to_string(i) + "_caption").c_str()] = _in_ports[i].caption;
   }
 
-  for (int i = 1; i < _out_ports.size(); ++i) {
-    json_obj[("out_port_" + std::to_string(i)).c_str()] =
-        _out_ports[i].data_type->type().id;
-    json_obj[("out_port_" + std::to_string(i) + "_caption").c_str()] =
-        _out_ports[i].caption;
+  for (int i = 1; i < _out_ports.size(); ++i)
+  {
+    json_obj[("out_port_" + std::to_string(i)).c_str()] = _out_ports[i].data_type->type().id;
+    json_obj[("out_port_" + std::to_string(i) + "_caption").c_str()] = _out_ports[i].caption;
   }
 
   return json_obj;
 }
 
-void LogicProcedureNode::restore(const QJsonObject &json_obj) {
+void LogicProcedureNode::restore(const QJsonObject& json_obj)
+{
   BaseNode::restore(json_obj);
 
   _scene_path = json_obj["procedure"].toString();
 
-  static_cast<ProcedureSelector *>(_procedure_default)->setPath(_scene_path);
+  static_cast<ProcedureSelector*>(_procedure_default)->setPath(_scene_path);
 
-  for (int i = 0; i < json_obj["n_dynamic_in_ports"].toInt(); ++i) {
-    addPort<LogicData>(
-        PortType::In,
-        json_obj[("in_port_" + std::to_string(i + 2) + "_caption").c_str()]
-            .toString(),
-        true);
-    addDefaultWidget(new QLabel(&_embedded_widget), PortType::In,
-                     static_cast<QtNodes::PortIndex>(_in_ports.size() - 1));
+  for (int i = 0; i < json_obj["n_dynamic_in_ports"].toInt(); ++i)
+  {
+    addPort<LogicData>(PortType::In, json_obj[("in_port_" + std::to_string(i + 2) + "_caption").c_str()].toString(), true);
+    addDefaultWidget(new QLabel(&_embedded_widget), PortType::In, static_cast<QtNodes::PortIndex>(_in_ports.size() - 1));
 
     std::unique_ptr<NodeData> type;
-    type.reset(TypeFactory::create(
-        json_obj[("in_port_" + std::to_string(i + 2)).c_str()]
-            .toString()
-            .toStdString()));
+    type.reset(TypeFactory::create(json_obj[("in_port_" + std::to_string(i + 2)).c_str()].toString().toStdString()));
 
     _in_ports[_in_ports.size() - 1].data_type = std::move(type);
-    emit portAdded(PortType::In,
-                   static_cast<QtNodes::PortIndex>(_in_ports.size() - 1));
+    emit portAdded(PortType::In, static_cast<QtNodes::PortIndex>(_in_ports.size() - 1));
   }
 
-  for (int i = 0; i < json_obj["n_dynamic_out_ports"].toInt(); ++i) {
-    addPort<LogicData>(
-        PortType::Out,
-        json_obj[("out_port_" + std::to_string(i + 1) + "_caption").c_str()]
-            .toString(),
-        true);
+  for (int i = 0; i < json_obj["n_dynamic_out_ports"].toInt(); ++i)
+  {
+    addPort<LogicData>(PortType::Out, json_obj[("out_port_" + std::to_string(i + 1) + "_caption").c_str()].toString(), true);
 
     std::unique_ptr<NodeData> type;
-    type.reset(TypeFactory::create(
-        json_obj[("out_port_" + std::to_string(i + 1)).c_str()]
-            .toString()
-            .toStdString()));
+    type.reset(TypeFactory::create(json_obj[("out_port_" + std::to_string(i + 1)).c_str()].toString().toStdString()));
 
     _out_ports[_out_ports.size() - 1].data_type = std::move(type);
-    emit portAdded(PortType::Out,
-                   static_cast<QtNodes::PortIndex>(_out_ports.size() - 1));
+    emit portAdded(PortType::Out, static_cast<QtNodes::PortIndex>(_out_ports.size() - 1));
   }
+
 }
 
-NodeValidationState LogicProcedureNode::validate() {
+NodeValidationState LogicProcedureNode::validate()
+{
   setValidationState(NodeValidationState::Valid);
-  auto logic = static_cast<LogicData *>(_in_ports[0].in_value.lock().get());
+  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
 
-  if (!logic) {
+  if (!logic)
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Failed to evaluate logic input");
 
@@ -232,7 +223,8 @@ NodeValidationState LogicProcedureNode::validate() {
     return _validation_state;
   }
 
-  if (_scene_path == "None") {
+  if (_scene_path == "None")
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: No procedure selected.");
 
@@ -243,25 +235,29 @@ NodeValidationState LogicProcedureNode::validate() {
   return _validation_state;
 }
 
-void LogicProcedureNode::clearDynamicPorts() {
-  for (int i = static_cast<int>(_in_ports.size() - 1); i != 1; --i) {
+void LogicProcedureNode::clearDynamicPorts()
+{
+  for (int i = static_cast<int>(_in_ports.size() - 1); i != 1 ; --i)
+  {
     deletePort(PortType::In, i);
   }
 
-  for (int i = static_cast<int>(_out_ports.size() - 1); i != 0; --i) {
+  for (int i = static_cast<int>(_out_ports.size() - 1); i != 0 ; --i)
+  {
     deletePort(PortType::Out, i);
   }
 }
 
-void LogicProcedureNode::setProcedure(const QString &path) {
+void LogicProcedureNode::setProcedure(const QString& path)
+{
   _scene_path = path;
   clearDynamicPorts();
   setValidationState(NodeValidationState::Valid);
 
-  _scene = gCurrentContext->getScene(
-      QDir("./scripts/").absoluteFilePath(_scene_path), this);
+  _scene = gCurrentContext->getScene(QDir("./scripts/").absoluteFilePath(_scene_path), this);
 
-  if (!_scene) {
+  if (!_scene)
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Scene loading failed.");
     return;
@@ -272,17 +268,18 @@ void LogicProcedureNode::setProcedure(const QString &path) {
   // handle in signature
   auto begin_node = _scene->getBeginNode();
 
-  if (!begin_node) {
+  if (!begin_node)
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: No entry point found. (Begin node missing)");
     delete _scene;
     return;
   }
 
-  auto in_signature = static_cast<LogicBeginNode *>(begin_node->nodeDataModel())
-                          ->getInSignature();
-  for (int i = 1; i < in_signature->size(); ++i) {
-    auto &port = (*in_signature)[i];
+  auto in_signature = static_cast<LogicBeginNode*>(begin_node->nodeDataModel())->getInSignature();
+  for (int i = 1; i < in_signature->size(); ++i)
+  {
+    auto& port = (*in_signature)[i];
 
     if (!port.connected)
       continue;
@@ -292,19 +289,18 @@ void LogicProcedureNode::setProcedure(const QString &path) {
     addDefaultWidget(new QLabel(&_embedded_widget), PortType::In, port_idx);
 
     _in_ports[port_idx].data_type = port.data_type->instantiate();
-    _in_ports[port_idx].data_type->set_parameter_type(
-        port.data_type->type().parameter_type_id);
+    _in_ports[port_idx].data_type->set_parameter_type(port.data_type->type().parameter_type_id);
     emit portAdded(PortType::In, port_idx);
   }
 
   auto return_node = _scene->getReturnNode();
 
-  if (return_node) {
-    auto out_signature =
-        static_cast<LogicReturnNode *>(return_node->nodeDataModel())
-            ->getOutSignature();
-    for (int i = 1; i < out_signature->size(); ++i) {
-      auto &port = (*out_signature)[i];
+  if (return_node)
+  {
+    auto out_signature = static_cast<LogicReturnNode*>(return_node->nodeDataModel())->getOutSignature();
+    for (int i = 1; i < out_signature->size(); ++i)
+    {
+      auto& port = (*out_signature)[i];
 
       if (!port.connected)
         continue;
@@ -312,8 +308,7 @@ void LogicProcedureNode::setProcedure(const QString &path) {
       addPort<LogicData>(PortType::Out, port.caption, true);
       int port_idx = static_cast<int>(_out_ports.size() - 1);
       _out_ports[port_idx].data_type = port.data_type->instantiate();
-      _out_ports[port_idx].data_type->set_parameter_type(
-          port.data_type->type().parameter_type_id);
+      _out_ports[port_idx].data_type->set_parameter_type(port.data_type->type().parameter_type_id);
       emit portAdded(PortType::Out, port_idx);
     }
   }

@@ -1,32 +1,39 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #ifndef NOGGIT_TOOLPANEL_HPP
 #define NOGGIT_TOOLPANEL_HPP
 
-#include <QDockWidget>
+#include <noggit/tool_enums.hpp>
+
 #include <QWidget>
+#include <QDockWidget>
 #include <ui_ToolPanelScroll.h>
 
 #include <vector>
+#include <utility>
 
-namespace Noggit {
-namespace Ui::Tools {
-class ToolPanel : public QDockWidget {
-  Q_OBJECT
+namespace Noggit
+{
+  class Tool;
 
-public:
-  explicit ToolPanel(QWidget *parent = nullptr);
+  namespace Ui::Tools
+  {
+    class ToolPanel : public QDockWidget
+    {
+      Q_OBJECT
 
-  void setCurrentIndex(int index);
-  void registerTool(QString const &title, QWidget *widget);
+    public:
+      explicit ToolPanel(QWidget* parent = nullptr);
 
-private:
-  ::Ui::toolPanel _ui;
-  std::vector<QString> _titles;
-  std::vector<QWidget *> _widgets;
-};
-} // namespace Ui::Tools
-} // namespace Noggit
+      void setCurrentTool(editing_mode mode);
+      void registerTool(Tool* tool, QWidget* widget);
 
-#endif // NOGGIT_TOOLPANEL_HPP
+    private:
+      ::Ui::toolPanel _ui;
+      std::vector<std::pair<Tool*, QWidget*>> _tools;
+
+    };
+  }
+}
+
+#endif //NOGGIT_TOOLPANEL_HPP

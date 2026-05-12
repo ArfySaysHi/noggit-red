@@ -1,45 +1,39 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #ifndef NOGGIT_LOGICPROCEDURENODE_HPP
 #define NOGGIT_LOGICPROCEDURENODE_HPP
 
 #include "noggit/ui/tools/NodeEditor/Nodes/LogicNodeBase.hpp"
-#include "noggit/ui/tools/NodeEditor/Nodes/Scene/Context.hpp"
-#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodeScene.hpp>
 
-#include <vector>
-
-using QtNodes::NodeData;
-using QtNodes::NodeDataModel;
-using QtNodes::NodeDataType;
 using QtNodes::NodeValidationState;
-using QtNodes::PortIndex;
-using QtNodes::PortType;
 
-namespace Noggit {
-namespace Ui::Tools::NodeEditor::Nodes {
-class LogicProcedureNode : public LogicNodeBase {
-  Q_OBJECT
+namespace Noggit
+{
+    namespace Ui::Tools::NodeEditor::Nodes
+    {
+        class NodeScene;
 
-public:
-  LogicProcedureNode();
-  void compute() override;
-  NodeValidationState validate() override;
-  QJsonObject save() const override;
-  void restore(QJsonObject const &json_obj) override;
-  void setProcedure(QString const &path);
+        class LogicProcedureNode : public LogicNodeBase
+        {
+        Q_OBJECT
 
-private:
-  void clearDynamicPorts();
+        public:
+            LogicProcedureNode();
+            void compute() override;
+            NodeValidationState validate() override;
+            QJsonObject save() const override;
+            void restore(QJsonObject const& json_obj) override;
+            void setProcedure(QString const& path);
 
-  QWidget *_procedure_default;
-  NodeScene *_scene;
-  QString _scene_path;
-};
+        private:
 
-} // namespace Ui::Tools::NodeEditor::Nodes
+          void clearDynamicPorts();
 
-} // namespace Noggit
+          QWidget* _procedure_default;
+          NodeScene* _scene;
+          QString _scene_path;
+        };
+    }
+}
 
-#endif // NOGGIT_LOGICPROCEDURENODE_HPP
+#endif //NOGGIT_LOGICPROCEDURENODE_HPP

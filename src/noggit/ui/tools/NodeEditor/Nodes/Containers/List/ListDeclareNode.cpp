@@ -1,14 +1,19 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "ListDeclareNode.hpp"
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 
+#include <external/NodeEditor/include/nodes/Node>
+
+#include <QComboBox>
+
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-ListDeclareNode::ListDeclareNode() : ListNodeBase() {
+ListDeclareNode::ListDeclareNode()
+: ListNodeBase()
+{
   setName("List :: Declare");
   setCaption("List :: Declare");
   _validation_state = NodeValidationState::Valid;
@@ -20,43 +25,44 @@ ListDeclareNode::ListDeclareNode() : ListNodeBase() {
   _type = new QComboBox(&_embedded_widget);
   _type->addItems(_type_list);
 
-  QComboBox::connect(
-      _type, qOverload<int>(&QComboBox::currentIndexChanged),
-      [this](int index) {
-        auto new_type_id =
-            _type_map[_type->currentText().toStdString()].c_str();
+  QComboBox::connect(_type, qOverload<int>(&QComboBox::currentIndexChanged)
+      ,[this](int index)
+     {
+       auto new_type_id = _type_map[_type->currentText().toStdString()].c_str();
 
-        if (_out_ports[0].data_type->type().parameter_type_id == new_type_id)
-          return;
+       if (_out_ports[0].data_type->type().parameter_type_id == new_type_id)
+         return;
 
-        deletePort(PortType::Out, 0);
+       deletePort(PortType::Out, 0);
 
-        addPortDynamic<ListData>(PortType::Out, 0,
-                                 "List[" + _type->currentText() + "]", true);
-        _out_ports[0].data_type->set_parameter_type(new_type_id);
+       addPortDynamic<ListData>(PortType::Out, 0, "List[" + _type->currentText() + "]", true);
+       _out_ports[0].data_type->set_parameter_type(new_type_id);
 
-        deletePort(PortType::In, 0);
+       deletePort(PortType::In, 0);
 
-        addPortDynamic<ListData>(PortType::In, 0,
-                                 "List[" + _type->currentText() + "]", true);
-        _in_ports[0].data_type->set_parameter_type(new_type_id);
-      });
+       addPortDynamic<ListData>(PortType::In, 0, "List[" + _type->currentText() + "]", true);
+       _in_ports[0].data_type->set_parameter_type(new_type_id);
+
+     }
+  );
 
   addWidgetTop(_type);
 }
 
-void ListDeclareNode::compute() {
-  auto list = static_cast<ListData *>(_in_ports[0].in_value.lock().get());
+void ListDeclareNode::compute()
+{
+  auto list = static_cast<ListData*>(_in_ports[0].in_value.lock().get());
 
   auto parameter_id = list->type().parameter_type_id;
-  if (parameter_id.isEmpty()) {
+  if (parameter_id.isEmpty())
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to resolve list parameter type.");
     return;
   }
 
-  if (parameter_id !=
-      _type_map.at(_type->currentText().toStdString()).c_str()) {
+  if (parameter_id != _type_map.at(_type->currentText().toStdString()).c_str())
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: passed list does not match declared type.");
     return;
@@ -64,9 +70,11 @@ void ListDeclareNode::compute() {
 
   _out_ports[0].out_value = _in_ports[0].in_value.lock();
   _node->onDataUpdated(0);
+
 }
 
-QJsonObject ListDeclareNode::save() const {
+QJsonObject ListDeclareNode::save() const
+{
   QJsonObject json_obj = BaseNode::save();
 
   json_obj["type"] = _type->currentText();
@@ -74,7 +82,8 @@ QJsonObject ListDeclareNode::save() const {
   return json_obj;
 }
 
-void ListDeclareNode::restore(const QJsonObject &json_obj) {
+void ListDeclareNode::restore(const QJsonObject& json_obj)
+{
   BaseNode::restore(json_obj);
 
   auto type_name = json_obj["type"].toString();
@@ -82,12 +91,15 @@ void ListDeclareNode::restore(const QJsonObject &json_obj) {
   _out_ports[0].data_type->set_parameter_type(new_type_id);
 
   _type->setCurrentText(type_name);
+
 }
 
-NodeValidationState ListDeclareNode::validate() {
-  auto list_ptr = static_cast<ListData *>(_in_ports[0].in_value.lock().get());
+NodeValidationState ListDeclareNode::validate()
+{
+  auto list_ptr = static_cast<ListData*>(_in_ports[0].in_value.lock().get());
 
-  if (!list_ptr) {
+  if (!list_ptr)
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate list input.");
     return _validation_state;

@@ -1,26 +1,34 @@
 #pragma once
 
-#include "ui_Changelog.h"
 #include <QDialog>
 
-namespace Noggit {
-namespace Ui {
-class CChangelog : public QDialog {
-  Q_OBJECT
-  ::Ui::Changelog *ui;
+namespace Ui
+{
+  class Changelog;
+}
 
-public:
-  CChangelog(QWidget *parent = nullptr);
-  void SelectFirst();
+namespace Noggit
+{
+    namespace Ui
+    {
+        class CChangelog : public QDialog
+        {
+            Q_OBJECT
+            ::Ui::Changelog* ui;
 
-private:
-  const QString ChangelogFolder = "/changelog";
-  const QString AttachmentFolder = "/changelog/attachment";
+        public:
+            CChangelog(QWidget* parent = nullptr);
+            void SelectFirst();
 
-  QString GetChangelogName(QString name);
-  void OpenChangelog(QString name);
+        private:
+            const QString ChangelogFolder = "/changelog";
+            const QString AttachmentFolder = "/changelog/attachment";
 
-  std::vector<QString> Changelog;
-};
-} // namespace Ui
-} // namespace Noggit
+            QString GetChangelogName(QString name);
+            void OpenChangelog(QString name);
+
+            std::vector<QString> Changelog;
+        };
+    }
+}
+

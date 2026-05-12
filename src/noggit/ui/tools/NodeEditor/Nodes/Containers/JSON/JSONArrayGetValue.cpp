@@ -1,14 +1,16 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "JSONArrayGetValue.hpp"
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <external/NodeEditor/include/nodes/Node>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-JSONArrayGetValueNode::JSONArrayGetValueNode() : BaseNode() {
+JSONArrayGetValueNode::JSONArrayGetValueNode()
+: BaseNode()
+{
   setName("JSON :: JsonArrayGetValue");
   setCaption("JSON :: JsonArrayGetValue");
   _validation_state = NodeValidationState::Valid;
@@ -24,31 +26,31 @@ JSONArrayGetValueNode::JSONArrayGetValueNode() : BaseNode() {
   addPort<JSONArrayData>(PortType::Out, "JSONArray", true);
 }
 
-void JSONArrayGetValueNode::compute() {
-  QJsonArray *json_array =
-      defaultPortData<JSONArrayData>(PortType::In, 0)->value_ptr();
-  unsigned index =
-      defaultPortData<UnsignedIntegerData>(PortType::In, 1)->value();
+void JSONArrayGetValueNode::compute()
+{
+  QJsonArray* json_array = defaultPortData<JSONArrayData>(PortType::In, 0)->value_ptr();
+  unsigned index = defaultPortData<UnsignedIntegerData>(PortType::In, 1)->value();
 
   QJsonValue value = json_array->at(index);
 
-  if (value.isUndefined()) {
+  if (value.isUndefined())
+  {
     setValidationState(NodeValidationState::Error);
-    setValidationMessage(
-        "Error: value is undefined. Possibly out of range index.");
+    setValidationMessage("Error: value is undefined. Possibly out of range index.");
     return;
   }
 
-  if (_out_ports[0].connected) {
+  if (_out_ports[0].connected)
+  {
     if (!value.isString())
       goto _ERROR;
 
-    _out_ports[0].out_value =
-        std::make_shared<StringData>(value.toString().toStdString());
+    _out_ports[0].out_value = std::make_shared<StringData>(value.toString().toStdString());
     _node->onDataUpdated(0);
   }
 
-  if (_out_ports[1].connected) {
+  if (_out_ports[1].connected)
+  {
     if (!value.isBool())
       goto _ERROR;
 
@@ -56,7 +58,8 @@ void JSONArrayGetValueNode::compute() {
     _node->onDataUpdated(1);
   }
 
-  if (_out_ports[2].connected) {
+  if (_out_ports[2].connected)
+  {
     if (!value.isDouble())
       goto _ERROR;
 
@@ -64,7 +67,8 @@ void JSONArrayGetValueNode::compute() {
     _node->onDataUpdated(2);
   }
 
-  if (_out_ports[3].connected) {
+  if (_out_ports[3].connected)
+  {
     if (!value.isDouble())
       goto _ERROR;
 
@@ -72,7 +76,8 @@ void JSONArrayGetValueNode::compute() {
     _node->onDataUpdated(3);
   }
 
-  if (_out_ports[4].connected) {
+  if (_out_ports[4].connected)
+  {
     if (!value.isObject())
       goto _ERROR;
 
@@ -80,7 +85,8 @@ void JSONArrayGetValueNode::compute() {
     _node->onDataUpdated(4);
   }
 
-  if (_out_ports[5].connected) {
+  if (_out_ports[5].connected)
+  {
     if (!value.isArray())
       goto _ERROR;
 
@@ -90,13 +96,15 @@ void JSONArrayGetValueNode::compute() {
 
   return;
 
-_ERROR:
+  _ERROR:
   setValidationState(NodeValidationState::Error);
   setValidationMessage("Error: type mismatch.");
 }
 
-NodeValidationState JSONArrayGetValueNode::validate() {
-  if (!static_cast<JSONArrayData *>(_in_ports[0].in_value.lock().get())) {
+NodeValidationState JSONArrayGetValueNode::validate()
+{
+  if (!static_cast<JSONArrayData*>(_in_ports[0].in_value.lock().get()))
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate json array input.");
     return _validation_state;
@@ -105,7 +113,8 @@ NodeValidationState JSONArrayGetValueNode::validate() {
   return _validation_state;
 }
 
-QJsonObject JSONArrayGetValueNode::save() const {
+QJsonObject JSONArrayGetValueNode::save() const
+{
   QJsonObject json_obj = BaseNode::save();
 
   defaultWidgetToJson(PortType::In, 1, json_obj, "index");
@@ -113,8 +122,10 @@ QJsonObject JSONArrayGetValueNode::save() const {
   return json_obj;
 }
 
-void JSONArrayGetValueNode::restore(const QJsonObject &json_obj) {
+void JSONArrayGetValueNode::restore(const QJsonObject& json_obj)
+{
   BaseNode::restore(json_obj);
 
   defaultWidgetFromJson(PortType::In, 1, json_obj, "index");
 }
+

@@ -3,56 +3,64 @@
 
 #include "noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp"
 
-#include <QComboBox>
 #include <array>
-#include <functional>
-#include <string_view>
-#include <unordered_map>
 
-using QtNodes::NodeData;
-using QtNodes::NodeDataModel;
-using QtNodes::NodeDataType;
-using QtNodes::NodeValidationState;
-using QtNodes::PortIndex;
+class QComboBox;
+
 using QtNodes::PortType;
+using QtNodes::PortIndex;
+using QtNodes::NodeData;
+using QtNodes::NodeDataType;
+using QtNodes::NodeDataModel;
+using QtNodes::NodeValidationState;
 using namespace std::literals;
 
-namespace Noggit {
-namespace Ui::Tools::NodeEditor::Nodes {
-class MathNode : public BaseNode {
-  Q_OBJECT
+namespace Noggit
+{
+    namespace Ui::Tools::NodeEditor::Nodes
+    {
+        class MathNode : public BaseNode
+        {
+        Q_OBJECT
 
-public:
-  MathNode();
-  void compute() override;
-  QJsonObject save() const override;
-  void restore(QJsonObject const &json_obj) override;
-  NodeValidationState validate() override;
+        public:
+            MathNode();
+            void compute() override;
+            QJsonObject save() const override;
+            void restore(QJsonObject const& json_obj) override;
+            NodeValidationState validate() override;
 
-public Q_SLOTS:
-  void inputConnectionCreated(const Connection &connection) override;
-  void inputConnectionDeleted(const Connection &connection) override;
 
-protected:
-  template <typename T> T commonCast(NodeData *data, int type_id);
+        public Q_SLOTS:
+            void inputConnectionCreated(const Connection& connection) override;
+            void inputConnectionDeleted(const Connection& connection) override;
 
-  template <typename T> void handleOperation(T first, T second);
+        protected:
 
-  void calculateResultType(PortIndex port_index, PortIndex other_port_index);
+            template <typename T>
+            T commonCast(NodeData* data, int type_id);
 
-  QComboBox *_operation;
+            template <typename T>
+            void handleOperation(T first, T second);
 
-  static constexpr std::array<std::pair<std::string_view, int>, 4> _types{
-      std::pair{"int"sv, 0}, std::pair{"uint"sv, 1}, std::pair{"double"sv, 2},
-      std::pair{"string"sv, 3}};
+            void calculateResultType(PortIndex port_index, PortIndex other_port_index);
 
-  int _first_type = -1;
-  int _second_type = -1;
-  int _result_type = -1;
-};
+            QComboBox* _operation;
 
-} // namespace Ui::Tools::NodeEditor::Nodes
+            static constexpr std::array<std::pair<std::string_view, int>, 4> _types {std::pair{"int"sv, 0},
+                                                                                     std::pair{"uint"sv, 1},
+                                                                                     std::pair{"double"sv, 2},
+                                                                                     std::pair{"string"sv, 3}};
 
-} // namespace Noggit
+            int _first_type = -1;
+            int _second_type = -1;
+            int _result_type = -1;
 
-#endif // NOGGIT_MATHNODE_HPP
+        };
+
+    }
+
+}
+
+
+#endif //NOGGIT_MATHNODE_HPP

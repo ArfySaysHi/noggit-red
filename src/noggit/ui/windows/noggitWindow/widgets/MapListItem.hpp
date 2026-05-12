@@ -1,48 +1,49 @@
 #ifndef NOGGIT_WIGDET_MAP_LIST_ITEM_HPP
 #define NOGGIT_WIGDET_MAP_LIST_ITEM_HPP
 
-#include <QAction>
-#include <QGridLayout>
-#include <QMenuBar>
+#include <QSize>
 #include <QString>
 #include <QWidget>
-#include <noggit/project/ApplicationProject.h>
-#include <qgraphicseffect.h>
 
-namespace Noggit::Ui::Widget {
-struct MapListData {
-  QString map_name;
-  int map_id;
-  int map_type_id;
-  int expansion_id;
-  bool pinned;
-  bool wmo_map;
-};
+class QLabel;
 
-class MapListItem : public QWidget {
-  Q_OBJECT
-private:
-  QLabel *_map_icon;
-  QLabel *_map_name;
-  QLabel *_map_id;
-  QLabel *_map_instance_type;
-  QLabel *_map_pinned_label;
-  int _max_width;
-  MapListData _map_data;
+namespace Noggit::Ui::Widget
+{
+    struct MapListData
+    {
+        QString map_name;
+        int map_id;
+        int map_type_id;
+        int expansion_id;
+        bool pinned;
+        bool wmo_map;
+    };
 
-public:
-  MapListItem(const MapListData &data, QWidget *parent);
-  QSize minimumSizeHint() const override;
+    class MapListItem : public QWidget
+    {
+        Q_OBJECT
+    private:
+        QLabel* _map_icon;
+        QLabel* _map_name;
+        QLabel* _map_id;
+        QLabel* _map_instance_type;
+        QLabel* _map_pinned_label;
+        int _max_width;
+        MapListData _map_data;
 
-  const QString name() { return _map_data.map_name; };
-  int id() { return _map_data.map_id; };
-  int type() { return _map_data.map_type_id; };
-  int expansion() { return _map_data.expansion_id; };
-  bool wmo_map() { return _map_data.wmo_map; };
+    public:
+        MapListItem(const MapListData& data, QWidget* parent);
+        QSize minimumSizeHint() const override;
 
-private:
-  QString toCamelCase(const QString &s);
-};
-} // namespace Noggit::Ui::Widget
+        const QString name() const;;
+        int id() const;;
+        int type() const;;
+        int expansion() const;;
+        bool wmo_map() const;;
 
-#endif // NOGGIT_WIGDET_MAP_LIST_ITEM_HPP
+    private:
+        QString toCamelCase(const QString& s);
+    };
+}
+
+#endif //NOGGIT_WIGDET_MAP_LIST_ITEM_HPP

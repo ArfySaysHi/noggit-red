@@ -1,154 +1,111 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
-#include <QApplication>
-#include <QDoubleSpinBox>
-#include <QLabel>
-#include <QLineEdit>
-#include <QListWidget>
-#include <QSlider>
-#include <QSpinBox>
-#include <QWidget>
-#include <array>
-#include <glm/vec4.hpp>
-#include <qt-color-widgets/color_selector.hpp>
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include <noggit/MinimapRenderSettings.hpp>
 
-#include <noggit/ui/minimap_widget.hpp>
+#include <QWidget>
+
+#include <string>
+#include <vector>
 
 class MapView;
 class World;
 
-enum MinimapGenMode { CURRENT_ADT, SELECTED_ADTS, MAP };
+class QDoubleSpinBox;
+class QLabel;
+class QLineEdit;
+class QListWidget;
+class QSlider;
 
-struct MinimapRenderSettings {
-  MinimapGenMode export_mode;
-  std::string file_format = ".blp";
+namespace Noggit
+{
+  namespace Ui
+  {
+    class minimap_widget;
 
-  // Render settings
-  int resolution = 512;
-  bool draw_m2 = false;
-  bool draw_wmo = true;
-  bool draw_water = true;
-  bool draw_adt_grid = false;
-  bool draw_elevation = false;
-  bool draw_shadows = false;
-  bool use_filters = false;
-  bool combined_minimap = false;
+    class MinimapCreator : public QWidget
+    {
+        Q_OBJECT
+    public:
+      MinimapCreator(MapView* mapView, World* world, QWidget* parent = nullptr);
 
-  // Selection
-  std::array<bool, 4096> selected_tiles = {false};
+      void changeRadius(float change);
 
-  // Filtering
-  QListWidget *m2_model_filter_include;
-  QListWidget *m2_instance_filter_include;
-  QListWidget *wmo_model_filter_exclude;
-  QListWidget *wmo_instance_filter_exclude;
+      float brushRadius() const;
 
-  // Lighting
-  glm::vec3 diffuse_color = {1.0, 0.532352924, 0.0};
-  glm::vec3 ambient_color = {0.407770514, 0.508424163, 0.602650642};
-  glm::vec4 ocean_color_light = {0.0693173409, 0.294008732, 0.348329663, 0.75};
-  glm::vec4 ocean_color_dark = {0.000762581825, 0.113907099, 0.161220074, 1.0};
-  glm::vec4 river_color_light = {0.308351517, 0.363725543, 0.0798838138, 0.5};
-  glm::vec4 river_color_dark = {0.19945538, 0.320697188, 0.332425594, 1.0};
-};
+      //std::array<bool, 4096>* getSelectedTiles() { return &_render_settings.selected_tiles; };
+      std::vector<char>* getSelectedTiles();;
 
-namespace Noggit {
+      MinimapRenderSettings* getMinimapRenderSettings();;
 
-namespace Ui {
+      QSize sizeHint() const override;
 
-class MinimapCreator : public QWidget {
-public:
-  MinimapCreator(MapView *mapView, World *world, QWidget *parent = nullptr);
+      void includeM2Model(std::string filename, float size_cat = 0.0f);
+      void unincludeM2Model(std::string filename);
+      void includeM2Instance(uint32_t uid);
+      void unincludeM2Instance(uint32_t uid);
 
-  void changeRadius(float change);
+      void excludeWMOModel(std::string filename);
+      void unexcludeWMOModel(std::string filename);
+      void excludeWMOInstance(uint32_t uid);
+      void unexcludeWMOInstance(uint32_t uid);
 
-  float brushRadius() const { return _radius; }
+      void loadFiltersFromJSON();
+      void saveFiltersToJSON();
 
-  std::array<bool, 4096> *getSelectedTiles() {
-    return &_render_settings.selected_tiles;
-  };
+    signals:
+      void onSave();
 
-  MinimapRenderSettings *getMinimapRenderSettings() {
-    return &_render_settings;
-  };
+    private:
+      float _radius = 0.01f;
+      MinimapRenderSettings _render_settings;
+      QSlider* _radius_slider;
+      QDoubleSpinBox* _radius_spin;
+      minimap_widget* _minimap_widget;
+      QListWidget* _m2_model_filter_include;
+      QListWidget* _m2_instance_filter_include;
+      QListWidget* _wmo_model_filter_exclude;
+      QListWidget* _wmo_instance_filter_exclude;
 
-  QSize sizeHint() const override;
+    };
 
-  void includeM2Model(std::string filename, float size_cat = 0.0f);
-  void unincludeM2Model(std::string filename);
-  void includeM2Instance(uint32_t uid);
-  void unincludeM2Instance(uint32_t uid);
+    class MinimapM2ModelFilterEntry : public QWidget
+    {
+    public:
+      MinimapM2ModelFilterEntry(QWidget* parent = nullptr);
 
-  void excludeWMOModel(std::string filename);
-  void unexcludeWMOModel(std::string filename);
-  void excludeWMOInstance(uint32_t uid);
-  void unexcludeWMOInstance(uint32_t uid);
+      QString getFileName() const;;
+      void setFileName(const std::string& filename);;
+      void setSizeCategory(float size_cat);;
+      float getSizeCategory() const;;
 
-  void loadFiltersFromJSON();
-  void saveFiltersToJSON();
+    private:
+      QLineEdit* _filename;
+      QDoubleSpinBox* _size_category_spin;
+    };
 
-private:
-  float _radius = 0.01f;
-  MinimapRenderSettings _render_settings;
-  QSlider *_radius_slider;
-  QDoubleSpinBox *_radius_spin;
-  minimap_widget *_minimap_widget;
-  QListWidget *_m2_model_filter_include;
-  QListWidget *_m2_instance_filter_include;
-  QListWidget *_wmo_model_filter_exclude;
-  QListWidget *_wmo_instance_filter_exclude;
-};
+    class MinimapWMOModelFilterEntry : public QWidget
+    {
+    public:
+      MinimapWMOModelFilterEntry(QWidget* parent = nullptr);
 
-class MinimapM2ModelFilterEntry : public QWidget {
-public:
-  MinimapM2ModelFilterEntry(QWidget *parent = nullptr);
+      QString getFileName() const;;
+      void setFileName(const std::string& filename);;
 
-  QString getFileName() { return _filename->text(); };
-  void setFileName(const std::string &filename) {
-    _filename->setText(QString(filename.c_str()));
-  };
-  void setSizeCategory(float size_cat) {
-    _size_category_spin->setValue(size_cat);
-  };
-  float getSizeCategory() {
-    return static_cast<float>(_size_category_spin->value());
-  };
+    private:
+      QLineEdit* _filename;
+    };
 
-private:
-  QLineEdit *_filename;
-  QDoubleSpinBox *_size_category_spin;
-};
+    class MinimapInstanceFilterEntry : public QWidget
+    {
+    public:
+      MinimapInstanceFilterEntry(QWidget* parent = nullptr);
 
-class MinimapWMOModelFilterEntry : public QWidget {
-public:
-  MinimapWMOModelFilterEntry(QWidget *parent = nullptr);
+      uint32_t getUid() const;;
+      void setUid(uint32_t uid);;
 
-  QString getFileName() { return _filename->text(); };
-  void setFileName(const std::string &filename) {
-    _filename->setText(QString(filename.c_str()));
-  };
-
-private:
-  QLineEdit *_filename;
-};
-
-class MinimapInstanceFilterEntry : public QWidget {
-public:
-  MinimapInstanceFilterEntry(QWidget *parent = nullptr);
-
-  uint32_t getUid() { return _uid; };
-  void setUid(uint32_t uid) {
-    _uid = uid;
-    _uid_label->setText(QString::fromStdString(std::to_string(uid)));
-  };
-
-private:
-  uint32_t _uid;
-  QLabel *_uid_label;
-};
-} // namespace Ui
-} // namespace Noggit
+    private:
+      uint32_t _uid;
+      QLabel* _uid_label;
+    };
+  }
+}

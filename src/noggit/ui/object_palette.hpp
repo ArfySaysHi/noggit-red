@@ -1,13 +1,12 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #ifndef NOGGIT_OBJECT_PALETTE_HPP
 #define NOGGIT_OBJECT_PALETTE_HPP
 
-#include <QtWidgets/QListWidget>
-#include <noggit/project/ApplicationProject.h>
-#include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
 #include <noggit/ui/widget.hpp>
+
+#include <QtWidgets/QListWidget>
+
 #include <string>
 #include <unordered_set>
 
@@ -20,58 +19,73 @@ class QListWidget;
 class QPoint;
 class MapView;
 
-namespace Noggit {
-namespace Ui {
-class current_texture;
+namespace Noggit::Project
+{
+  class NoggitProject;
+}
 
-class ObjectList : public QListWidget {
-public:
-  ObjectList(QWidget *parent);
-  void mouseMoveEvent(QMouseEvent *event) override;
-  void mousePressEvent(QMouseEvent *event) override;
+namespace Noggit
+{
+  namespace Ui
+  {
+    namespace Tools
+    {
+      class PreviewRenderer;
+    }
 
-private:
-  QPoint _start_pos;
-};
+    class current_texture;
 
-class ObjectPalette : public widget {
-  Q_OBJECT
+    class ObjectList : public QListWidget
+    {
+    public:
+      ObjectList(QWidget* parent);
+      void mouseMoveEvent(QMouseEvent* event) override;
+      void mousePressEvent(QMouseEvent* event) override;
 
-public:
-  ObjectPalette(MapView *map_view,
-                std::shared_ptr<Noggit::Project::NoggitProject> Project,
-                QWidget *parent);
+    private:
+      QPoint _start_pos;
 
-  ~ObjectPalette();
+    };
 
-  void addObjectFromAssetBrowser();
-  void addObjectByFilename(QString const &filename, bool save_palette = true);
-  void LoadSavedPalette();
+    class ObjectPalette : public widget
+    {
+      Q_OBJECT
 
-  void SavePalette();
+    public:
+      ObjectPalette(MapView* map_view, std::shared_ptr<Noggit::Project::NoggitProject> Project, QWidget* parent);
 
-  void removeObject(QString filename);
+      ~ObjectPalette();
 
-  void removeSelectedTexture();
+      void addObjectFromAssetBrowser();
+      void addObjectByFilename(QString const& filename, bool save_palette = true);
+      void LoadSavedPalette();
 
-  void dragEnterEvent(QDragEnterEvent *event) override;
-  void dropEvent(QDropEvent *event) override;
+      void SavePalette();
 
-signals:
-  void selected(std::string);
+      void removeObject(QString filename);
 
-private:
-  QGridLayout *layout;
+      void removeSelectedTexture();
 
-  QListWidget *_object_list;
-  QPushButton *_add_button;
-  QPushButton *_remove_button;
-  std::unordered_set<std::string> _object_paths;
-  MapView *_map_view;
-  Noggit::Ui::Tools::PreviewRenderer *_preview_renderer;
-  std::shared_ptr<Noggit::Project::NoggitProject> _project;
-};
-} // namespace Ui
-} // namespace Noggit
+      void dragEnterEvent(QDragEnterEvent* event) override;
+      void dropEvent(QDropEvent* event) override;
 
-#endif // NOGGIT_OBJECT_PALETTE_HPP
+    signals:
+      void selected(std::string);
+
+    private:
+
+      QGridLayout* layout;
+
+      ObjectList* _object_list;
+      QPushButton* _add_button;
+      QPushButton* _remove_button;
+      std::unordered_set<std::string> _object_paths;
+      MapView* _map_view;
+      Noggit::Ui::Tools::PreviewRenderer* _preview_renderer;
+      std::shared_ptr<Noggit::Project::NoggitProject> _project;
+
+    };
+  }
+}
+
+#endif //NOGGIT_OBJECT_PALETTE_HPP

@@ -1,14 +1,17 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "Vector4DToXYZWNode.hpp"
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 
+#include <external/NodeEditor/include/nodes/Node>
+
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-Vector4DToXYZWNode::Vector4DToXYZWNode() : BaseNode() {
+Vector4DToXYZWNode::Vector4DToXYZWNode()
+    : BaseNode()
+{
   setName("Vector :: Vector4DToXYZW");
   setCaption("Vector :: Vector4DToXYZW");
   _validation_state = NodeValidationState::Valid;
@@ -21,9 +24,9 @@ Vector4DToXYZWNode::Vector4DToXYZWNode() : BaseNode() {
   addPort<DecimalData>(PortType::Out, "W<Decimal>", true);
 }
 
-void Vector4DToXYZWNode::compute() {
-  glm::vec4 vector =
-      static_cast<Vector4DData *>(_in_ports[0].in_value.lock().get())->value();
+void Vector4DToXYZWNode::compute()
+{
+  glm::vec4 vector = static_cast<Vector4DData*>(_in_ports[0].in_value.lock().get())->value();
   _out_ports[0].out_value = std::make_shared<DecimalData>(vector.x);
   _out_ports[1].out_value = std::make_shared<DecimalData>(vector.y);
   _out_ports[2].out_value = std::make_shared<DecimalData>(vector.z);
@@ -35,9 +38,11 @@ void Vector4DToXYZWNode::compute() {
   _node->onDataUpdated(3);
 }
 
-NodeValidationState Vector4DToXYZWNode::validate() {
+NodeValidationState Vector4DToXYZWNode::validate()
+{
 
-  if (!static_cast<Vector4DData *>(_in_ports[0].in_value.lock().get())) {
+  if (!static_cast<Vector4DData*>(_in_ports[0].in_value.lock().get()))
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate vector input.");
     return _validation_state;

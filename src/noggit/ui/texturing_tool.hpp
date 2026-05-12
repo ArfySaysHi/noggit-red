@@ -1,168 +1,197 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
 #include <noggit/BoolToggleProperty.hpp>
 #include <noggit/Brush.h>
 #include <noggit/TextureManager.h>
-#include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
-#include <noggit/ui/tools/UiCommon/ImageMaskSelector.hpp>
-#include <noggit/UnsignedIntProperty.hpp>
+#include <noggit/unsigned_int_property.hpp>
 
 #include <QJsonObject>
-#include <QtWidgets/QCheckBox>
-#include <QtWidgets/QComboBox>
 #include <QtWidgets/QDial>
-#include <QtWidgets/QDoubleSpinBox>
-#include <QtWidgets/QGroupBox>
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QListWidget>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
 
 class World;
 class MapView;
 
-namespace Noggit {
-namespace Ui {
-class CheckBox;
-class current_texture;
-class texture_swapper;
+class QCheckBox;
+class QDoubleSpinBox;
+class QGroupBox;
+class QPushButton;
+class QSpinBox;
+class QTabWidget;
 
-enum class texturing_mode { paint, swap, anim };
+inline constexpr const char* STRING_EMPTY_DISPLAY = "-NONE-";
 
-struct GroundEffectEntry {
-  unsigned int effectID;
-  unsigned int terrainType;
-  QString label;
-};
+namespace Noggit
+{
+  namespace Ui
+  {
+    class CheckBox;
+    class current_texture;
+    class GroundEffectsTool;
+    class texture_swapper;
 
-std::vector<GroundEffectEntry> buildGroundEffectList();
+    namespace Tools
+    {
+      namespace UiCommon
+      {
+        class ExtendedSlider;
+      }
 
-class texturing_tool : public QWidget {
-public:
-  texturing_tool(const glm::vec3 *camera_pos, MapView *map_view,
-                 BoolToggleProperty *show_quick_palette,
-                 QWidget *parent = nullptr);
+      class ImageMaskSelector;
+    }
 
-  float brush_radius() const;
-  float hardness() const;
-  bool show_unpaintable_chunks() const;
+    class OpacitySlider : public QSlider{
+    public:
+        OpacitySlider(Qt::Orientation orientation, QWidget * parent = nullptr);
+    
+    protected:
+        void paintEvent(QPaintEvent * event) override;
+    };
 
-  void set_brush_level(float level);
+    enum class texturing_mode
+    {
+      paint,
+      swap,
+      anim,
+      ground_effect
+    };
 
-  void toggle_tool();
+    /// <summary>
+    /// ///////////////////////////////////////////////////////////////////////////////////////////////////
+    /// </summary>
+    /// 
+    /// 
+    /// 
+    /// 
 
-  void change_radius(float change);
-  void setRadius(float radius);
-  void setHardness(float hardness);
-  void change_hardness(float change);
-  void change_pressure(float change);
-  void change_brush_level(float change);
-  void set_pressure(float pressure);
-  void toggle_brush_level_min_max();
-  void change_spray_size(float change);
-  void change_spray_pressure(float change);
+    class texturing_tool : public QWidget
+    {
+        Q_OBJECT
+    public:
+      texturing_tool ( const glm::vec3* camera_pos
+                     , MapView* map_view
+                     , BoolToggleProperty* show_quick_palette
+                     , QWidget* parent = nullptr
+                     );
 
-  Noggit::Ui::Tools::UiCommon::ExtendedSlider *getRadiusSlider() {
-    return _radius_slider;
-  };
-  Noggit::Ui::Tools::UiCommon::ExtendedSlider *getInnerRadiusSlider() {
-    return _hardness_slider;
-  };
-  Noggit::Ui::Tools::UiCommon::ExtendedSlider *getSpeedSlider() {
-    return _pressure_slider;
-  };
-  QDial *getMaskOrientationDial() {
-    return _image_mask_group->getMaskOrientationDial();
-  };
+      ~texturing_tool(); // { _ground_effect_tool->deleteLater(); }; // { delete _ground_effect_tool; };
+      void unload();
 
-  void paint(World *world, glm::vec3 const &pos, float dt,
-             scoped_blp_texture_reference texture);
+      float brush_radius() const;
+      float hardness() const;
+      bool show_unpaintable_chunks() const;
 
-  QGroupBox *_ground_effect_group;
+      void set_brush_level (float level);
 
-  Brush const &texture_brush() const { return _texture_brush; }
+      void toggle_tool();
 
-  float alpha_target() const { return static_cast<float>(_brush_level); }
+      GroundEffectsTool* getGroundEffectsTool();;
 
-  current_texture *_current_texture;
+      void change_radius (float change);
+      void setRadius(float radius);
+      void setHardness(float hardness);
+      void change_hardness (float change);
+      void change_pressure (float change);
+      void change_brush_level (float change);
+      void set_pressure (float pressure);
+	  void toggle_brush_level_min_max();
+      void change_spray_size (float change);
+      void change_spray_pressure (float change);
 
-  texture_swapper *const texture_swap_tool() { return _texture_switcher; }
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getRadiusSlider();;
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getInnerRadiusSlider();;
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getSpeedSlider();;
+      QDial* getMaskOrientationDial();;
 
-  QSize sizeHint() const override;
+      void paint (World* world, glm::vec3 const& pos, float dt, scoped_blp_texture_reference texture);      
 
-  Noggit::Ui::Tools::ImageMaskSelector *getImageMaskSelector() {
-    return _image_mask_group;
-  };
-  QImage *getMaskImage() { return &_mask_image; }
-  texturing_mode getTexturingMode() { return _texturing_mode; };
-  void updateMaskImage();
+      Brush const& texture_brush() const;
 
-  QJsonObject toJSON();
-  void fromJSON(QJsonObject const &json);
+      float alpha_target() const;
 
-private:
-  void change_tex_flag(World *world, glm::vec3 const &pos, bool add,
-                       scoped_blp_texture_reference texture);
+      current_texture* _current_texture;
 
-  unsigned int selectedEffectID() const;
+      texture_swapper* const texture_swap_tool();
 
-  void filterEffectList(const QString &filter);
+      QSize sizeHint() const override;
 
-  void update_brush_hardness();
-  void set_radius(float radius);
-  void update_spray_brush();
+      Noggit::Ui::Tools::ImageMaskSelector* getImageMaskSelector();;
+      QImage* getMaskImage();
+      texturing_mode getTexturingMode() const;;
+      void updateMaskImage();
 
-  Brush _texture_brush;
-  Brush _inner_brush;
-  Brush _spray_brush;
+      QJsonObject toJSON();
+      void fromJSON(QJsonObject const& json);
 
-  int _brush_level;
-  bool _show_unpaintable_chunks;
+      QPushButton* const heightmappingApplyGlobalButton();
+      QPushButton* const heightmappingApplyAdtButton();
+      texture_heightmapping_data& getCurrentHeightMappingSetting();
+    signals:
+      void texturePaletteToggled();
 
-  float _spray_size;
-  float _spray_pressure;
+    private:
+      void change_tex_flags(World* world, glm::vec3 const& pos, bool add, scoped_blp_texture_reference texture);
 
-  BoolToggleProperty _anim_prop;
-  UnsignedIntProperty _anim_speed_prop;
-  UnsignedIntProperty _anim_rotation_prop;
-  BoolToggleProperty _overbright_prop;
+      // slider functions
+      void update_brush_hardness();
+      void set_radius (float radius);
+      void update_spray_brush();
 
-  texturing_mode _texturing_mode;
+      Brush _texture_brush;
+      Brush _inner_brush;
+      Brush _spray_brush;
 
-  std::vector<GroundEffectEntry> _effect_entries;
+      int _brush_level;
+      bool _show_unpaintable_chunks;
 
-private:
-  QSlider *_brush_level_slider;
-  Noggit::Ui::Tools::UiCommon::ExtendedSlider *_hardness_slider;
-  Noggit::Ui::Tools::UiCommon::ExtendedSlider *_radius_slider;
-  Noggit::Ui::Tools::UiCommon::ExtendedSlider *_pressure_slider;
-  QSpinBox *_brush_level_spin;
+      int* _heightinfo_group;
 
-  QCheckBox *_show_unpaintable_chunks_cb;
+      float _spray_size;
+      float _spray_pressure;
 
-  QGroupBox *_spray_mode_group;
-  QWidget *_spray_content;
-  QCheckBox *_inner_radius_cb;
-  QSlider *_spray_size_slider;
-  QSlider *_spray_pressure_slider;
-  QDoubleSpinBox *_spray_size_spin;
-  QDoubleSpinBox *_spray_pressure_spin;
+      BoolToggleProperty _anim_prop;
+      unsigned_int_property _anim_speed_prop;
+      unsigned_int_property _anim_rotation_prop;
+      BoolToggleProperty _overbright_prop;
 
-  QGroupBox *_anim_group;
+      texturing_mode _texturing_mode; // use getTexturingMode() to check for ground effect mode
+      texture_heightmapping_data textureHeightmappingData;
 
-  texture_swapper *_texture_switcher;
+    private:
+      OpacitySlider* _brush_level_slider;
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* _hardness_slider;
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* _radius_slider;
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* _pressure_slider;
+      QSpinBox* _brush_level_spin;
 
-  Noggit::Ui::Tools::ImageMaskSelector *_image_mask_group;
+      QCheckBox* _show_unpaintable_chunks_cb;
 
-  QTabWidget *tabs;
+      QGroupBox* _spray_mode_group;
+      QWidget* _spray_content;
+      QCheckBox* _inner_radius_cb;
+      QSlider* _spray_size_slider;
+      QSlider* _spray_pressure_slider;
+      QDoubleSpinBox* _spray_size_spin;
+      QDoubleSpinBox* _spray_pressure_spin;
 
-  QImage _mask_image;
-  MapView *_map_view;
+      QGroupBox* _anim_group;
 
-  QLineEdit *_effect_filter;
-  QListWidget *_effect_list;
-};
-} // namespace Ui
-} // namespace Noggit
+      texture_swapper* _texture_switcher;
+
+      QGroupBox* _heightmapping_group;
+      QPushButton* _heightmapping_apply_global_btn;
+      QPushButton* _heightmapping_apply_adt_btn;
+
+      GroundEffectsTool* _ground_effect_tool;
+
+      Noggit::Ui::Tools::ImageMaskSelector* _image_mask_group;
+
+      QTabWidget* tabs;
+
+      QImage _mask_image;
+      MapView* _map_view;
+    };
+  }
+}

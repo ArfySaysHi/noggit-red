@@ -1,36 +1,39 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #ifndef NOGGIT_SETWATERTYPE_HPP
 #define NOGGIT_SETWATERTYPE_HPP
 
-#include <QComboBox>
 #include <noggit/ui/tools/NodeEditor/Nodes/ContextLogicNodeBase.hpp>
 
-using QtNodes::NodeData;
-using QtNodes::NodeDataModel;
-using QtNodes::NodeDataType;
-using QtNodes::NodeValidationState;
-using QtNodes::PortIndex;
 using QtNodes::PortType;
+using QtNodes::PortIndex;
+using QtNodes::NodeData;
+using QtNodes::NodeDataType;
+using QtNodes::NodeDataModel;
+using QtNodes::NodeValidationState;
 
-namespace Noggit {
-namespace Ui::Tools::NodeEditor::Nodes {
-class SetWaterTypeNode : public ContextLogicNodeBase {
-  Q_OBJECT
+class QComboBox;
 
-public:
-  SetWaterTypeNode();
-  void compute() override;
-  QJsonObject save() const override;
-  void restore(QJsonObject const &json_obj) override;
+namespace Noggit
+{
+  namespace Ui::Tools::NodeEditor::Nodes
+  {
+    class SetWaterTypeNode : public ContextLogicNodeBase
+    {
+    Q_OBJECT
 
-private:
-  QComboBox *_liquid_type;
-};
+    public:
+      SetWaterTypeNode();
+      void compute() override;
+      QJsonObject save() const override;
+      void restore(QJsonObject const& json_obj) override;
 
-} // namespace Ui::Tools::NodeEditor::Nodes
+    private:
+        QComboBox* _liquid_type;
+    };
 
-} // namespace Noggit
+  }
 
-#endif // NOGGIT_SETWATERTYPE_HPP
+}
+
+#endif //NOGGIT_SETWATERTYPE_HPP

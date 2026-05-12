@@ -3,22 +3,21 @@
 
 #include <filesystem>
 
-namespace Noggit::Project {
-class NoggitProject;
+namespace Noggit::Project
+{
+	class NoggitProject;
 
-class ApplicationProjectWriter {
-public:
-  ApplicationProjectWriter() = default;
+	class ApplicationProjectWriter
+	{
+	public:
+		ApplicationProjectWriter() = default;
 
-  void saveProject(NoggitProject *project,
-                   std::filesystem::path const &project_path);
+		void saveProject(NoggitProject* project, std::filesystem::path const& project_path);
 
-  void savePalettes(NoggitProject *project,
-                    std::filesystem::path const &project_path);
+		void savePalettes(NoggitProject* project, std::filesystem::path const& project_path);
 
-  void saveObjectSelectionGroups(NoggitProject *project,
-                                 std::filesystem::path const &project_path);
-};
-} // namespace Noggit::Project
+		void saveObjectSelectionGroups(NoggitProject* project, std::filesystem::path const& project_path);
+	};
+}
 
-#endif // NOGGIT_APPLICATION_PROJECT_WRITER_HPP
+#endif //NOGGIT_APPLICATION_PROJECT_WRITER_HPP

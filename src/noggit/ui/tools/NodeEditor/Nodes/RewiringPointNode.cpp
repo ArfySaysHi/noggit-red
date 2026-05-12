@@ -1,17 +1,18 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "RewiringPointNode.hpp"
 
-#include <external/NodeEditor/include/nodes/Node>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodeScene.hpp>
+#include <external/NodeEditor/include/nodes/Node>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 using QtNodes::Node;
 
-RewiringPointNode::RewiringPointNode() : BaseNode() {
+RewiringPointNode::RewiringPointNode()
+: BaseNode()
+{
   setName("RewiringPoint");
   _validation_state = NodeValidationState::Valid;
 
@@ -19,13 +20,16 @@ RewiringPointNode::RewiringPointNode() : BaseNode() {
   addPort<UndefinedData>(PortType::Out, "", false);
 }
 
-void RewiringPointNode::compute() {
+void RewiringPointNode::compute()
+{
   _out_ports[0].out_value = _in_ports[0].in_value.lock();
   _node->onDataUpdated(0);
 }
 
-NodeValidationState RewiringPointNode::validate() {
-  if (!_in_ports[0].in_value.lock()) {
+NodeValidationState RewiringPointNode::validate()
+{
+  if (!_in_ports[0].in_value.lock())
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate input.");
     return _validation_state;
@@ -34,7 +38,8 @@ NodeValidationState RewiringPointNode::validate() {
   return _validation_state;
 }
 
-void RewiringPointNode::inputConnectionCreated(Connection const &connection) {
+void RewiringPointNode::inputConnectionCreated(Connection const& connection)
+{
   auto in_type = connection.dataType(PortType::Out);
 
   if (in_type.id == "any")
@@ -47,10 +52,12 @@ void RewiringPointNode::inputConnectionCreated(Connection const &connection) {
   _out_ports[0].data_type->set_parameter_type(in_type.parameter_type_id);
 }
 
-void RewiringPointNode::inputConnectionDeleted(Connection const &connection) {
-  auto scene = static_cast<NodeScene *>(_node->nodeGraphicsObject().scene());
+void RewiringPointNode::inputConnectionDeleted(Connection const& connection)
+{
+  auto scene = static_cast<NodeScene*>(_node->nodeGraphicsObject().scene());
 
-  for (auto &con : _node->nodeState().connections(PortType::Out, 0)) {
+  for (auto& con : _node->nodeState().connections(PortType::Out, 0))
+  {
     scene->deleteConnection(*con.second);
   }
 
@@ -58,7 +65,8 @@ void RewiringPointNode::inputConnectionDeleted(Connection const &connection) {
   _in_ports[0].data_type.reset(TypeFactory::create("any"));
 }
 
-QJsonObject RewiringPointNode::save() const {
+QJsonObject RewiringPointNode::save() const
+{
   QJsonObject json_obj = BaseNode::save();
 
   auto type = _in_ports[0].data_type->type();
@@ -68,7 +76,8 @@ QJsonObject RewiringPointNode::save() const {
   return json_obj;
 }
 
-void RewiringPointNode::restore(const QJsonObject &json_obj) {
+void RewiringPointNode::restore(const QJsonObject& json_obj)
+{
   BaseNode::restore(json_obj);
 
   auto type_id = json_obj["type_id"].toString().toStdString();

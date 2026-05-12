@@ -1,45 +1,49 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #ifndef NOGGIT_EXTENDEDSLIDER_HPP
 #define NOGGIT_EXTENDEDSLIDER_HPP
 
-#include "ui_ExtendedSliderUi.h"
 #include <QWidget>
-#include <noggit/TabletManager.hpp>
+#include "ui_ExtendedSliderUi.h"
 
-namespace Noggit {
-namespace Ui::Tools::UiCommon {
-class ExtendedSlider : public QWidget {
-  Q_OBJECT
-public:
-  ExtendedSlider(QWidget *parent = nullptr);
+namespace Noggit
+{
+  class TabletManager;
 
-  void setPrefix(const QString &prefix);
-  void setMinimum(double min);
-  void setMaximum(double max);
-  void setRange(double min, double max);
-  void setDecimals(int decimals);
-  void setSingleStep(double val);
-  void setSliderRange(int min, int max);
-  void setValue(double value);
-  double value();
-  double rawValue();
+  namespace Ui::Tools::UiCommon
+  {
+    class ExtendedSlider : public QWidget
+    {
+      Q_OBJECT
+    public:
+      ExtendedSlider(QWidget* parent = nullptr);
 
-  void setTabletSupportEnabled(bool state);
+      void setPrefix(const QString& prefix);
+      void setMinimum(double min);
+      void setMaximum(double max);
+      void setRange(double min, double max);
+      void setDecimals(int decimals);
+      void setSingleStep(double val);
+      void setSliderRange(int min, int max);
+      void setValue(double value);
+      double value();
+      double rawValue();
 
-signals:
-  void valueChanged(double value);
+      void setTabletSupportEnabled(bool state);
 
-private:
-  ::Ui::ExtendedSliderUi _ui;
-  bool _is_tablet_supported = true;
-  bool _is_tablet_affecting = false;
-  QWidget *_tablet_popup;
-  unsigned _tablet_sens_factor = 300;
-  TabletManager *_tablet_manager;
-};
-} // namespace Ui::Tools::UiCommon
-} // namespace Noggit
+    signals:
+      void valueChanged(double value);
 
-#endif // NOGGIT_EXTENDEDSLIDER_HPP
+    private:
+      ::Ui::ExtendedSliderUi _ui;
+      bool _is_tablet_supported = true;
+      bool _is_tablet_affecting = false;
+      QWidget* _tablet_popup;
+      unsigned _tablet_sens_factor = 300;
+      TabletManager* _tablet_manager;
+
+    };
+  }
+}
+
+#endif //NOGGIT_EXTENDEDSLIDER_HPP

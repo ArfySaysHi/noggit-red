@@ -1,11 +1,11 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
 
-#include <QtWidgets/QListWidget>
-#include <noggit/project/ApplicationProject.h>
 #include <noggit/ui/widget.hpp>
+
+#include <QtWidgets/QListWidget>
+
 #include <string>
 #include <unordered_set>
 
@@ -17,55 +17,65 @@ class QMouseEvent;
 class QListWidget;
 class QPoint;
 
-namespace Noggit {
-namespace Ui {
-class current_texture;
+namespace Noggit
+{
+  namespace Project
+  {
+    class NoggitProject;
+  }
 
-class PaletteList : public QListWidget {
-public:
-  PaletteList(QWidget *parent);
+  namespace Ui
+  {
+    class current_texture;
 
-  void mouseMoveEvent(QMouseEvent *event) override;
-  void mousePressEvent(QMouseEvent *event) override;
+    class PaletteList : public QListWidget
+    {
+    public:
+      PaletteList(QWidget* parent);
 
-private:
-  QPoint _start_pos;
-};
+      void mouseMoveEvent(QMouseEvent* event) override;
+      void mousePressEvent(QMouseEvent* event) override;
 
-class texture_palette_small : public widget {
-  Q_OBJECT
+    private:
+      QPoint _start_pos;
 
-public:
-  texture_palette_small(std::shared_ptr<Noggit::Project::NoggitProject> Project,
-                        int mapId, QWidget *parent);
+    };
 
-  void addTexture();
-  void addTextureByFilename(const std::string &filename,
-                            bool save_palette = true);
+    class texture_palette_small : public widget
+    {
+      Q_OBJECT
 
-  void removeTexture(QString filename);
+    public:
+      texture_palette_small (std::shared_ptr<Noggit::Project::NoggitProject> Project, int mapId, QWidget* parent);
 
-  void LoadSavedPalette();
-  void SavePalette();
+      void addTexture();
+      void addTextureByFilename(const std::string& filename, bool save_palette = true);
 
-  void removeSelectedTexture();
+      void removeTexture(QString filename);
 
-  void dragEnterEvent(QDragEnterEvent *event) override;
-  void dropEvent(QDropEvent *event) override;
+      void LoadSavedPalette();
+      void SavePalette();
 
-signals:
-  void selected(std::string);
+      void removeSelectedTexture();
 
-private:
-  QGridLayout *layout;
+      void dragEnterEvent(QDragEnterEvent* event) override;
+      void dropEvent(QDropEvent* event) override;
 
-  QListWidget *_texture_list;
-  QPushButton *_add_button;
-  QPushButton *_remove_button;
-  std::unordered_set<std::string> _texture_paths;
 
-  std::shared_ptr<Noggit::Project::NoggitProject> _project;
-  int _map_id;
-};
-} // namespace Ui
-} // namespace Noggit
+    signals:
+      void selected(std::string);
+
+    private:
+
+      QGridLayout* layout;
+
+      PaletteList* _texture_list;
+      QPushButton* _add_button;
+      QPushButton* _remove_button;
+      std::unordered_set<std::string> _texture_paths;
+
+      std::shared_ptr<Noggit::Project::NoggitProject> _project;
+      int _map_id;
+    };
+  }
+}

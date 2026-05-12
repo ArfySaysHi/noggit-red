@@ -1,36 +1,45 @@
 #ifndef NOGGIT_CONDITIONNODE_HPP
 #define NOGGIT_CONDITIONNODE_HPP
 
-#include "noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp"
+#include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp>
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
 
 #include <QComboBox>
 
-using QtNodes::NodeData;
-using QtNodes::NodeDataModel;
-using QtNodes::NodeDataType;
-using QtNodes::NodeValidationState;
-using QtNodes::PortIndex;
 using QtNodes::PortType;
+using QtNodes::PortIndex;
+using QtNodes::NodeData;
+using QtNodes::NodeDataType;
+using QtNodes::NodeDataModel;
+using QtNodes::NodeValidationState;
 
-namespace Noggit {
-namespace Ui::Tools::NodeEditor::Nodes {
-class ConditionNode : public BaseNode {
-  Q_OBJECT
+class QDoubleSpinBox;
+class QComboBox;
 
-public:
-  ConditionNode();
-  void compute() override;
-  QJsonObject save() const override;
-  void restore(QJsonObject const &json_obj) override;
+namespace Noggit
+{
+    namespace Ui::Tools::NodeEditor::Nodes
+    {
+        class ConditionNode : public BaseNode
+        {
+        Q_OBJECT
 
-private:
-  QDoubleSpinBox *_first;
-  QDoubleSpinBox *_second;
-  QComboBox *_operation;
-};
+        public:
+            ConditionNode();
+            void compute() override;
+            QJsonObject save() const override;
+            void restore(QJsonObject const& json_obj) override;
 
-} // namespace Ui::Tools::NodeEditor::Nodes
+        private:
+            QDoubleSpinBox* _first;
+            QDoubleSpinBox* _second;
+            QComboBox* _operation;
 
-} // namespace Noggit
 
-#endif // NOGGIT_CONDITIONNODE_HPP
+        };
+
+    }
+
+}
+
+#endif //NOGGIT_CONDITIONNODE_HPP

@@ -1,17 +1,20 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "TexturingSetAdtBaseTextureAtPosNode.hpp"
 
-#include <noggit/ToolEnums.hpp>
-#include <noggit/World.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
+#include <noggit/tool_enums.hpp>
+#include <noggit/World.inl>
+
+#include <external/NodeEditor/include/nodes/Node>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 TexturingSetAdtBaseTextureAtPosNode::TexturingSetAdtBaseTextureAtPosNode()
-    : ContextLogicNodeBase() {
+: ContextLogicNodeBase()
+{
   setName("Texturing :: SetADTBaseTextureAtPos");
   setCaption("Texturing :: SetADTBaseTextureAtPos");
   _validation_state = NodeValidationState::Valid;
@@ -24,24 +27,25 @@ TexturingSetAdtBaseTextureAtPosNode::TexturingSetAdtBaseTextureAtPosNode()
   addPort<LogicData>(PortType::Out, "Logic", true);
 }
 
-void TexturingSetAdtBaseTextureAtPosNode::compute() {
-  World *world = gCurrentContext->getWorld();
+void TexturingSetAdtBaseTextureAtPosNode::compute()
+{
+  World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _(
-      ::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   auto pos_data = defaultPortData<Vector3DData>(PortType::In, 1);
-  glm::vec3 const &pos = pos_data->value();
+  glm::vec3 const& pos = pos_data->value();
 
-  scoped_blp_texture_reference tex(
-      defaultPortData<StringData>(PortType::In, 2)->value(),
-      gCurrentContext->getViewport()->getRenderContext());
+  scoped_blp_texture_reference tex(defaultPortData<StringData>(PortType::In, 2)->value(),
+                                   gCurrentContext->getViewport()->getRenderContext());
 
-  world->for_all_chunks_on_tile({pos.x, pos.y, pos.z}, [&](MapChunk *chunk) {
-    chunk->eraseTextures();
-    chunk->addTexture(tex);
+  world->for_all_chunks_on_tile({pos.x, pos.y, pos.z}, [&](MapChunk* chunk)
+  {
+      chunk->eraseTextures();
+      chunk->addTexture(tex);
   });
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
+
 }

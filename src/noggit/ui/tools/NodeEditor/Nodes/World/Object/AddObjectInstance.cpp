@@ -1,19 +1,25 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "AddObjectInstance.hpp"
 
 #include <noggit/Action.hpp>
 #include <noggit/ActionManager.hpp>
+#include <noggit/object_paste_params.hpp>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
+#include <noggit/World.h>
+
+#include <external/NodeEditor/include/nodes/Node>
 
 #include <typeinfo>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-AddObjectInstanceNode::AddObjectInstanceNode() : ContextLogicNodeBase() {
+AddObjectInstanceNode::AddObjectInstanceNode()
+: ContextLogicNodeBase()
+{
   setName("Object :: AddObjectInstance");
   setCaption("Object :: AddObjectInstance");
   _validation_state = NodeValidationState::Valid;
@@ -28,44 +34,43 @@ AddObjectInstanceNode::AddObjectInstanceNode() : ContextLogicNodeBase() {
   addPort<ObjectInstanceData>(PortType::Out, "ObjectInstance", true);
 }
 
-void AddObjectInstanceNode::compute() {
-  World *world = gCurrentContext->getWorld();
+void AddObjectInstanceNode::compute()
+{
+  World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _(
-      ::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   auto path_data = defaultPortData<StringData>(PortType::In, 1);
-  std::string const &path = path_data->value();
+  std::string const& path = path_data->value();
 
   auto pos_data = defaultPortData<Vector3DData>(PortType::In, 2);
-  glm::vec3 const &pos = pos_data->value();
+  glm::vec3 const& pos = pos_data->value();
 
   auto dir_data = defaultPortData<Vector3DData>(PortType::In, 3);
-  glm::vec3 const &dir = dir_data->value();
+  glm::vec3 const& dir = dir_data->value();
 
   float scale = defaultPortData<DecimalData>(PortType::In, 4)->value();
 
-  if (path.empty()) {
+  if (path.empty())
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: path is empty.");
     return;
   }
 
-  SceneObject *obj;
+  SceneObject* obj;
 
-  if (QString(path.c_str()).endsWith(".m2", Qt::CaseInsensitive)) {
+  if (QString(path.c_str()).endsWith(".m2", Qt::CaseInsensitive))
+  {
     Noggit::object_paste_params paste_params;
-    obj = world->addM2AndGetInstance(path, {pos.x, pos.y, pos.z}, scale,
-                                     {math::degrees(dir.x)._,
-                                      math::degrees(dir.y)._,
-                                      math::degrees(dir.z)._},
-                                     &paste_params);
-  } else if (QString(path.c_str()).endsWith(".wmo", Qt::CaseInsensitive)) {
-    obj = world->addWMOAndGetInstance(path, {pos.x, pos.y, pos.z},
-                                      {math::degrees(dir.x)._,
-                                       math::degrees(dir.y)._,
-                                       math::degrees(dir.z)._});
-  } else {
+    obj = world->addM2AndGetInstance(path, {pos.x, pos.y, pos.z}, scale, {math::degrees(dir.x)._, math::degrees(dir.y)._, math::degrees(dir.z)._ }, &paste_params, false, false);
+  }
+  else if (QString(path.c_str()).endsWith(".wmo", Qt::CaseInsensitive))
+  {
+    obj = world->addWMOAndGetInstance(path, {pos.x, pos.y, pos.z}, {math::degrees(dir.x)._, math::degrees(dir.y)._, math::degrees(dir.z)._ }, scale, false);
+  }
+  else
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: path is not a valid .m2 or .wmo file.");
     return;
@@ -78,4 +83,6 @@ void AddObjectInstanceNode::compute() {
 
   _out_ports[1].out_value = std::make_shared<ObjectInstanceData>(obj);
   _node->onDataUpdated(1);
+
 }
+

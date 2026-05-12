@@ -1,16 +1,15 @@
-#ifndef NOGGIT_APPLICATION_CONFIGURATION_WRITER_HPP
-#define NOGGIT_APPLICATION_CONFIGURATION_WRITER_HPP
+#pragma once
 
-#include <QFile>
-#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+class QFile;
 
-namespace Noggit::Application {
+namespace Noggit::Application
+{
+  struct NoggitApplicationConfiguration;
 
-class NoggitApplicationConfigurationWriter {
-public:
-  void PersistDefaultConfigurationState(QFile &outputFile);
-  void PersistConfigurationState(
-      QFile &outputFile, const NoggitApplicationConfiguration &configuration);
-};
-} // namespace Noggit::Application
-#endif // NOGGIT_APPLICATION_CONFIGURATION_WRITER_HPP
+    class NoggitApplicationConfigurationWriter
+    {
+    public:
+        void PersistDefaultConfigurationState(QFile& outputFile);
+        void PersistConfigurationState(QFile& outputFile, const NoggitApplicationConfiguration& configuration);
+    };
+}

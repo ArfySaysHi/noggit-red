@@ -1,41 +1,40 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #ifndef NOGGIT_REORDERABLEVERTICALBOX_HPP
 #define NOGGIT_REORDERABLEVERTICALBOX_HPP
 
-#include <QPoint>
-#include <QRect>
 #include <QWidget>
+#include <QPoint>
 
-namespace Noggit::Ui::Tools {
+namespace Noggit::Ui::Tools
+{
+  class ReorderableVerticalBox : public QWidget
+  {
+  public:
 
-class ReorderableVerticalBox : public QWidget {
+    ReorderableVerticalBox(QWidget* parent = nullptr);;
 
-public:
-  ReorderableVerticalBox(QWidget *parent = nullptr) : QWidget(parent) {};
+    void mouseMoveEvent(QMouseEvent* event) override;
 
-  void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent* event) override;
 
-  void mousePressEvent(QMouseEvent *event) override;
+    bool IsMinimumDistanceRiched(QMouseEvent* event);
 
-  bool IsMinimumDistanceRiched(QMouseEvent *event);
+    void paintEvent(QPaintEvent*) override;
 
-  void paintEvent(QPaintEvent *) override;
+    void mouseReleaseEvent(QMouseEvent*) override;
 
-  void mouseReleaseEvent(QMouseEvent *) override;
+    void setActiveRectWidget(QWidget* widget);
 
-  void setActiveRectWidget(QWidget *widget);
+  private:
+    int oldX;
+    int oldY;
+    int mouseClickX;
+    int mouseClickY;
+    QPoint dragStartPosition;
+    bool dragInitiated = false;
+    QWidget* activeRectWidget;
+  };
+}
 
-private:
-  int oldX;
-  int oldY;
-  int mouseClickX;
-  int mouseClickY;
-  QPoint dragStartPosition;
-  bool dragInitiated = false;
-  QWidget *activeRectWidget;
-};
-} // namespace Noggit::Ui::Tools
-
-#endif // NOGGIT_REORDERABLEVERTICALBOX_HPP
+#endif //NOGGIT_REORDERABLEVERTICALBOX_HPP

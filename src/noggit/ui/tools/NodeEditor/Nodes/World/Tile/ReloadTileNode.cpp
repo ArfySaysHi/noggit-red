@@ -1,15 +1,20 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "ReloadTileNode.hpp"
 
-#include <noggit/ToolEnums.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
+#include <noggit/tool_enums.hpp>
+#include <noggit/World.h>
+
+#include <external/NodeEditor/include/nodes/Node>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-ReloadTileNode::ReloadTileNode() : ContextLogicNodeBase() {
+ReloadTileNode::ReloadTileNode()
+: ContextLogicNodeBase()
+{
   setName("Tile :: Reload");
   setCaption("Tile :: Reload");
   _validation_state = NodeValidationState::Valid;
@@ -20,19 +25,20 @@ ReloadTileNode::ReloadTileNode() : ContextLogicNodeBase() {
   addPort<LogicData>(PortType::Out, "Logic", true);
 }
 
-void ReloadTileNode::compute() {
-  World *world = gCurrentContext->getWorld();
+void ReloadTileNode::compute()
+{
+  World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _(
-      ::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   auto xy_data = defaultPortData<Vector2DData>(PortType::In, 1);
-  glm::vec2 const &xy = xy_data->value();
+  glm::vec2 const& xy = xy_data->value();
 
-  if (!world->mapIndex.hasTile(TileIndex(xy.x, xy.y))) {
+
+  if (!world->mapIndex.hasTile(TileIndex(xy.x, xy.y)))
+  {
     setValidationState(NodeValidationState::Error);
-    setValidationMessage(
-        "Error: tile index is out of range or tile does not exist.");
+    setValidationMessage("Error: tile index is out of range or tile does not exist.");
     return;
   }
 
@@ -40,4 +46,5 @@ void ReloadTileNode::compute() {
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
+
 }

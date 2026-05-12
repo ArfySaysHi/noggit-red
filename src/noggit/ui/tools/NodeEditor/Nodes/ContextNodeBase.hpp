@@ -1,39 +1,34 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #ifndef NOGGIT_CONTEXTNODEBASE_HPP
 #define NOGGIT_CONTEXTNODEBASE_HPP
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp>
-#include <noggit/ui/tools/NodeEditor/Nodes/Scene/Context.hpp>
 
-using QtNodes::NodeData;
-using QtNodes::NodeDataModel;
-using QtNodes::NodeDataType;
-using QtNodes::NodeValidationState;
-using QtNodes::PortIndex;
 using QtNodes::PortType;
+using QtNodes::PortIndex;
+using QtNodes::NodeData;
+using QtNodes::NodeDataType;
+using QtNodes::NodeDataModel;
+using QtNodes::NodeValidationState;
 
-namespace Noggit {
-namespace Ui::Tools::NodeEditor::Nodes {
-class ContextNodeBase : public BaseNode {
-  Q_OBJECT
 
-public:
-  ContextNodeBase() {};
+namespace Noggit
+{
+    namespace Ui::Tools::NodeEditor::Nodes
+    {
+        class ContextNodeBase : public BaseNode
+        {
+        Q_OBJECT
 
-  NodeValidationState validate() override {
-    if (!gCurrentContext->getWorld() || !gCurrentContext->getViewport()) {
-      setValidationState(NodeValidationState::Error);
-      setValidationMessage("Error: this node requires a world context to run.");
+        public:
+            ContextNodeBase();
+
+            NodeValidationState validate() override;;
+        };
+
     }
 
-    return _validation_state;
-  };
-};
+}
 
-} // namespace Ui::Tools::NodeEditor::Nodes
-
-} // namespace Noggit
-
-#endif // NOGGIT_CONTEXTNODEBASE_HPP
+#endif //NOGGIT_CONTEXTNODEBASE_HPP

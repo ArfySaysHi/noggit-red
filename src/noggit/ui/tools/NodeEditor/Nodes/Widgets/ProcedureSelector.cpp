@@ -1,37 +1,36 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "ProcedureSelector.hpp"
 #include <noggit/ui/FontAwesome.hpp>
 
 #include <QDir>
-#include <QFileSystemModel>
 #include <QHBoxLayout>
-#include <QHeaderView>
-#include <QItemSelectionModel>
-#include <QLineEdit>
-#include <QMenu>
 #include <QPushButton>
-#include <QTreeView>
 #include <QWidgetAction>
+#include <QLineEdit>
+#include <QTreeView>
+#include <QFileSystemModel>
+#include <QItemSelectionModel>
+#include <QMenu>
+#include <QHeaderView>
+
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-ProcedureSelector::ProcedureSelector(QWidget *parent) {
+ProcedureSelector::ProcedureSelector(QWidget *parent)
+{
   setAttribute(Qt::WA_TranslucentBackground);
 
   auto layout = new QHBoxLayout(this);
 
   auto search_button = new QPushButton("None", this);
   layout->addWidget(search_button);
-  search_button->setIcon(Noggit::Ui::FontAwesomeIcon(
-      Noggit::Ui::FontAwesome::Icons::networkwired));
+  search_button->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::Icons::networkwired));
   search_button->setToolTip("Select procedure");
   search_button->adjustSize();
 
   auto menu = new QMenu(search_button);
-  menu->setSizePolicy(QSizePolicy::MinimumExpanding,
-                      QSizePolicy::MinimumExpanding);
+  menu->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
   menu->setMinimumSize(200, 300);
   menu->setMaximumSize(400, 600);
   search_button->setMenu(menu);
@@ -58,8 +57,7 @@ ProcedureSelector::ProcedureSelector(QWidget *parent) {
   auto model = new QFileSystemModel(menu);
 
   auto root_index = model->setRootPath(QDir("./scripts/").absolutePath());
-  model->setFilter(QDir::Files | QDir::AllDirs | QDir::AllEntries |
-                   QDir::NoDotAndDotDot);
+  model->setFilter(QDir::Files | QDir::AllDirs | QDir::AllEntries | QDir::NoDotAndDotDot);
 
   QStringList filters;
   filters << "*.ns";
@@ -74,43 +72,48 @@ ProcedureSelector::ProcedureSelector(QWidget *parent) {
   tree->hideColumn(3);
   tree->header()->close();
 
-  QMenu::connect(menu, &QMenu::aboutToShow,
-                 ([=, this] { search_text->setFocus(); }));
+  QMenu::connect(menu, &QMenu::aboutToShow, [=] { search_text->setFocus(); });
 
-  QTreeView::connect(tree->selectionModel(),
-                     &QItemSelectionModel::selectionChanged,
-                     ([=, this](const QItemSelection &selected,
-                                const QItemSelection &deselected) {
-                       for (auto index : selected.indexes()) {
-                         auto path = model->filePath(index);
-                         auto text = QDir("./scripts/").relativeFilePath(path);
-                         search_button->setText(text);
-                         search_button->adjustSize();
+  QTreeView::connect(tree->selectionModel(), &QItemSelectionModel::selectionChanged
+      ,[=] (const QItemSelection& selected, const QItemSelection& deselected)
+                     {
+                         for (auto index : selected.indexes())
+                         {
+                           auto path = model->filePath(index);
+                           auto text = QDir("./scripts/").relativeFilePath(path);
+                           search_button->setText(text);
+                           search_button->adjustSize();
 
-                         emit entry_updated(text);
+                           emit entry_updated(text);
 
-                         menu->close();
-                         break;
-                       }
-                     }));
+                           menu->close();
+                           break;
+                         }
+                     }
+  );
 
-  QLineEdit::connect(search_text, &QLineEdit::textChanged, ([=, this] {
-                       QStringList filters_search;
+  QLineEdit::connect(search_text, &QLineEdit::textChanged
+      ,[=]
+                     {
+                         QStringList filters_search;
 
-                       auto text = search_text->text();
-                       if (text.count())
-                         filters_search << "*" + text + "*.ns";
-                       else
-                         filters_search << "*.ns";
+                         auto text = search_text->text();
+                         if (text.count())
+                           filters_search << "*" + text + "*.ns";
+                         else
+                           filters_search << "*.ns";
 
-                       model->setNameFilters(filters_search);
-                     }));
+                         model->setNameFilters(filters_search);
+                     });
 }
 
-QString ProcedureSelector::getPath() {
-  return static_cast<QPushButton *>(layout()->itemAt(0)->widget())->text();
+QString ProcedureSelector::getPath()
+{
+  return static_cast<QPushButton*>(layout()->itemAt(0)->widget())->text();
 }
 
-void ProcedureSelector::setPath(QString const &path) {
-  static_cast<QPushButton *>(layout()->itemAt(0)->widget())->setText(path);
+void ProcedureSelector::setPath(QString const& path)
+{
+  static_cast<QPushButton*>(layout()->itemAt(0)->widget())->setText(path);
 }
+

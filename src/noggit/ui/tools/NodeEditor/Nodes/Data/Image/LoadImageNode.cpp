@@ -1,17 +1,19 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "LoadImageNode.hpp"
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <external/NodeEditor/include/nodes/Node>
 
 #include <QFileDialog>
 #include <QImage>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-LoadImageNode::LoadImageNode() : LogicNodeBase() {
+LoadImageNode::LoadImageNode()
+: LogicNodeBase()
+{
   setName("Image :: Load");
   setCaption("Image :: Load");
   _validation_state = NodeValidationState::Valid;
@@ -19,36 +21,37 @@ LoadImageNode::LoadImageNode() : LogicNodeBase() {
   addPort<LogicData>(PortType::In, "Logic", true);
 
   addPort<StringData>(PortType::In, "Path<String>", true);
-  addDefaultWidget(_in_ports[1].data_type->default_widget(&_embedded_widget),
-                   PortType::In, 1);
+  addDefaultWidget(_in_ports[1].data_type->default_widget(&_embedded_widget), PortType::In, 1);
 
   _load_button = new QPushButton("Load", &_embedded_widget);
   addWidgetTop(_load_button);
 
-  connect(_load_button, &QPushButton::clicked, ([=, this] {
-            auto result(QFileDialog::getOpenFileName(
-                nullptr, "Load image",
-                static_cast<QLineEdit *>(_in_ports[1].default_widget)->text(),
-                "*.png"));
+  connect(_load_button, &QPushButton::clicked
+    , [=]
+    {
+      auto result(QFileDialog::getOpenFileName(
+          nullptr, "Load image", static_cast<QLineEdit*>(_in_ports[1].default_widget)->text(), "*.png"));
 
-            if (!result.isNull()) {
-              static_cast<QLineEdit *>(_in_ports[1].default_widget)
-                  ->setText(result);
-            }
-          }));
+      if (!result.isNull())
+      {
+        static_cast<QLineEdit*>(_in_ports[1].default_widget)->setText(result);
+      }
+    }
+  );
 
   addPort<LogicData>(PortType::Out, "Logic", true);
   addPort<ImageData>(PortType::Out, "Image", true);
+
 }
 
-void LoadImageNode::compute() {
+void LoadImageNode::compute()
+{
   QImage image;
-  auto path_ptr = static_cast<StringData *>(_in_ports[1].in_value.lock().get());
-  QString path =
-      path_ptr ? path_ptr->value().c_str()
-               : static_cast<QLineEdit *>(_in_ports[1].default_widget)->text();
+  auto path_ptr = static_cast<StringData*>(_in_ports[1].in_value.lock().get());
+  QString path = path_ptr ? path_ptr->value().c_str() : static_cast<QLineEdit*>(_in_ports[1].default_widget)->text();
 
-  if (!image.load(path, "PNG")) {
+  if (!image.load(path, "PNG"))
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to load image.");
     return;
@@ -63,23 +66,24 @@ void LoadImageNode::compute() {
   _node->onDataUpdated(1);
 }
 
-QJsonObject LoadImageNode::save() const {
+QJsonObject LoadImageNode::save() const
+{
   QJsonObject json_obj = BaseNode::save();
 
-  json_obj["filepath"] =
-      static_cast<QLineEdit *>(_in_ports[1].default_widget)->text();
+  json_obj["filepath"] = static_cast<QLineEdit*>(_in_ports[1].default_widget)->text();
 
   return json_obj;
 }
 
-void LoadImageNode::restore(const QJsonObject &json_obj) {
+void LoadImageNode::restore(const QJsonObject& json_obj)
+{
   BaseNode::restore(json_obj);
 
-  static_cast<QLineEdit *>(_in_ports[1].default_widget)
-      ->setText(json_obj["filepath"].toString());
+  static_cast<QLineEdit*>(_in_ports[1].default_widget)->setText(json_obj["filepath"].toString());
 }
 
-void LoadImageNode::inputConnectionCreated(Connection const &connection) {
+void LoadImageNode::inputConnectionCreated(Connection const& connection)
+{
   BaseNode::inputConnectionCreated(connection);
   PortIndex port_index = connection.getPortIndex(PortType::In);
 
@@ -87,9 +91,11 @@ void LoadImageNode::inputConnectionCreated(Connection const &connection) {
     return;
 
   _load_button->setHidden(true);
+
 }
 
-void LoadImageNode::inputConnectionDeleted(const Connection &connection) {
+void LoadImageNode::inputConnectionDeleted(const Connection& connection)
+{
   BaseNode::inputConnectionDeleted(connection);
   PortIndex port_index = connection.getPortIndex(PortType::In);
 

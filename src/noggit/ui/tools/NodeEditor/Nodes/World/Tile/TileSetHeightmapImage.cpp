@@ -1,16 +1,21 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "TileSetHeightmapImage.hpp"
 
-#include <noggit/ToolEnums.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
+#include <noggit/tool_enums.hpp>
+
+#include <external/NodeEditor/include/nodes/Node>
+
+#include <QComboBox>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 TileSetHeightmapImageNode::TileSetHeightmapImageNode()
-    : ContextLogicNodeBase() {
+: ContextLogicNodeBase()
+{
   setName("Tile :: SetHeightmapImage");
   setCaption("Tile :: SetHeightmapImage");
   _validation_state = NodeValidationState::Valid;
@@ -27,44 +32,49 @@ TileSetHeightmapImageNode::TileSetHeightmapImageNode()
   addPort<LogicData>(PortType::Out, "Logic", true);
 }
 
-void TileSetHeightmapImageNode::compute() {
+void TileSetHeightmapImageNode::compute()
+{
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _(
-      ::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
-  MapTile *tile = defaultPortData<TileData>(PortType::In, 1)->value();
-  QImage *image = defaultPortData<ImageData>(PortType::In, 2)->value_ptr();
+  MapTile* tile = defaultPortData<TileData>(PortType::In, 1)->value();
+  QImage* image = defaultPortData<ImageData>(PortType::In, 2)->value_ptr();
   double multiplier = defaultPortData<DecimalData>(PortType::In, 3)->value();
 
-  QImage *image_to_use = image;
+  QImage* image_to_use = image;
 
-  if (image->width() != image->height()) {
+  if (image->width() != image->height())
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: image should have square dimensions.");
     return;
   }
 
   QImage scaled;
-  if (image->width() != 257 || image->height() != 257) {
-    scaled =
-        image->scaled(257, 257, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+  if (image->width() != 257 || image->height() != 257)
+  {
+    scaled = image->scaled(257, 257, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     image_to_use = &scaled;
   }
 
-  if (image->depth() != 64 && image->depth() != 32) {
+  if (image->depth() != 64 && image->depth() != 32)
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: invalid image depth.");
     return;
   }
 
-  tile->setHeightmapImage(*image_to_use, static_cast<float>(multiplier),
-                          _operation->currentIndex(), false);
+  // TODO change to min/max instead of multiplier
+  tile->setHeightmapImage(*image_to_use, -32768.f, 32768.f, _operation->currentIndex(), false);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
+
 }
 
-QJsonObject TileSetHeightmapImageNode::save() const {
+
+QJsonObject TileSetHeightmapImageNode::save() const
+{
   QJsonObject json_obj = ContextLogicNodeBase::save();
 
   json_obj["operation"] = _operation->currentIndex();
@@ -72,20 +82,24 @@ QJsonObject TileSetHeightmapImageNode::save() const {
   return json_obj;
 }
 
-void TileSetHeightmapImageNode::restore(const QJsonObject &json_obj) {
+void TileSetHeightmapImageNode::restore(const QJsonObject& json_obj)
+{
   _operation->setCurrentIndex(json_obj["operation"].toInt());
 
   ContextLogicNodeBase::restore(json_obj);
 }
 
-NodeValidationState TileSetHeightmapImageNode::validate() {
-  if (!static_cast<TileData *>(_in_ports[1].in_value.lock().get())) {
+NodeValidationState TileSetHeightmapImageNode::validate()
+{
+  if (!static_cast<TileData*>(_in_ports[1].in_value.lock().get()))
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate tile input.");
     return _validation_state;
   }
 
-  if (!static_cast<ImageData *>(_in_ports[2].in_value.lock().get())) {
+  if (!static_cast<ImageData*>(_in_ports[2].in_value.lock().get()))
+  {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate image input.");
     return _validation_state;
@@ -93,3 +107,4 @@ NodeValidationState TileSetHeightmapImageNode::validate() {
 
   return ContextLogicNodeBase::validate();
 }
+
