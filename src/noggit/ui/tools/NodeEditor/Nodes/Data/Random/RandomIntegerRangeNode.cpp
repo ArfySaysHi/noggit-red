@@ -1,16 +1,15 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "RandomIntegerRangeNode.hpp"
 
+#include <QRandomGenerator>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-#include <QRandomGenerator>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-RandomIntegerRangeNode::RandomIntegerRangeNode()
-: BaseNode()
-{
+RandomIntegerRangeNode::RandomIntegerRangeNode() : BaseNode() {
   setName("Random :: IntegerRange");
   setCaption("Random :: IntegerRange");
   _validation_state = NodeValidationState::Valid;
@@ -21,27 +20,25 @@ RandomIntegerRangeNode::RandomIntegerRangeNode()
   addPort<IntegerData>(PortType::Out, "Integer", true);
 }
 
-void RandomIntegerRangeNode::compute()
-{
+void RandomIntegerRangeNode::compute() {
   QRandomGenerator rand;
   rand.seed(defaultPortData<IntegerData>(PortType::In, 0)->value());
 
   int lowest = defaultPortData<IntegerData>(PortType::In, 1)->value();
-  int highest =  defaultPortData<IntegerData>(PortType::In, 2)->value();
+  int highest = defaultPortData<IntegerData>(PortType::In, 2)->value();
 
-  if (lowest >= highest)
-  {
+  if (lowest >= highest) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: incorrect range.");
     return;
   }
-  _out_ports[0].out_value = std::make_shared<IntegerData>(rand.bounded(lowest, highest));
+  _out_ports[0].out_value =
+      std::make_shared<IntegerData>(rand.bounded(lowest, highest));
 
   _node->onDataUpdated(0);
 }
 
-QJsonObject RandomIntegerRangeNode::save() const
-{
+QJsonObject RandomIntegerRangeNode::save() const {
   QJsonObject json_obj = BaseNode::save();
 
   defaultWidgetToJson(PortType::In, 0, json_obj, "seed");
@@ -51,8 +48,7 @@ QJsonObject RandomIntegerRangeNode::save() const
   return json_obj;
 }
 
-void RandomIntegerRangeNode::restore(const QJsonObject& json_obj)
-{
+void RandomIntegerRangeNode::restore(const QJsonObject &json_obj) {
   BaseNode::restore(json_obj);
 
   defaultWidgetFromJson(PortType::In, 0, json_obj, "seed");

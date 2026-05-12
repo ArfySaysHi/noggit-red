@@ -3,16 +3,14 @@
 #pragma once
 #include <noggit/ChunkWater.hpp>
 #include <noggit/MapHeaders.h>
+#include <noggit/ToolEnums.hpp>
 #include <noggit/rendering/LiquidRender.hpp>
 #include <noggit/rendering/LiquidTextureManager.hpp>
-#include <noggit/tool_enums.hpp>
 #include <opengl/context.hpp>
 #include <opengl/types.hpp>
 
 #include <array>
 #include <memory>
-#include <set>
-#include <vector>
 
 class MapTile;
 class LiquidLayer;

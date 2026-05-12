@@ -1,24 +1,21 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "TerrainBlurNode.hpp"
 
+#include <noggit/ToolEnums.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-#include <noggit/tool_enums.hpp>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-TerrainBlurNode::TerrainBlurNode()
-: ContextLogicNodeBase()
-{
+TerrainBlurNode::TerrainBlurNode() : ContextLogicNodeBase() {
   setName("Terrain :: Blur");
   setCaption("Terrain :: Blur");
   _validation_state = NodeValidationState::Valid;
 
   _mode = new QComboBox(&_embedded_widget);
-  _mode->addItems({"Flat",
-                   "Linear",
-                   "Smooth"});
+  _mode->addItems({"Flat", "Linear", "Smooth"});
   addWidgetTop(_mode);
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -32,30 +29,27 @@ TerrainBlurNode::TerrainBlurNode()
   addPort<LogicData>(PortType::Out, "Logic", true);
 }
 
-void TerrainBlurNode::compute()
-{
-  World* world = gCurrentContext->getWorld();
+void TerrainBlurNode::compute() {
+  World *world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _(
+      ::gl, gCurrentContext->getViewport()->context());
 
   auto pos_data = defaultPortData<Vector3DData>(PortType::In, 1);
-  glm::vec3 const& pos = pos_data->value();
+  glm::vec3 const &pos = pos_data->value();
 
   world->blurTerrain({pos.x, pos.y, pos.z},
-                      defaultPortData<DecimalData>(PortType::In, 2)->value(),
-                      defaultPortData<DecimalData>(PortType::In, 3)->value(),
-                      _mode->currentIndex(),
-                      {defaultPortData<BooleanData>(PortType::In, 4)->value(),
-                       defaultPortData<BooleanData>(PortType::In, 5)->value()});
+                     defaultPortData<DecimalData>(PortType::In, 2)->value(),
+                     defaultPortData<DecimalData>(PortType::In, 3)->value(),
+                     _mode->currentIndex(),
+                     {defaultPortData<BooleanData>(PortType::In, 4)->value(),
+                      defaultPortData<BooleanData>(PortType::In, 5)->value()});
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
-
 }
 
-
-QJsonObject TerrainBlurNode::save() const
-{
+QJsonObject TerrainBlurNode::save() const {
   QJsonObject json_obj = ContextLogicNodeBase::save();
 
   json_obj["mode"] = _mode->currentIndex();
@@ -63,8 +57,7 @@ QJsonObject TerrainBlurNode::save() const
   return json_obj;
 }
 
-void TerrainBlurNode::restore(const QJsonObject& json_obj)
-{
+void TerrainBlurNode::restore(const QJsonObject &json_obj) {
   ContextLogicNodeBase::restore(json_obj);
   _mode->setCurrentIndex(json_obj["mode"].toInt());
 }

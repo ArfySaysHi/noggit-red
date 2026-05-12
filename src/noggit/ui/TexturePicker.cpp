@@ -4,9 +4,9 @@
 #include <noggit/ui/TexturePicker.h>
 
 #include <noggit/Selection.h>
+#include <noggit/TextureSet.hpp>
+#include <noggit/ToolEnums.hpp>
 #include <noggit/World.h>
-#include <noggit/texture_set.hpp>
-#include <noggit/tool_enums.hpp>
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/FontNoggit.hpp>

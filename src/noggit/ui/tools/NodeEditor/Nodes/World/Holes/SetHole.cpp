@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "SetHole.hpp"
 
@@ -7,9 +8,7 @@
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-SetHoleNode::SetHoleNode()
-: ContextLogicNodeBase()
-{
+SetHoleNode::SetHoleNode() : ContextLogicNodeBase() {
   setName("Hole :: SetHole");
   setCaption("Hole :: SetHole");
   _validation_state = NodeValidationState::Valid;
@@ -23,14 +22,14 @@ SetHoleNode::SetHoleNode()
   addPort<LogicData>(PortType::Out, "Logic", true);
 }
 
-void SetHoleNode::compute()
-{
-  World* world = gCurrentContext->getWorld();
+void SetHoleNode::compute() {
+  World *world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _(
+      ::gl, gCurrentContext->getViewport()->context());
 
   auto pos_data = defaultPortData<Vector3DData>(PortType::In, 1);
-  glm::vec3 const& pos = pos_data->value();
+  glm::vec3 const &pos = pos_data->value();
 
   double radius = defaultPortData<DecimalData>(PortType::In, 2)->value();
   bool full_chunk = defaultPortData<BooleanData>(PortType::In, 3)->value();
@@ -41,4 +40,3 @@ void SetHoleNode::compute()
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
 }
-

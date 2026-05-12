@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "ColorToRGBANode.hpp"
 
@@ -7,9 +8,7 @@
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-ColorToRGBANode::ColorToRGBANode()
-: BaseNode()
-{
+ColorToRGBANode::ColorToRGBANode() : BaseNode() {
   setName("Color :: ColorToRGBA");
   setCaption("Color :: ColorToRGBA");
   _validation_state = NodeValidationState::Valid;
@@ -21,9 +20,9 @@ ColorToRGBANode::ColorToRGBANode()
   addPort<DecimalData>(PortType::Out, "A<Decimal>", true);
 }
 
-void ColorToRGBANode::compute()
-{
-  glm::vec4 color = static_cast<ColorData*>(_in_ports[0].in_value.lock().get())->value();
+void ColorToRGBANode::compute() {
+  glm::vec4 color =
+      static_cast<ColorData *>(_in_ports[0].in_value.lock().get())->value();
 
   _out_ports[0].out_value = std::make_shared<DecimalData>(color.r);
   _out_ports[1].out_value = std::make_shared<DecimalData>(color.g);
@@ -36,10 +35,8 @@ void ColorToRGBANode::compute()
   _node->onDataUpdated(3);
 }
 
-NodeValidationState ColorToRGBANode::validate()
-{
-  if (!static_cast<ColorData*>(_in_ports[0].in_value.lock().get()))
-  {
+NodeValidationState ColorToRGBANode::validate() {
+  if (!static_cast<ColorData *>(_in_ports[0].in_value.lock().get())) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate color input.");
     return _validation_state;

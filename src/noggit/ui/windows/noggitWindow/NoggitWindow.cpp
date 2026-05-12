@@ -20,6 +20,7 @@
 #include <noggit/DBCFile.h>
 #include <noggit/Log.h>
 #include <noggit/MapView.h>
+#include <noggit/UidStorage.hpp>
 #include <noggit/World.h>
 #include <noggit/application/Utils.hpp>
 #include <noggit/ui/FontAwesome.hpp>
@@ -34,7 +35,6 @@
 #include <noggit/ui/windows/noggitWindow/widgets/MapBookmarkListItem.hpp>
 #include <noggit/ui/windows/noggitWindow/widgets/MapListItem.hpp>
 #include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
-#include <noggit/uid_storage.hpp>
 #include <sstream>
 
 #ifdef USE_MYSQL_UID_STORAGE
@@ -133,7 +133,7 @@ void NoggitWindow::check_uid_then_enter_map(glm::vec3 pos,
                from_bookmark);
   }
 #else
-  if (uid_storage::hasMaxUIDStored(_world->getMapID())) {
+  if (UidStorage::hasMaxUIDStored(_world->getMapID())) {
     if (settings.value("uid_startup_check", true).toBool()) {
       enterMapAt(pos, camera_pitch, camera_yaw, uid_fix_mode::max_uid,
                  from_bookmark);

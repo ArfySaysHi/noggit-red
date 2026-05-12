@@ -1,14 +1,12 @@
 #include "PrintNode.hpp"
 
+#include <noggit/Log.h>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-#include <noggit/Log.h>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-PrintNode::PrintNode()
-: LogicNodeBase()
-{
+PrintNode::PrintNode() : LogicNodeBase() {
   setName("Functions :: Print");
   setCaption("Print()");
   _validation_state = NodeValidationState::Valid;
@@ -21,18 +19,16 @@ PrintNode::PrintNode()
   addDefaultWidget(_text, PortType::In, 1);
 
   addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
-
 }
 
-void PrintNode::compute()
-{
-  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
+void PrintNode::compute() {
+  auto logic = static_cast<LogicData *>(_in_ports[0].in_value.lock().get());
 
-  if(!logic->value())
+  if (!logic->value())
     return;
 
   auto text = _in_ports[1].in_value.lock();
-  auto text_ptr = static_cast<StringData*>(text.get());
+  auto text_ptr = static_cast<StringData *>(text.get());
 
   auto msg = text_ptr ? text_ptr->value() : _text->text().toStdString();
 
@@ -42,8 +38,7 @@ void PrintNode::compute()
   _node->onDataUpdated(0);
 }
 
-QJsonObject PrintNode::save() const
-{
+QJsonObject PrintNode::save() const {
   QJsonObject json_obj;
   json_obj["name"] = name();
   json_obj["caption"] = caption();
@@ -52,20 +47,17 @@ QJsonObject PrintNode::save() const
   return json_obj;
 }
 
-void PrintNode::restore(const QJsonObject& json_obj)
-{
+void PrintNode::restore(const QJsonObject &json_obj) {
   setName(json_obj["name"].toString());
   setCaption(json_obj["caption"].toString());
   _text->setText(json_obj["text"].toString());
 }
 
-NodeValidationState PrintNode::validate()
-{
+NodeValidationState PrintNode::validate() {
   setValidationState(NodeValidationState::Valid);
-  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
+  auto logic = static_cast<LogicData *>(_in_ports[0].in_value.lock().get());
 
-  if (!logic)
-  {
+  if (!logic) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Failed to evaluate logic input");
 
@@ -74,5 +66,4 @@ NodeValidationState PrintNode::validate()
   }
 
   return _validation_state;
-
 }

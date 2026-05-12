@@ -3,28 +3,19 @@
 
 using namespace Noggit::Ui::Tools::ViewportManager;
 
-std::vector<Viewport*> ViewportManager::_viewports;
+std::vector<Viewport *> ViewportManager::_viewports;
 
-Viewport::Viewport(QWidget* parent)
-: QOpenGLWidget(parent)
-{
+Viewport::Viewport(QWidget *parent) : QOpenGLWidget(parent) {
   ViewportManager::registerViewport(this);
-  _gl_connection = connect(this, &Viewport::aboutToLooseContext, [this]()
-  {
+  _gl_connection = connect(this, &Viewport::aboutToLooseContext, [this]() {
     ViewportManager::unloadOpenglData(this);
   });
-
 }
 
-Viewport::~Viewport()
-{
-  ViewportManager::unregisterViewport(this);
-}
+Viewport::~Viewport() { ViewportManager::unregisterViewport(this); }
 
-void ViewportManager::unloadOpenglData(Viewport* caller)
-{
-  for (auto viewport : ViewportManager::_viewports)
-  {
+void ViewportManager::unloadOpenglData(Viewport *caller) {
+  for (auto viewport : ViewportManager::_viewports) {
     if (viewport == caller)
       continue;
 
@@ -32,10 +23,8 @@ void ViewportManager::unloadOpenglData(Viewport* caller)
   }
 }
 
-void ViewportManager::unloadAll()
-{
-  for (auto viewport : ViewportManager::_viewports)
-  {
+void ViewportManager::unloadAll() {
+  for (auto viewport : ViewportManager::_viewports) {
     viewport->unloadOpenglData();
   }
 

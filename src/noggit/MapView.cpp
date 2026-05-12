@@ -7,14 +7,15 @@
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
+#include <noggit/MapIndex.hpp>
 #include <noggit/MapView.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/Selection.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
-#include <noggit/WMOInstance.h>    // WMOInstance
+#include <noggit/UidStorage.hpp>
+#include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
-#include <noggit/map_index.hpp>
 #include <noggit/project/CurrentProject.hpp>
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/DetailInfos.h> // detailInfos
@@ -47,7 +48,6 @@
 #include <noggit/ui/tools/UiCommon/ImageBrowser.hpp>
 #include <noggit/ui/tools/ViewToolbar/Ui/ViewToolbar.hpp>
 #include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
-#include <noggit/uid_storage.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/types.hpp>
 #include <variant>
@@ -259,15 +259,15 @@ void MapView::ResetSelectedObjectRotation() {
 
     if (obj->which() == eWMO) {
       WMOInstance *wmo = static_cast<WMOInstance *>(obj);
-      _world->updateTilesWMO(wmo, model_update::remove);
+      _world->updateTilesWMO(wmo, ModelUpdate::remove);
       wmo->resetDirection();
-      _world->updateTilesWMO(wmo, model_update::add);
+      _world->updateTilesWMO(wmo, ModelUpdate::add);
     } else if (obj->which() == eMODEL) {
       ModelInstance *m2 = static_cast<ModelInstance *>(obj);
-      _world->updateTilesModel(m2, model_update::remove);
+      _world->updateTilesModel(m2, ModelUpdate::remove);
       m2->resetDirection();
       m2->recalcExtents();
-      _world->updateTilesModel(m2, model_update::add);
+      _world->updateTilesModel(m2, ModelUpdate::add);
     }
   }
 
@@ -2019,7 +2019,7 @@ MapView::~MapView() {
   }
 
   if (_force_uid_check) {
-    uid_storage::remove_uid_for_map(_world->getMapID());
+    UidStorage::remove_uid_for_map(_world->getMapID());
   }
 
   _world.reset();
@@ -3599,7 +3599,7 @@ void MapView::change_selected_wmo_nameset(int set) {
     if (obj->which() == eWMO) {
       WMOInstance *wmo = static_cast<WMOInstance *>(obj);
       wmo->change_nameset(set);
-      _world->updateTilesWMO(wmo, model_update::none); // needed?
+      _world->updateTilesWMO(wmo, ModelUpdate::none); // needed?
       auto tiles = wmo->getTiles();
       for (auto tile : tiles) {
         tile->changed = true;
@@ -3618,7 +3618,7 @@ void MapView::change_selected_wmo_doodadset(int set) {
     if (obj->which() == eWMO) {
       auto wmo = static_cast<WMOInstance *>(obj);
       wmo->change_doodadset(set);
-      _world->updateTilesWMO(wmo, model_update::none);
+      _world->updateTilesWMO(wmo, ModelUpdate::none);
       auto tiles = wmo->getTiles();
       for (auto tile : tiles) {
         tile->changed = true;
@@ -4229,10 +4229,10 @@ void MapView::ShowContextMenu(QPoint pos) {
 
           // Just swapping model
           // Issue : doesn't work with actions
-          // _world->updateTilesEntry(entry, model_update::remove);
+          // _world->updateTilesEntry(entry, ModelUpdate::remove);
           // source_m2->model = scoped_model_reference(replace_path, _context);
           // source_m2->recalcExtents();
-          // _world->updateTilesEntry(entry, model_update::add);
+          // _world->updateTilesEntry(entry, ModelUpdate::add);
 
           auto new_obj = _world->addM2AndGetInstance(
               replace_path, source_pos, source_scale, source_rot,

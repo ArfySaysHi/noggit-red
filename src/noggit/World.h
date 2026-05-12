@@ -5,27 +5,26 @@
 
 #include <QtCore/QSettings>
 #include <array>
-#include <map>
 #include <math/frustum.hpp>
 #include <math/trig.hpp>
 #include <noggit/ContextObject.hpp>
+#include <noggit/MapHorizon.h>
+#include <noggit/MapIndex.hpp>
 #include <noggit/Misc.h>
 #include <noggit/Model.h> // ModelManager
 #include <noggit/Selection.h>
 #include <noggit/Sky.h> // Skies, OutdoorLighting, OutdoorLightStats
 #include <noggit/TileIndex.hpp>
+#include <noggit/ToolEnums.hpp>
 #include <noggit/WMO.h> // WMOManager
-#include <noggit/map_horizon.h>
-#include <noggit/map_index.hpp>
+#include <noggit/WorldModelInstancesStorage.hpp>
+#include <noggit/WorldTileUpdateQueue.hpp>
 #include <noggit/project/ApplicationProject.h>
 #include <noggit/rendering/CursorRender.hpp>
 #include <noggit/rendering/LiquidTextureManager.hpp>
 #include <noggit/rendering/Primitives.hpp>
 #include <noggit/rendering/WorldRender.hpp>
-#include <noggit/tool_enums.hpp>
 #include <noggit/ui/MinimapCreator.hpp>
-#include <noggit/world_model_instances_storage.hpp>
-#include <noggit/world_tile_update_queue.hpp>
 #include <opengl/shader.fwd.hpp>
 #include <opengl/types.hpp>
 #include <optional>
@@ -57,14 +56,14 @@ protected:
   std::vector<selection_type> _current_selection;
   // std::unordered_map<std::string, std::vector<ModelInstance*>>
   // _models_by_filename;
-  Noggit::world_model_instances_storage _model_instance_storage;
-  Noggit::world_tile_update_queue _tile_update_queue;
+  Noggit::WorldModelInstancesStorage _model_instance_storage;
+  Noggit::WorldTileUpdateQueue _tile_update_queue;
 
 public:
   std::vector<selection_group> _selection_groups;
 
   MapIndex mapIndex;
-  Noggit::map_horizon horizon;
+  Noggit::MapHorizon horizon;
 
   // Temporary variables for loading a WMO, if we have a global WMO.
   std::string mWmoFilename;
@@ -143,7 +142,7 @@ public:
   void delete_selected_models();
   glm::vec3 get_ground_height(glm::vec3 pos);
   void range_add_to_selection(glm::vec3 const &pos, float radius, bool remove);
-  Noggit::world_model_instances_storage &getModelInstanceStorage() {
+  Noggit::WorldModelInstancesStorage &getModelInstanceStorage() {
     return _model_instance_storage;
   };
 
@@ -341,11 +340,11 @@ public:
 
   void reload_tile(TileIndex const &tile);
 
-  void updateTilesEntry(selection_type const &entry, model_update type);
-  void updateTilesEntry(SceneObject *entry, model_update type);
-  void updateTilesWMO(WMOInstance *wmo, model_update type);
-  void updateTilesModel(ModelInstance *m2, model_update type);
-  void wait_for_all_tile_updates();
+  void updateTilesEntry(selection_type const &entry, ModelUpdate type);
+  void updateTilesEntry(SceneObject *entry, ModelUpdate type);
+  void updateTilesWMO(WMOInstance *wmo, ModelUpdate type);
+  void updateTilesModel(ModelInstance *m2, ModelUpdate type);
+  void waitForAllTileUpdates();
 
   void deleteModelInstance(int uid);
   void deleteWMOInstance(int uid);
@@ -377,7 +376,7 @@ public:
 
   void fixAllGaps();
 
-  void convert_alphamap(bool to_big_alpha);
+  void convertAlphamap(bool to_big_alpha);
 
   bool deselectVertices(glm::vec3 const &pos, float radius);
   void selectVertices(glm::vec3 const &pos, float radius);
@@ -401,7 +400,7 @@ public:
   Noggit::VertexSelectionCache getVertexSelectionCache();
   void setVertexSelectionCache(Noggit::VertexSelectionCache &cache);
 
-  bool need_model_updates = false;
+  bool need_ModelUpdates = false;
 
   void loadAllTiles();
   unsigned getNumLoadedTiles() const { return _n_loaded_tiles; };

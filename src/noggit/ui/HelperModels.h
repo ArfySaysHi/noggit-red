@@ -1,19 +1,17 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #pragma once
 
 #include <QtWidgets/QWidget>
 
-namespace Noggit
-{
-  namespace Ui
-  {
-    class object_editor;
+namespace Noggit {
+namespace Ui {
+class object_editor;
 
-    class helper_models : public QWidget
-    {
-    public:
-      helper_models (object_editor* object_editor);
-    };
-  }
-}
+class helper_models : public QWidget {
+public:
+  helper_models(object_editor *object_editor);
+};
+} // namespace Ui
+} // namespace Noggit

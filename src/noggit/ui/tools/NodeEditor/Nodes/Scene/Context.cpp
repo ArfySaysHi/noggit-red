@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "Context.hpp"
 #include "../../NodeRegistry.hpp"
@@ -8,25 +9,21 @@
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-Context* Noggit::Ui::Tools::NodeEditor::Nodes::gCurrentContext = new Context(NodeExecutionContext::MAP_VIEW);
-std::shared_ptr<DataModelRegistry> Noggit::Ui::Tools::NodeEditor::Nodes::gDataModelRegistry;
+Context *Noggit::Ui::Tools::NodeEditor::Nodes::gCurrentContext =
+    new Context(NodeExecutionContext::MAP_VIEW);
+std::shared_ptr<DataModelRegistry>
+    Noggit::Ui::Tools::NodeEditor::Nodes::gDataModelRegistry;
 
-Context::Context(NodeExecutionContext context_type, QObject* parent)
-: QObject(parent)
-, _context_type(context_type)
-{
+Context::Context(NodeExecutionContext context_type, QObject *parent)
+    : QObject(parent), _context_type(context_type) {}
 
-}
-
-NodeScene* Context::getScene(const QString& path, QObject* parent)
-{
+NodeScene *Context::getScene(const QString &path, QObject *parent) {
   if (!gDataModelRegistry)
     gDataModelRegistry = registerDataModels();
 
   auto it = _scene_cache.find(path.toStdString());
 
-  if (it != _scene_cache.end())
-  {
+  if (it != _scene_cache.end()) {
     auto document = it->second;
 
     auto scene = new NodeScene(gDataModelRegistry, parent);
@@ -51,11 +48,6 @@ NodeScene* Context::getScene(const QString& path, QObject* parent)
   _scene_cache[path.toStdString()] = document;
 
   return scene;
-
 }
 
-void Context::makeCurrent()
-{
-  gCurrentContext = this;
-}
-
+void Context::makeCurrent() { gCurrentContext = this; }

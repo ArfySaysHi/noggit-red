@@ -548,13 +548,13 @@ void MapView::setupAssistMenu() {
                   DESTRUCTIVE_ACTION(
                       makeCurrent();
                       OpenGL::context::scoped_setter const _(::gl, context());
-                      _world->convert_alphamap(true);)
+                      _world->convertAlphamap(true);)
                 }));
   ADD_ACTION_NS(assist_menu, "Map to old alpha", ([=, this] {
                   DESTRUCTIVE_ACTION(
                       makeCurrent();
                       OpenGL::context::scoped_setter const _(::gl, context());
-                      _world->convert_alphamap(false);)
+                      _world->convertAlphamap(false);)
                 }));
 
   ADD_ACTION_NS(assist_menu, "Ensure 4 texture layers", ([=, this] {

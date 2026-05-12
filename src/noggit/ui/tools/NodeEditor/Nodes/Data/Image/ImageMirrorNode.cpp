@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "ImageMirrorNode.hpp"
 
@@ -7,9 +8,7 @@
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-ImageMirrorNode::ImageMirrorNode()
-: LogicNodeBase()
-{
+ImageMirrorNode::ImageMirrorNode() : LogicNodeBase() {
   setName("Image :: Mirror");
   setCaption("Image :: Mirror");
   _validation_state = NodeValidationState::Valid;
@@ -23,13 +22,13 @@ ImageMirrorNode::ImageMirrorNode()
   addPort<ImageData>(PortType::Out, "Image", true);
 }
 
-void ImageMirrorNode::compute()
-{
-  QImage image = static_cast<ImageData*>(_in_ports[1].in_value.lock().get())->value();
+void ImageMirrorNode::compute() {
+  QImage image =
+      static_cast<ImageData *>(_in_ports[1].in_value.lock().get())->value();
 
-  QImage new_img = image.mirrored(defaultPortData<BooleanData>(PortType::In, 2)->value(),
-                                    defaultPortData<BooleanData>(PortType::In, 3)->value());
-
+  QImage new_img =
+      image.mirrored(defaultPortData<BooleanData>(PortType::In, 2)->value(),
+                     defaultPortData<BooleanData>(PortType::In, 3)->value());
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
@@ -38,20 +37,17 @@ void ImageMirrorNode::compute()
   _node->onDataUpdated(1);
 }
 
-NodeValidationState ImageMirrorNode::validate()
-{
-  if (!static_cast<ImageData*>(_in_ports[1].in_value.lock().get()))
-  {
+NodeValidationState ImageMirrorNode::validate() {
+  if (!static_cast<ImageData *>(_in_ports[1].in_value.lock().get())) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate image input.");
     return _validation_state;
   }
 
-   return LogicNodeBase::validate();
+  return LogicNodeBase::validate();
 }
 
-QJsonObject ImageMirrorNode::save() const
-{
+QJsonObject ImageMirrorNode::save() const {
   QJsonObject json_obj = BaseNode::save();
 
   defaultWidgetToJson(PortType::In, 2, json_obj, "mirror_u");
@@ -60,8 +56,7 @@ QJsonObject ImageMirrorNode::save() const
   return json_obj;
 }
 
-void ImageMirrorNode::restore(const QJsonObject& json_obj)
-{
+void ImageMirrorNode::restore(const QJsonObject &json_obj) {
   BaseNode::restore(json_obj);
 
   defaultWidgetFromJson(PortType::In, 2, json_obj, "mirror_u");

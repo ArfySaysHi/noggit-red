@@ -2,23 +2,24 @@
 // (version 3).
 
 #pragma once
+#include "noggit/TextureSet.hpp"
 #include <QImage>
 #include <array>
 #include <map>
-#include <memory>
 #include <noggit/ContextObject.hpp>
+#include <noggit/MapEnums.hpp>
 #include <noggit/MapTile.h> // MapTile
 #include <noggit/Misc.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
 #include <noggit/TextureManager.h>
+#include <noggit/TextureSet.hpp>
+#include <noggit/ToolEnums.hpp>
 #include <noggit/WMOInstance.h>
-#include <noggit/map_enums.hpp>
-#include <noggit/texture_set.hpp>
-#include <noggit/tool_enums.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/texture.hpp>
 #include <optional>
+#include <unordered_set>
 
 namespace BlizzardArchive {
 class ClientFile;
@@ -49,7 +50,7 @@ enum ChunkUpdateFlags {
 
 class MapChunk {
 private:
-  tile_mode _mode;
+  TileMode _mode;
 
   bool hasMCCV;
 
@@ -60,7 +61,7 @@ private:
 
 public:
   MapChunk(MapTile *mt, BlizzardArchive::ClientFile *f, bool bigAlpha,
-           tile_mode mode, Noggit::NoggitRenderContext context,
+           TileMode mode, Noggit::NoggitRenderContext context,
            bool init_empty = false, int chunk_idx = 0,
            bool load_textures = true);
 

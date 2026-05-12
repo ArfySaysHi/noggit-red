@@ -9,7 +9,6 @@
 #include <noggit/Misc.h>
 
 #include <algorithm>
-#include <string>
 
 namespace {
 inline glm::vec2 default_uv(int px, int pz) {

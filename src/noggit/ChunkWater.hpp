@@ -4,10 +4,9 @@
 #include <math/frustum.hpp>
 #include <noggit/LiquidLayer.hpp>
 #include <noggit/MapHeaders.h>
-#include <noggit/tool_enums.hpp>
+#include <noggit/ToolEnums.hpp>
 
 #include <optional>
-#include <set>
 #include <vector>
 
 class sExtendableArray;

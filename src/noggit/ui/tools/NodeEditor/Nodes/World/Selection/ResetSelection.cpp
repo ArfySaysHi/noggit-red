@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "ResetSelection.hpp"
 
@@ -7,9 +8,7 @@
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-ResetSelectionNode::ResetSelectionNode()
-: ContextLogicNodeBase()
-{
+ResetSelectionNode::ResetSelectionNode() : ContextLogicNodeBase() {
   setName("Selection :: ResetSelectionNode");
   setCaption("Selection :: ResetSelection");
   _validation_state = NodeValidationState::Valid;
@@ -19,16 +18,14 @@ ResetSelectionNode::ResetSelectionNode()
   addPort<LogicData>(PortType::Out, "Logic", true);
 }
 
-void ResetSelectionNode::compute()
-{
-  World* world = gCurrentContext->getWorld();
+void ResetSelectionNode::compute() {
+  World *world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _(
+      ::gl, gCurrentContext->getViewport()->context());
 
   world->reset_selection();
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
-
 }
-

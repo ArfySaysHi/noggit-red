@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "SetHoleADTAtPos.hpp"
 
@@ -7,9 +8,7 @@
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-SetHoleADTAtPosNode::SetHoleADTAtPosNode()
-: ContextLogicNodeBase()
-{
+SetHoleADTAtPosNode::SetHoleADTAtPosNode() : ContextLogicNodeBase() {
   setName("Holes :: SetHoleADTAtPosNode");
   setCaption("Holes :: SetHoleADTAtPos");
   _validation_state = NodeValidationState::Valid;
@@ -21,14 +20,14 @@ SetHoleADTAtPosNode::SetHoleADTAtPosNode()
   addPort<LogicData>(PortType::Out, "Logic", true);
 }
 
-void SetHoleADTAtPosNode::compute()
-{
-  World* world = gCurrentContext->getWorld();
+void SetHoleADTAtPosNode::compute() {
+  World *world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _(
+      ::gl, gCurrentContext->getViewport()->context());
 
   auto pos_data = defaultPortData<Vector3DData>(PortType::In, 1);
-  glm::vec3 const& pos = pos_data->value();
+  glm::vec3 const &pos = pos_data->value();
 
   bool add = defaultPortData<BooleanData>(PortType::In, 2)->value();
 
@@ -36,6 +35,4 @@ void SetHoleADTAtPosNode::compute()
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
-
 }
-

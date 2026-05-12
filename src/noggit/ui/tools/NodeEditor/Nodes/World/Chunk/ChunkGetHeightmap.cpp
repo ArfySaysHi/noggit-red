@@ -1,16 +1,15 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "ChunkGetHeightmap.hpp"
 
+#include <noggit/ToolEnums.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-#include <noggit/tool_enums.hpp>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-ChunkGetHeightmapNode::ChunkGetHeightmapNode()
-: ContextLogicNodeBase()
-{
+ChunkGetHeightmapNode::ChunkGetHeightmapNode() : ContextLogicNodeBase() {
   setName("Chunk :: GetHeightmap");
   setCaption("Chunk :: GetHeightmap");
   _validation_state = NodeValidationState::Valid;
@@ -23,21 +22,20 @@ ChunkGetHeightmapNode::ChunkGetHeightmapNode()
   _out_ports[1].data_type->set_parameter_type("double");
 }
 
-void ChunkGetHeightmapNode::compute()
-{
-  World* world = gCurrentContext->getWorld();
+void ChunkGetHeightmapNode::compute() {
+  World *world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _(
+      ::gl, gCurrentContext->getViewport()->context());
 
-  MapChunk* chunk = defaultPortData<ChunkData>(PortType::In, 1)->value();
+  MapChunk *chunk = defaultPortData<ChunkData>(PortType::In, 1)->value();
 
-  glm::vec3* heightmap = chunk->getHeightmap();
+  glm::vec3 *heightmap = chunk->getHeightmap();
 
   _heightmap.clear();
   _heightmap.resize(mapbufsize);
 
-  for (int i = 0; i < mapbufsize; ++i)
-  {
+  for (int i = 0; i < mapbufsize; ++i) {
     _heightmap[i] = std::make_shared<DecimalData>(heightmap[i].y);
   }
 
@@ -49,14 +47,11 @@ void ChunkGetHeightmapNode::compute()
 
   _out_ports[1].out_value = std::move(list);
   _node->onDataUpdated(1);
-
 }
 
-NodeValidationState ChunkGetHeightmapNode::validate()
-{
+NodeValidationState ChunkGetHeightmapNode::validate() {
 
-  if (!static_cast<ChunkData*>(_in_ports[1].in_value.lock().get()))
-  {
+  if (!static_cast<ChunkData *>(_in_ports[1].in_value.lock().get())) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate chunk input.");
     return _validation_state;

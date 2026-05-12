@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "SnapSelectedObjectInstancesToGround.hpp"
 
@@ -7,9 +8,9 @@
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-SnapSelectedObjectInstancesToGroundNode::SnapSelectedObjectInstancesToGroundNode()
-: ContextLogicNodeBase()
-{
+SnapSelectedObjectInstancesToGroundNode::
+    SnapSelectedObjectInstancesToGroundNode()
+    : ContextLogicNodeBase() {
   setName("Selection :: SnapSelectedObjectInstancesToGround");
   setCaption("Selection :: SnapSelectedObjectInstancesToGround");
   _validation_state = NodeValidationState::Valid;
@@ -19,15 +20,14 @@ SnapSelectedObjectInstancesToGroundNode::SnapSelectedObjectInstancesToGroundNode
   addPort<LogicData>(PortType::Out, "Logic", true);
 }
 
-void SnapSelectedObjectInstancesToGroundNode::compute()
-{
-  World* world = gCurrentContext->getWorld();
+void SnapSelectedObjectInstancesToGroundNode::compute() {
+  World *world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _(
+      ::gl, gCurrentContext->getViewport()->context());
 
   world->snap_selected_models_to_the_ground();
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
-
 }

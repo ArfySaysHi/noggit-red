@@ -1,7 +1,7 @@
 #include "ModelView.hpp"
-#include <external/imguizmo/ImGuizmo.h>
 #include <external/qtimgui/imgui/imgui.h>
 
+#include <external/imguizmo/ImGuizmo.h>
 #include <vector>
 
 using namespace Noggit::Ui::Tools::PresetEditor;

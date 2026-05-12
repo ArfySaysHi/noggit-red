@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "LogicReturnNoDataNode.hpp"
 
@@ -7,9 +8,7 @@
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-LogicReturnNoDataNode::LogicReturnNoDataNode()
-: LogicNodeBase()
-{
+LogicReturnNoDataNode::LogicReturnNoDataNode() : LogicNodeBase() {
   setName("Logic :: ReturnNoData");
   setCaption("Logic :: ReturnNoData");
   _validation_state = NodeValidationState::Valid;
@@ -18,18 +17,13 @@ LogicReturnNoDataNode::LogicReturnNoDataNode()
   addPort<LogicData>(PortType::In, "Logic", true);
 }
 
-void LogicReturnNoDataNode::compute()
-{
+void LogicReturnNoDataNode::compute() {}
 
-}
-
-NodeValidationState LogicReturnNoDataNode::validate()
-{
+NodeValidationState LogicReturnNoDataNode::validate() {
   setValidationState(NodeValidationState::Valid);
-  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
+  auto logic = static_cast<LogicData *>(_in_ports[0].in_value.lock().get());
 
-  if (!logic)
-  {
+  if (!logic) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Failed to evaluate logic input");
   }

@@ -1,0 +1,353 @@
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
+
+#include <noggit/Action.hpp>
+#include <noggit/ActionManager.hpp>
+#include <noggit/Log.h>
+#include <noggit/World.h>
+#include <noggit/WorldModelInstancesStorage.hpp>
+
+namespace Noggit {
+WorldModelInstancesStorage::WorldModelInstancesStorage(World *world)
+    : _world(world) {}
+
+std::uint32_t
+WorldModelInstancesStorage::add_model_instance(ModelInstance instance,
+                                               bool from_reloading) {
+  std::uint32_t uid = instance.uid;
+  std::uint32_t uid_after;
+
+  {
+    std::lock_guard<std::mutex> const lock(_mutex);
+    uid_after = unsafe_add_model_instance_no_world_upd(std::move(instance));
+  }
+
+  if (from_reloading || uid_after != uid) {
+    _world->updateTilesModel(&_m2s.at(uid_after), ModelUpdate::add);
+  }
+
+  return uid_after;
+}
+std::uint32_t
+WorldModelInstancesStorage::unsafe_add_model_instance_no_world_upd(
+    ModelInstance instance) {
+  std::uint32_t uid = instance.uid;
+  auto existing_instance = unsafe_get_model_instance(uid);
+
+  if (existing_instance) {
+    // instance already loaded
+    if (existing_instance.value()->isDuplicateOf(instance)) {
+      _instance_count_per_uid[uid]++;
+      return uid;
+    }
+  } else if (!unsafe_uid_is_used(uid)) {
+    if (NOGGIT_CUR_ACTION)
+      NOGGIT_CUR_ACTION->registerObjectAdded(&instance);
+    _m2s.emplace(uid, instance);
+    _instance_count_per_uid[uid] = 1;
+    return uid;
+  }
+
+  // the uid is already used for another model/wmo, use a new one
+  _uid_duplicates_found = true;
+  instance.uid = _world->mapIndex.newGUID();
+
+  return unsafe_add_model_instance_no_world_upd(std::move(instance));
+}
+
+std::uint32_t
+WorldModelInstancesStorage::add_wmo_instance(WMOInstance instance,
+                                             bool from_reloading) {
+  std::uint32_t uid = instance.uid;
+  std::uint32_t uid_after;
+
+  {
+    std::lock_guard<std::mutex> const lock(_mutex);
+    uid_after = unsafe_add_wmo_instance_no_world_upd(std::move(instance));
+  }
+
+  if (from_reloading || uid_after != uid) {
+    _world->updateTilesWMO(&_wmos.at(uid_after), ModelUpdate::add);
+  }
+
+  return uid_after;
+}
+std::uint32_t WorldModelInstancesStorage::unsafe_add_wmo_instance_no_world_upd(
+    WMOInstance instance) {
+  std::uint32_t uid = instance.uid;
+  auto existing_instance = unsafe_get_wmo_instance(uid);
+
+  if (existing_instance) {
+    // instance already loaded
+    if (existing_instance.value()->isDuplicateOf(instance)) {
+      _instance_count_per_uid[uid]++;
+
+      return uid;
+    }
+  } else if (!unsafe_uid_is_used(uid)) {
+    if (NOGGIT_CUR_ACTION)
+      NOGGIT_CUR_ACTION->registerObjectAdded(&instance);
+    _wmos.emplace(uid, instance);
+    _instance_count_per_uid[uid] = 1;
+    return uid;
+  }
+
+  // the uid is already used for another model/wmo, use a new one
+  _uid_duplicates_found = true;
+  instance.uid = _world->mapIndex.newGUID();
+
+  return unsafe_add_wmo_instance_no_world_upd(std::move(instance));
+}
+
+void WorldModelInstancesStorage::delete_instances_from_tile(
+    TileIndex const &tile) {
+  std::unique_lock<std::mutex> const lock(_mutex);
+
+  for (auto it = _m2s.begin(); it != _m2s.end();) {
+    if (TileIndex(it->second.pos) == tile) {
+      if (NOGGIT_CUR_ACTION)
+        NOGGIT_CUR_ACTION->registerObjectRemoved(&it->second);
+      _world->updateTilesModel(&it->second, ModelUpdate::remove);
+      _instance_count_per_uid.erase(it->first);
+      it = _m2s.erase(it);
+    } else {
+      it++;
+    }
+  }
+  for (auto it = _wmos.begin(); it != _wmos.end();) {
+    if (TileIndex(it->second.pos) == tile) {
+      if (NOGGIT_CUR_ACTION)
+        NOGGIT_CUR_ACTION->registerObjectRemoved(&it->second);
+      _world->updateTilesWMO(&it->second, ModelUpdate::remove);
+      _instance_count_per_uid.erase(it->first);
+      it = _wmos.erase(it);
+    } else {
+      it++;
+    }
+  }
+}
+
+void WorldModelInstancesStorage::delete_instances(
+    std::vector<selection_type> const &instances) {
+  std::unique_lock<std::mutex> const lock(_mutex);
+
+  for (auto &it : instances) {
+    if (it.index() != eEntry_Object)
+      continue;
+
+    auto obj = std::get<selected_object_type>(it);
+
+    if (NOGGIT_CUR_ACTION)
+      NOGGIT_CUR_ACTION->registerObjectRemoved(obj);
+
+    if (obj->which() == eMODEL) {
+      auto instance = static_cast<ModelInstance *>(obj);
+
+      _world->updateTilesModel(instance, ModelUpdate::remove);
+
+      _instance_count_per_uid.erase(instance->uid);
+      _m2s.erase(instance->uid);
+    } else if (obj->which() == eWMO) {
+      auto instance = static_cast<WMOInstance *>(obj);
+
+      _world->updateTilesWMO(instance, ModelUpdate::remove);
+
+      _instance_count_per_uid.erase(instance->uid);
+      _wmos.erase(instance->uid);
+    }
+  }
+}
+
+void WorldModelInstancesStorage::delete_instance(std::uint32_t uid) {
+  std::unique_lock<std::mutex> const lock(_mutex);
+
+  if (auto instance = get_instance(uid, false)) {
+    _world->updateTilesEntry(instance.value(), ModelUpdate::remove);
+    auto obj = std::get<selected_object_type>(instance.value());
+
+    for (auto &selection_group : _world->_selection_groups) {
+      if (selection_group.contains_object(obj)) {
+        selection_group.remove_member(obj->uid);
+      }
+    }
+
+    if (NOGGIT_CUR_ACTION) {
+      NOGGIT_CUR_ACTION->registerObjectRemoved(obj);
+    }
+  }
+
+  _instance_count_per_uid.erase(uid);
+  _m2s.erase(uid);
+  _wmos.erase(uid);
+}
+
+void WorldModelInstancesStorage::
+    unload_instance_and_remove_from_selection_if_necessary(std::uint32_t uid) {
+  std::unique_lock<std::mutex> const lock(_mutex);
+
+  if (!unsafe_uid_is_used(uid)) {
+    LogError << "Trying to unload an instance that wasn't stored" << std::endl;
+    return;
+  }
+
+  if (--_instance_count_per_uid.at(uid) == 0) {
+    _world->remove_from_selection(uid);
+
+    _instance_count_per_uid.erase(uid);
+    _m2s.erase(uid);
+    _wmos.erase(uid);
+  }
+}
+
+void WorldModelInstancesStorage::clear() {
+  std::unique_lock<std::mutex> const lock(_mutex);
+
+  _instance_count_per_uid.clear();
+  _m2s.clear();
+  _wmos.clear();
+}
+
+std::optional<ModelInstance *>
+WorldModelInstancesStorage::get_model_instance(std::uint32_t uid) {
+  std::unique_lock<std::mutex> const lock(_mutex);
+  return unsafe_get_model_instance(uid);
+}
+std::optional<ModelInstance *>
+WorldModelInstancesStorage::unsafe_get_model_instance(std::uint32_t uid) {
+  auto it = _m2s.find(uid);
+
+  if (it != _m2s.end()) {
+    return &it->second;
+  } else {
+    return std::nullopt;
+  }
+}
+
+std::optional<WMOInstance *>
+WorldModelInstancesStorage::get_wmo_instance(std::uint32_t uid) {
+  std::unique_lock<std::mutex> const lock(_mutex);
+  return unsafe_get_wmo_instance(uid);
+}
+std::optional<WMOInstance *>
+WorldModelInstancesStorage::unsafe_get_wmo_instance(std::uint32_t uid) {
+  auto it = _wmos.find(uid);
+
+  if (it != _wmos.end()) {
+    return &it->second;
+  } else {
+    return std::nullopt;
+  }
+}
+
+std::optional<selection_type>
+WorldModelInstancesStorage::get_instance(std::uint32_t uid, bool lock) {
+  if (lock) {
+    std::unique_lock<std::mutex> const lock(_mutex);
+
+    auto wmo_it = _wmos.find(uid);
+
+    if (wmo_it != _wmos.end()) {
+      return selection_type{&wmo_it->second};
+    } else {
+      auto m2_it = _m2s.find(uid);
+
+      if (m2_it != _m2s.end()) {
+        return selection_type{&m2_it->second};
+      } else {
+        return std::nullopt;
+      }
+    }
+  } else {
+    auto wmo_it = _wmos.find(uid);
+
+    if (wmo_it != _wmos.end()) {
+      return selection_type{&wmo_it->second};
+    } else {
+      auto m2_it = _m2s.find(uid);
+
+      if (m2_it != _m2s.end()) {
+        return selection_type{&m2_it->second};
+      } else {
+        return std::nullopt;
+      }
+    }
+  }
+}
+
+bool WorldModelInstancesStorage::unsafe_uid_is_used(std::uint32_t uid) const {
+  return _instance_count_per_uid.find(uid) != _instance_count_per_uid.end();
+}
+
+void WorldModelInstancesStorage::clear_duplicates() {
+  std::unique_lock<std::mutex> const lock(_mutex);
+
+  int deleted_uids = 0;
+
+  for (auto lhs(_wmos.begin()); lhs != _wmos.end(); ++lhs) {
+    for (auto rhs(std::next(lhs)); rhs != _wmos.end();) {
+      assert(lhs->first != rhs->first);
+
+      if (lhs->second.isDuplicateOf(rhs->second)) {
+        _world->updateTilesWMO(&rhs->second, ModelUpdate::remove);
+
+        _instance_count_per_uid.erase(rhs->second.uid);
+        if (NOGGIT_CUR_ACTION)
+          NOGGIT_CUR_ACTION->registerObjectRemoved(&rhs->second);
+        rhs = _wmos.erase(rhs);
+        deleted_uids++;
+      } else {
+        rhs++;
+      }
+    }
+  }
+
+  for (auto lhs(_m2s.begin()); lhs != _m2s.end(); ++lhs) {
+    for (auto rhs(std::next(lhs)); rhs != _m2s.end();) {
+      assert(lhs->first != rhs->first);
+
+      if (lhs->second.isDuplicateOf(rhs->second)) {
+        _world->updateTilesModel(&rhs->second, ModelUpdate::remove);
+
+        _instance_count_per_uid.erase(rhs->second.uid);
+
+        if (NOGGIT_CUR_ACTION)
+          NOGGIT_CUR_ACTION->registerObjectRemoved(&rhs->second);
+        rhs = _m2s.erase(rhs);
+        deleted_uids++;
+      } else {
+        rhs++;
+      }
+    }
+  }
+
+  Log << "Deleted " << deleted_uids << " duplicate Model/WMO" << std::endl;
+}
+
+void WorldModelInstancesStorage::upload() {
+  if (_transform_storage_uploaded)
+    return;
+
+  _buffers.upload();
+
+  gl.genTextures(1, &_m2_instances_transform_buf_tex);
+  gl.activeTexture(GL_TEXTURE0);
+  gl.bindTexture(GL_TEXTURE_BUFFER, _m2_instances_transform_buf_tex);
+  gl.bindBuffer(GL_TEXTURE_BUFFER, _m2_instances_transform_buf);
+  gl.bufferData(GL_TEXTURE_BUFFER,
+                _n_allocated_m2_transforms * sizeof(glm::mat4x4), nullptr,
+                GL_DYNAMIC_DRAW);
+  gl.texBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, _m2_instances_transform_buf);
+
+  _transform_storage_uploaded = true;
+}
+
+void WorldModelInstancesStorage::unload() {
+  if (!_transform_storage_uploaded)
+    return;
+
+  gl.deleteTextures(1, &_m2_instances_transform_buf_tex);
+  _buffers.unload();
+
+  _transform_storage_uploaded = false;
+}
+} // namespace Noggit

@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "ImageFillNode.hpp"
 
@@ -7,9 +8,7 @@
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-ImageFillNode::ImageFillNode()
-: LogicNodeBase()
-{
+ImageFillNode::ImageFillNode() : LogicNodeBase() {
   setName("Image :: Fill");
   setCaption("Image :: Fill");
   _validation_state = NodeValidationState::Valid;
@@ -22,9 +21,9 @@ ImageFillNode::ImageFillNode()
   addPort<ImageData>(PortType::Out, "Image", true);
 }
 
-void ImageFillNode::compute()
-{
-  QImage image = static_cast<ImageData*>(_in_ports[1].in_value.lock().get())->value();
+void ImageFillNode::compute() {
+  QImage image =
+      static_cast<ImageData *>(_in_ports[1].in_value.lock().get())->value();
   glm::vec4 color = defaultPortData<ColorData>(PortType::In, 2)->value();
   image.fill(QColor::fromRgbF(color.r, color.g, color.b, color.a));
 
@@ -35,10 +34,8 @@ void ImageFillNode::compute()
   _node->onDataUpdated(1);
 }
 
-NodeValidationState ImageFillNode::validate()
-{
-  if (!static_cast<ImageData*>(_in_ports[1].in_value.lock().get()))
-  {
+NodeValidationState ImageFillNode::validate() {
+  if (!static_cast<ImageData *>(_in_ports[1].in_value.lock().get())) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate image input.");
     return _validation_state;
@@ -47,8 +44,7 @@ NodeValidationState ImageFillNode::validate()
   return LogicNodeBase::validate();
 }
 
-QJsonObject ImageFillNode::save() const
-{
+QJsonObject ImageFillNode::save() const {
   QJsonObject json_obj = BaseNode::save();
 
   defaultWidgetToJson(PortType::In, 2, json_obj, "color");
@@ -56,8 +52,7 @@ QJsonObject ImageFillNode::save() const
   return json_obj;
 }
 
-void ImageFillNode::restore(const QJsonObject& json_obj)
-{
+void ImageFillNode::restore(const QJsonObject &json_obj) {
   BaseNode::restore(json_obj);
 
   defaultWidgetFromJson(PortType::In, 2, json_obj, "color");

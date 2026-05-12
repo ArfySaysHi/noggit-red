@@ -12,7 +12,6 @@
 #include <noggit/rendering/LiquidTextureManager.hpp>
 
 #include <limits>
-#include <stdexcept>
 
 TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase,
                      bool use_mclq_green_lava)

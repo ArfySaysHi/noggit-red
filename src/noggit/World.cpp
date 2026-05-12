@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License
 // (version 3).
 
+#include "noggit/MapEnums.hpp"
 #include <noggit/World.h>
 #include <noggit/World.inl>
 
@@ -25,11 +26,11 @@
 #include <noggit/Misc.h>
 #include <noggit/ModelManager.h>
 #include <noggit/TextureManager.h>
+#include <noggit/TextureSet.hpp>
+#include <noggit/ToolEnums.hpp>
 #include <noggit/WMOInstance.h>
 #include <noggit/application/NoggitApplication.hpp>
 #include <noggit/project/CurrentProject.hpp>
-#include <noggit/texture_set.hpp>
-#include <noggit/tool_enums.hpp>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/TexturingGUI.h>
 #include <string>
@@ -301,7 +302,7 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY,
       continue;
     }
 
-    updateTilesEntry(entry, model_update::remove);
+    updateTilesEntry(entry, ModelUpdate::remove);
 
     auto &obj = std::get<selected_object_type>(entry);
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
@@ -361,7 +362,7 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY,
 
     obj->recalcExtents();
 
-    updateTilesEntry(entry, model_update::add);
+    updateTilesEntry(entry, ModelUpdate::add);
   }
 }
 
@@ -378,7 +379,7 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals) {
     auto &obj = std::get<selected_object_type>(entry);
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
 
-    updateTilesEntry(entry, model_update::remove);
+    updateTilesEntry(entry, ModelUpdate::remove);
 
     glm::vec3 rayPos = obj->pos;
     math::degrees::vec3 &dir = obj->dir;
@@ -400,7 +401,7 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals) {
     // flat ground)
     if (results.empty()) {
       // just to avoid models disappearing when this happens
-      updateTilesEntry(entry, model_update::add);
+      updateTilesEntry(entry, ModelUpdate::add);
       continue;
     }
 
@@ -501,7 +502,7 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals) {
     // yaw (z-axis rotation)
     double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
     double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
-    updateTilesEntry(entry, model_update::add);
+    updateTilesEntry(entry, ModelUpdate::add);
   }
   update_selected_model_groups();
 }
@@ -616,7 +617,7 @@ void World::delete_selected_models() {
   }
 
   _model_instance_storage.delete_instances(_current_selection);
-  need_model_updates = true;
+  need_ModelUpdates = true;
   reset_selection();
 }
 
@@ -663,7 +664,7 @@ void World::snap_selected_models_to_the_ground() {
 
     std::get<selected_object_type>(entry)->recalcExtents();
 
-    updateTilesEntry(entry, model_update::add);
+    updateTilesEntry(entry, ModelUpdate::add);
   }
 
   update_selection_pivot();
@@ -704,11 +705,11 @@ void World::scale_selected_models(float v, m2_scaling_type type) {
         continue;
       }
 
-      updateTilesModel(mi, model_update::remove);
+      updateTilesModel(mi, ModelUpdate::remove);
       mi->scale = std::min(ModelInstance::max_scale(),
                            std::max(ModelInstance::min_scale(), scale));
       mi->recalcExtents();
-      updateTilesModel(mi, model_update::add);
+      updateTilesModel(mi, ModelUpdate::add);
     }
   }
   update_selected_model_groups();
@@ -728,7 +729,7 @@ void World::move_selected_models(float dx, float dy, float dz) {
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
     glm::vec3 &pos = obj->pos;
 
-    updateTilesEntry(entry, model_update::remove);
+    updateTilesEntry(entry, ModelUpdate::remove);
 
     pos.x += dx;
     pos.y += dy;
@@ -736,7 +737,7 @@ void World::move_selected_models(float dx, float dy, float dz) {
 
     std::get<selected_object_type>(entry)->recalcExtents();
 
-    updateTilesEntry(entry, model_update::add);
+    updateTilesEntry(entry, ModelUpdate::add);
   }
 
   update_selection_pivot();
@@ -754,7 +755,7 @@ void World::move_model(selection_type entry, float dx, float dy, float dz) {
   NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
   glm::vec3 &pos = obj->pos;
 
-  updateTilesEntry(entry, model_update::remove);
+  updateTilesEntry(entry, ModelUpdate::remove);
 
   pos.x += dx;
   pos.y += dy;
@@ -762,7 +763,7 @@ void World::move_model(selection_type entry, float dx, float dy, float dz) {
 
   std::get<selected_object_type>(entry)->recalcExtents();
 
-  updateTilesEntry(entry, model_update::add);
+  updateTilesEntry(entry, ModelUpdate::add);
 }
 
 void World::set_selected_models_pos(glm::vec3 const &pos, bool change_height) {
@@ -788,14 +789,14 @@ void World::set_selected_models_pos(glm::vec3 const &pos, bool change_height) {
       continue;
     }
 
-    updateTilesEntry(entry, model_update::remove);
+    updateTilesEntry(entry, ModelUpdate::remove);
 
     auto &obj = std::get<selected_object_type>(entry);
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
     obj->pos = pos;
     obj->recalcExtents();
 
-    updateTilesEntry(entry, model_update::add);
+    updateTilesEntry(entry, ModelUpdate::add);
   }
 
   update_selection_pivot();
@@ -810,14 +811,14 @@ void World::set_model_pos(selection_type entry, glm::vec3 const &pos,
     return;
   }
 
-  updateTilesEntry(entry, model_update::remove);
+  updateTilesEntry(entry, ModelUpdate::remove);
 
   auto &obj = std::get<selected_object_type>(entry);
   NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
   obj->pos = pos;
   obj->recalcExtents();
 
-  updateTilesEntry(entry, model_update::add);
+  updateTilesEntry(entry, ModelUpdate::add);
 }
 
 void World::rotate_selected_models(math::degrees rx, math::degrees ry,
@@ -835,7 +836,7 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry,
       continue;
     }
 
-    updateTilesEntry(entry, model_update::remove);
+    updateTilesEntry(entry, ModelUpdate::remove);
 
     auto &obj = std::get<selected_object_type>(entry);
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
@@ -857,7 +858,7 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry,
 
     obj->recalcExtents();
 
-    updateTilesEntry(entry, model_update::add);
+    updateTilesEntry(entry, ModelUpdate::add);
   }
   update_selected_model_groups();
 }
@@ -879,7 +880,7 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry,
     auto &obj = std::get<selected_object_type>(entry);
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
 
-    updateTilesEntry(entry, model_update::remove);
+    updateTilesEntry(entry, ModelUpdate::remove);
 
     math::degrees::vec3 &dir = obj->dir;
 
@@ -887,7 +888,7 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry,
 
     obj->recalcExtents();
 
-    updateTilesEntry(entry, model_update::add);
+    updateTilesEntry(entry, ModelUpdate::add);
   }
   update_selected_model_groups();
 }
@@ -1506,7 +1507,7 @@ void World::loadAllTiles() {
   }
 }
 
-void World::convert_alphamap(bool to_big_alpha) {
+void World::convertAlphamap(bool to_big_alpha) {
   ZoneScoped;
 
   if (to_big_alpha == mapIndex.hasBigAlpha()) {
@@ -1524,7 +1525,7 @@ void World::convert_alphamap(bool to_big_alpha) {
       if (mTile) {
         mTile->wait_until_loaded();
 
-        mTile->convert_alphamap(to_big_alpha);
+        mTile->convertAlphamap(to_big_alpha);
         mTile->saveTile(this);
         mapIndex.markOnDisc(tile, true);
         mapIndex.unsetChanged(tile);
@@ -1536,7 +1537,7 @@ void World::convert_alphamap(bool to_big_alpha) {
     }
   }
 
-  mapIndex.convert_alphamap(to_big_alpha);
+  mapIndex.convertAlphamap(to_big_alpha);
   mapIndex.save();
 }
 
@@ -1546,7 +1547,7 @@ void World::deleteModelInstance(int uid) {
 
   if (instance) {
     _model_instance_storage.delete_instance(uid);
-    need_model_updates = true;
+    need_ModelUpdates = true;
     reset_selection();
   }
 }
@@ -1557,7 +1558,7 @@ void World::deleteWMOInstance(int uid) {
 
   if (instance) {
     _model_instance_storage.delete_instance(uid);
-    need_model_updates = true;
+    need_ModelUpdates = true;
     reset_selection();
   }
 }
@@ -1568,7 +1569,7 @@ void World::deleteInstance(int uid) {
 
   if (instance) {
     _model_instance_storage.delete_instance(uid);
-    need_model_updates = true;
+    need_ModelUpdates = true;
     reset_selection();
   }
 }
@@ -1583,7 +1584,7 @@ void World::delete_duplicate_model_and_wmo_instances() {
   reset_selection();
 
   _model_instance_storage.clear_duplicates();
-  need_model_updates = true;
+  need_ModelUpdates = true;
 }
 
 void World::unload_every_model_and_wmo_instance() {
@@ -1743,7 +1744,7 @@ void World::remove_models_if_needed(std::vector<uint32_t> const &uids) {
   // todo: manage instances properly
   // don't unload anything during the uid fix all,
   // otherwise models spanning several adts will be unloaded too soon
-  if (mapIndex.uid_fix_all_in_progress()) {
+  if (mapIndex.uidFixAllInProgress()) {
     return;
   }
 
@@ -1774,10 +1775,10 @@ void World::reload_tile(TileIndex const &tile) {
 void World::deleteObjects(std::vector<selection_type> const &types) {
   ZoneScoped;
   _model_instance_storage.delete_instances(types);
-  need_model_updates = true;
+  need_ModelUpdates = true;
 }
 
-void World::updateTilesEntry(selection_type const &entry, model_update type) {
+void World::updateTilesEntry(selection_type const &entry, ModelUpdate type) {
   ZoneScoped;
   if (entry.index() != eEntry_Object)
     return;
@@ -1790,7 +1791,7 @@ void World::updateTilesEntry(selection_type const &entry, model_update type) {
     updateTilesModel(static_cast<ModelInstance *>(obj), type);
 }
 
-void World::updateTilesEntry(SceneObject *entry, model_update type) {
+void World::updateTilesEntry(SceneObject *entry, ModelUpdate type) {
   ZoneScoped;
   if (entry->which() == eWMO)
     updateTilesWMO(static_cast<WMOInstance *>(entry), type);
@@ -1798,19 +1799,19 @@ void World::updateTilesEntry(SceneObject *entry, model_update type) {
     updateTilesModel(static_cast<ModelInstance *>(entry), type);
 }
 
-void World::updateTilesWMO(WMOInstance *wmo, model_update type) {
+void World::updateTilesWMO(WMOInstance *wmo, ModelUpdate type) {
   ZoneScoped;
-  _tile_update_queue.queue_update(wmo, type);
+  _tile_update_queue.queueUpdate(wmo, type);
 }
 
-void World::updateTilesModel(ModelInstance *m2, model_update type) {
+void World::updateTilesModel(ModelInstance *m2, ModelUpdate type) {
   ZoneScoped;
-  _tile_update_queue.queue_update(m2, type);
+  _tile_update_queue.queueUpdate(m2, type);
 }
 
-void World::wait_for_all_tile_updates() {
+void World::waitForAllTileUpdates() {
   ZoneScoped;
-  _tile_update_queue.wait_for_all_update();
+  _tile_update_queue.waitForAllUpdate();
 }
 
 unsigned int World::getMapID() {
@@ -2500,23 +2501,7 @@ std::unordered_set<MapChunk *> &World::vertexBorderChunks() {
   }
   return _vertex_border_chunks;
 }
-/*
-void World::update_models_by_filename()
-{
-  ZoneScoped;
-  _models_by_filename.clear();
 
-  _model_instance_storage.for_each_m2_instance([&] (ModelInstance&
-model_instance)
-  {
-    _models_by_filename[model_instance.model->file_key().filepath()].push_back(&model_instance);
-    // to make sure the transform matrix are up to date
-    model_instance.ensureExtents();
-  });
-
-  need_model_updates = false;
-}
-*/
 void World::range_add_to_selection(glm::vec3 const &pos, float radius,
                                    bool remove) {
   ZoneScoped;
@@ -2572,7 +2557,7 @@ SceneObject *World::getObjectInstance(std::uint32_t uid) {
 void World::setBasename(const std::string &name) {
   ZoneScoped;
   basename = name;
-  mapIndex.set_basename(name);
+  mapIndex.setBasename(name);
 }
 
 Noggit::VertexSelectionCache World::getVertexSelectionCache() {

@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "NoiseAbsNode.hpp"
 
@@ -7,9 +8,7 @@
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-NoiseAbsNode::NoiseAbsNode()
-: BaseNode()
-{
+NoiseAbsNode::NoiseAbsNode() : BaseNode() {
   setName("Noise :: Abs");
   setCaption("Noise :: Abs");
   _validation_state = NodeValidationState::Valid;
@@ -18,20 +17,18 @@ NoiseAbsNode::NoiseAbsNode()
   addPort<NoiseData>(PortType::Out, "Noise", true);
 }
 
-void NoiseAbsNode::compute()
-{
-  _module.SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value());
+void NoiseAbsNode::compute() {
+  _module.SetSourceModule(
+      0,
+      *static_cast<NoiseData *>(_in_ports[0].in_value.lock().get())->value());
 
   _out_ports[0].out_value = std::make_shared<NoiseData>(&_module);
 
   _node->onDataUpdated(0);
-
 }
 
-NodeValidationState NoiseAbsNode::validate()
-{
-  if (!static_cast<NoiseData*>(_in_ports[0].in_value.lock().get()))
-  {
+NodeValidationState NoiseAbsNode::validate() {
+  if (!static_cast<NoiseData *>(_in_ports[0].in_value.lock().get())) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate noise input.");
     return _validation_state;
@@ -39,4 +36,3 @@ NodeValidationState NoiseAbsNode::validate()
 
   return _validation_state;
 }
-

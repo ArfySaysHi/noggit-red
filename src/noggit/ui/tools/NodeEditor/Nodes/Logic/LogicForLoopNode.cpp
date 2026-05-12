@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "LogicForLoopNode.hpp"
 
@@ -7,9 +8,7 @@
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-LogicForLoopNode::LogicForLoopNode()
-: LogicNodeBase()
-{
+LogicForLoopNode::LogicForLoopNode() : LogicNodeBase() {
   setName("Logic :: ForLoop");
   setCaption("Logic:: ForLoop");
   _validation_state = NodeValidationState::Valid;
@@ -19,23 +18,22 @@ LogicForLoopNode::LogicForLoopNode()
   addPortDefault<UnsignedIntegerData>(PortType::In, "Times", true);
 
   addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
-  addPort<UnsignedIntegerData>(PortType::Out, "Index", true, ConnectionPolicy::Many);
+  addPort<UnsignedIntegerData>(PortType::Out, "Index", true,
+                               ConnectionPolicy::Many);
 
   setIsIterable(true);
 }
 
-void LogicForLoopNode::compute()
-{
-  unsigned n_iterations = defaultPortData<UnsignedIntegerData>(PortType::In, 1)->value();
+void LogicForLoopNode::compute() {
+  unsigned n_iterations =
+      defaultPortData<UnsignedIntegerData>(PortType::In, 1)->value();
 
-  if (!n_iterations)
-  {
+  if (!n_iterations) {
     setIterationIndex(-1);
     return;
   }
 
-  if (_iteration_index == n_iterations)
-  {
+  if (_iteration_index == n_iterations) {
     setIterationIndex(-1);
     return;
   }
@@ -43,15 +41,14 @@ void LogicForLoopNode::compute()
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
 
-  _out_ports[1].out_value = std::make_shared<UnsignedIntegerData>(getIterationindex());
+  _out_ports[1].out_value =
+      std::make_shared<UnsignedIntegerData>(getIterationindex());
   _node->onDataUpdated(1);
 
   setIterationIndex(getIterationindex() + 1);
-
 }
 
-QJsonObject LogicForLoopNode::save() const
-{
+QJsonObject LogicForLoopNode::save() const {
   QJsonObject json_obj;
 
   json_obj["name"] = name();
@@ -62,17 +59,14 @@ QJsonObject LogicForLoopNode::save() const
   return json_obj;
 }
 
-void LogicForLoopNode::restore(const QJsonObject& json_obj)
-{
+void LogicForLoopNode::restore(const QJsonObject &json_obj) {
   setName(json_obj["name"].toString());
   setCaption(json_obj["caption"].toString());
   defaultWidgetFromJson(PortType::In, 1, json_obj, "n_iterations");
 }
 
-NodeValidationState LogicForLoopNode::validate()
-{
-  if (!static_cast<LogicData*>(_in_ports[0].in_value.lock().get()))
-  {
+NodeValidationState LogicForLoopNode::validate() {
+  if (!static_cast<LogicData *>(_in_ports[0].in_value.lock().get())) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Failed to evaluate logic input.");
 
@@ -80,10 +74,10 @@ NodeValidationState LogicForLoopNode::validate()
     _node->onDataUpdated(0);
   }
 
-  unsigned n_iterations = defaultPortData<UnsignedIntegerData>(PortType::In, 1)->value();
+  unsigned n_iterations =
+      defaultPortData<UnsignedIntegerData>(PortType::In, 1)->value();
 
-  if (!n_iterations)
-  {
+  if (!n_iterations) {
     setIterationIndex(-1);
   }
 

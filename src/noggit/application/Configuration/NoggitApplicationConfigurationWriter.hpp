@@ -6,11 +6,11 @@
 
 namespace Noggit::Application {
 
-    class NoggitApplicationConfigurationWriter
-    {
-    public:
-        void PersistDefaultConfigurationState(QFile& outputFile);
-        void PersistConfigurationState(QFile& outputFile, const NoggitApplicationConfiguration& configuration);
-    };
-}
+class NoggitApplicationConfigurationWriter {
+public:
+  void PersistDefaultConfigurationState(QFile &outputFile);
+  void PersistConfigurationState(
+      QFile &outputFile, const NoggitApplicationConfiguration &configuration);
+};
+} // namespace Noggit::Application
 #endif // NOGGIT_APPLICATION_CONFIGURATION_WRITER_HPP

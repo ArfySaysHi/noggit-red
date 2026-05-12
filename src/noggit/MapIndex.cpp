@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License
 // (version 3).
 
+#include "noggit/MapEnums.hpp"
 #include <noggit/Action.hpp>
 #include <noggit/ActionManager.hpp>
 #include <noggit/AsyncLoader.h>
@@ -14,9 +15,9 @@
 #include <mysql/mysql.h>
 #endif
 #include <ClientFile.hpp>
+#include <noggit/MapIndex.hpp>
+#include <noggit/UidStorage.hpp>
 #include <noggit/application/NoggitApplication.hpp>
-#include <noggit/map_index.hpp>
-#include <noggit/uid_storage.hpp>
 
 #include <QByteArray>
 #include <QFile>
@@ -34,7 +35,7 @@ MapIndex::MapIndex(const std::string &pBasename, int map_id, World *world,
           (clock() / CLOCKS_PER_SEC)) // to not try to unload right away
       ,
       mBigAlpha(false), mHasAGlobalWMO(false), noadt(false), changed(false),
-      _sort_models_by_size_class(false), highestGUID(0), _world(world),
+      _sortModelsBySizeClass(false), highestGUID(0), _world(world),
       _context(context) {
 
   QSettings settings;
@@ -45,7 +46,7 @@ MapIndex::MapIndex(const std::string &pBasename, int map_id, World *world,
 
     mHasAGlobalWMO = false;
     mBigAlpha = true;
-    _sort_models_by_size_class = true;
+    _sortModelsBySizeClass = true;
     changed = false;
 
     for (int j = 0; j < 64; ++j) {
@@ -91,7 +92,7 @@ MapIndex::MapIndex(const std::string &pBasename, int map_id, World *world,
 
   mHasAGlobalWMO = mphd.flags & FLAG_GLOBAL_OBJECT;
   mBigAlpha = mphd.flags & FLAG_BIG_ALPHA;
-  _sort_models_by_size_class = mphd.flags & FLAG_DOODADS_SORT;
+  _sortModelsBySizeClass = mphd.flags & FLAG_DOODADS_SORT;
 
   if (!(mphd.flags & FLAG_SHADING)) {
     mphd.flags |= FLAG_SHADING;
@@ -170,7 +171,7 @@ MapIndex::MapIndex(const std::string &pBasename, int map_id, World *world,
 }
 
 void MapIndex::saveall(World *world) {
-  world->wait_for_all_tile_updates();
+  world->waitForAllTileUpdates();
 
   saveMaxUID();
 
@@ -213,7 +214,7 @@ void MapIndex::save() {
     mphd.flags |= FLAG_GLOBAL_OBJECT;
   if (mBigAlpha)
     mphd.flags |= FLAG_BIG_ALPHA;
-  if (_sort_models_by_size_class)
+  if (_sortModelsBySizeClass)
     mphd.flags |= FLAG_DOODADS_SORT;
 
   mphd.flags |= FLAG_SHADING;
@@ -288,8 +289,8 @@ void MapIndex::enterTile(const TileIndex &tile) {
   }
 }
 
-void MapIndex::update_model_tile(const TileIndex &tile, model_update type,
-                                 SceneObject *instance) {
+void MapIndex::updateModelTile(const TileIndex &tile, ModelUpdate type,
+                               SceneObject *instance) {
   MapTile *adt = loadTile(tile);
 
   if (!adt)
@@ -298,9 +299,9 @@ void MapIndex::update_model_tile(const TileIndex &tile, model_update type,
   adt->wait_until_loaded();
   adt->changed = true;
 
-  if (type == model_update::add) {
+  if (type == ModelUpdate::add) {
     adt->add_model(instance);
-  } else if (type == model_update::remove) {
+  } else if (type == ModelUpdate::remove) {
     adt->remove_model(instance);
   }
 }
@@ -322,7 +323,7 @@ void MapIndex::unsetChanged(const TileIndex &tile) {
   }
 }
 
-bool MapIndex::has_unsaved_changes(const TileIndex &tile) const {
+bool MapIndex::hasUnsavedChanges(const TileIndex &tile) const {
   return (tileLoaded(tile) ? getTile(tile)->changed.load() : false);
 }
 
@@ -364,8 +365,8 @@ MapTile *MapIndex::loadTile(const TileIndex &tile, bool reloading,
 
   mTiles[tile.z][tile.x].tile = std::make_unique<MapTile>(
       static_cast<int>(tile.x), static_cast<int>(tile.z), filename.str(),
-      mBigAlpha, load_models, use_mclq_green_lava(), reloading, _world,
-      _context, tile_mode::edit, load_textures);
+      mBigAlpha, load_models, useMclqGreenLava(), reloading, _world, _context,
+      TileMode::edit, load_textures);
 
   MapTile *adt = mTiles[tile.z][tile.x].tile.get();
 
@@ -419,7 +420,7 @@ bool MapIndex::isTileExternal(const TileIndex &tile) const {
 
 void MapIndex::saveTile(const TileIndex &tile, World *world,
                         bool save_unloaded) {
-  world->wait_for_all_tile_updates();
+  world->waitForAllTileUpdates();
 
   // save given tile
   if (save_unloaded) {
@@ -444,7 +445,7 @@ void MapIndex::saveTile(const TileIndex &tile, World *world,
 }
 
 void MapIndex::saveChanged(World *world, bool save_unloaded) {
-  world->wait_for_all_tile_updates();
+  world->waitForAllTileUpdates();
 
   if (changed) {
     save();
@@ -543,7 +544,7 @@ uint32_t MapIndex::getFlag(const TileIndex &tile) const {
   return (tile.is_valid() ? mTiles[tile.z][tile.x].flags : 0);
 }
 
-void MapIndex::convert_alphamap(bool to_big_alpha) {
+void MapIndex::convertAlphamap(bool to_big_alpha) {
   mBigAlpha = to_big_alpha;
   if (to_big_alpha) {
     mphd.flags |= 4;
@@ -658,7 +659,7 @@ uid_fix_status MapIndex::fixUIDs(World *world,
     }
   }
 
-  _uid_fix_all_in_progress = true;
+  _uidFixAllInProgress = true;
 
   std::forward_list<ModelInstance> models;
   std::forward_list<WMOInstance> wmos;
@@ -907,9 +908,8 @@ uid_fix_status MapIndex::fixUIDs(World *world,
                << "_" << z << ".adt";
 
       // load the tile without the models
-      MapTile tile(x, z, filename.str(), mBigAlpha, false,
-                   use_mclq_green_lava(), false, world, _context,
-                   tile_mode::uid_fix_all);
+      MapTile tile(x, z, filename.str(), mBigAlpha, false, useMclqGreenLava(),
+                   false, world, _context, TileMode::uid_fix_all);
       tile.finishLoading();
 
       // add the uids to the tile to be able to save the models
@@ -925,7 +925,7 @@ uid_fix_status MapIndex::fixUIDs(World *world,
   // override the db highest uid if used
   saveMaxUID();
 
-  _uid_fix_all_in_progress = false;
+  _uidFixAllInProgress = false;
 
   // force instances unloading
   world->unload_every_model_and_wmo_instance();
@@ -965,11 +965,11 @@ void MapIndex::saveMaxUID() {
   }
 #endif
   // save the max UID on the disk (always save to sync with the db if used
-  uid_storage::saveMaxUID(_map_id, highestGUID);
+  UidStorage::saveMaxUID(_map_id, highestGUID);
 }
 
 void MapIndex::loadMaxUID() {
-  highestGUID = uid_storage::getMaxUID(_map_id);
+  highestGUID = UidStorage::getMaxUID(_map_id);
 #ifdef USE_MYSQL_UID_STORAGE
   QSettings settings;
 
@@ -1073,7 +1073,7 @@ void MapIndex::addTile(const TileIndex &tile) {
 
   mTiles[tile.z][tile.x].tile = std::make_unique<MapTile>(
       static_cast<int>(tile.x), static_cast<int>(tile.z), filename.str(),
-      mBigAlpha, true, use_mclq_green_lava(), false, _world, _context);
+      mBigAlpha, true, useMclqGreenLava(), false, _world, _context);
 
   mTiles[tile.z][tile.x].flags |= 0x1;
   mTiles[tile.z][tile.x].tile->changed = true;
@@ -1091,7 +1091,7 @@ void MapIndex::removeTile(const TileIndex &tile) {
            << "_" << tile.z << ".adt";
   mTiles[tile.z][tile.x].tile = std::make_unique<MapTile>(
       static_cast<int>(tile.x), static_cast<int>(tile.z), filename.str(),
-      mBigAlpha, true, use_mclq_green_lava(), false, _world, _context);
+      mBigAlpha, true, useMclqGreenLava(), false, _world, _context);
 
   mTiles[tile.z][tile.x].tile->changed = true;
   mTiles[tile.z][tile.x].onDisc = false;
@@ -1117,7 +1117,7 @@ unsigned MapIndex::getNumExistingTiles() {
   return _n_existing_tiles;
 }
 
-void MapIndex::set_basename(const std::string &pBasename) {
+void MapIndex::setBasename(const std::string &pBasename) {
   basename = pBasename;
 
   for (int z = 0; z < 64; ++z) {
@@ -1135,7 +1135,7 @@ void MapIndex::set_basename(const std::string &pBasename) {
   }
 }
 
-void MapIndex::create_empty_wdl() {
+void MapIndex::createEmptyWdl() {
   // for new map creation, creates a new WDL with all heights as 0
   std::stringstream filename;
   filename << "World/Maps/" << basename << "/" << basename

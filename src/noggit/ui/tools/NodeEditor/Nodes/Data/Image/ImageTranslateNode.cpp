@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "ImageTranslateNode.hpp"
 
@@ -7,9 +8,7 @@
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-ImageTranslateNode::ImageTranslateNode()
-: LogicNodeBase()
-{
+ImageTranslateNode::ImageTranslateNode() : LogicNodeBase() {
   setName("Image :: Translate");
   setCaption("Image :: Translate");
   _validation_state = NodeValidationState::Valid;
@@ -26,33 +25,33 @@ ImageTranslateNode::ImageTranslateNode()
   addPort<ImageData>(PortType::Out, "Image", true);
 }
 
-void ImageTranslateNode::compute()
-{
-  glm::vec2 translate_vec = defaultPortData<Vector2DData>(PortType::In, 2)->value();
+void ImageTranslateNode::compute() {
+  glm::vec2 translate_vec =
+      defaultPortData<Vector2DData>(PortType::In, 2)->value();
 
-  _out_ports[1].out_value = std::make_shared<ImageData>(
-      std::move(static_cast<ImageData*>(_in_ports[1].in_value.lock().get())->value().transformed(
-          QTransform().translate(translate_vec.x, translate_vec.y), static_cast<Qt::TransformationMode>(_mode->currentIndex()))));
+  _out_ports[1].out_value = std::make_shared<ImageData>(std::move(
+      static_cast<ImageData *>(_in_ports[1].in_value.lock().get())
+          ->value()
+          .transformed(
+              QTransform().translate(translate_vec.x, translate_vec.y),
+              static_cast<Qt::TransformationMode>(_mode->currentIndex()))));
   _node->onDataUpdated(1);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
 }
 
-NodeValidationState ImageTranslateNode::validate()
-{
-  if (!static_cast<ImageData*>(_in_ports[1].in_value.lock().get()))
-  {
+NodeValidationState ImageTranslateNode::validate() {
+  if (!static_cast<ImageData *>(_in_ports[1].in_value.lock().get())) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate image input.");
     return _validation_state;
   }
 
-   return LogicNodeBase::validate();
+  return LogicNodeBase::validate();
 }
 
-QJsonObject ImageTranslateNode::save() const
-{
+QJsonObject ImageTranslateNode::save() const {
   QJsonObject json_obj = BaseNode::save();
 
   json_obj["mode"] = _mode->currentIndex();
@@ -62,8 +61,7 @@ QJsonObject ImageTranslateNode::save() const
   return json_obj;
 }
 
-void ImageTranslateNode::restore(const QJsonObject& json_obj)
-{
+void ImageTranslateNode::restore(const QJsonObject &json_obj) {
   BaseNode::restore(json_obj);
   defaultWidgetFromJson(PortType::In, 2, json_obj, "translate_vec");
   _mode->setCurrentIndex(json_obj["mode"].toInt());

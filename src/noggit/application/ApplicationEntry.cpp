@@ -7,16 +7,13 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMessageBox>
-#include <codecvt>
 #include <external/framelesshelper/framelesswindowsmanager.h>
+#include <noggit/ErrorHandling.h>
 #include <noggit/Log.h>
 #include <noggit/application/NoggitApplication.hpp>
-#include <noggit/errorHandling.h>
 #include <opengl/context.hpp>
 #include <qcommandlineoption.h>
 #include <qcommandlineparser.h>
-#include <string>
-#include <string_view>
 #include <util/exception_to_string.hpp>
 
 QCommandLineParser *ProcessCommandLine() {

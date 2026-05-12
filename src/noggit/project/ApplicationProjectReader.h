@@ -4,20 +4,19 @@
 #include <filesystem>
 #include <optional>
 
-namespace Noggit::Project
-{
-	class NoggitProject;
+namespace Noggit::Project {
+class NoggitProject;
 
-	class ApplicationProjectReader
-	{
-	public:
-		ApplicationProjectReader() = default;
+class ApplicationProjectReader {
+public:
+  ApplicationProjectReader() = default;
 
-		std::optional<NoggitProject> readProject(std::filesystem::path const& project_path);
+  std::optional<NoggitProject>
+  readProject(std::filesystem::path const &project_path);
 
-		void readPalettes(NoggitProject* project);
-		void readObjectSelectionGroups(NoggitProject* project);
-	};
-}
+  void readPalettes(NoggitProject *project);
+  void readObjectSelectionGroups(NoggitProject *project);
+};
+} // namespace Noggit::Project
 
-#endif //NOGGIT_APPLICATION_PROJECT_READER_HPP
+#endif // NOGGIT_APPLICATION_PROJECT_READER_HPP

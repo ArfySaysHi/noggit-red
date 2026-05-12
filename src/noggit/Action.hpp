@@ -13,10 +13,10 @@
 #include <noggit/LiquidLayer.hpp>
 #include <noggit/SceneObject.hpp>
 #include <noggit/TextureManager.h>
-#include <noggit/texture_set.hpp>
+#include <noggit/TextureSet.hpp>
 #include <optional>
-#include <set>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 class MapView;

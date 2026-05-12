@@ -1,16 +1,16 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "TileGetAlphaLayerTexture.hpp"
 
+#include <noggit/ToolEnums.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-#include <noggit/tool_enums.hpp>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 TileGetAlphaLayerTextureNode::TileGetAlphaLayerTextureNode()
-: ContextLogicNodeBase()
-{
+    : ContextLogicNodeBase() {
   setName("Tile :: GetAlphaLayerTexture");
   setCaption("Tile :: GetAlphaLayerTexture");
   _validation_state = NodeValidationState::Valid;
@@ -23,16 +23,15 @@ TileGetAlphaLayerTextureNode::TileGetAlphaLayerTextureNode()
   addPort<ImageData>(PortType::Out, "Image", true);
 }
 
-void TileGetAlphaLayerTextureNode::compute()
-{
+void TileGetAlphaLayerTextureNode::compute() {
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _(
+      ::gl, gCurrentContext->getViewport()->context());
 
-  MapTile* tile = defaultPortData<TileData>(PortType::In, 1)->value();
+  MapTile *tile = defaultPortData<TileData>(PortType::In, 1)->value();
   auto tex = defaultPortData<StringData>(PortType::In, 2)->value();
 
-  if (tex.empty())
-  {
+  if (tex.empty()) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: texture filepath is empty.");
     return;
@@ -41,15 +40,13 @@ void TileGetAlphaLayerTextureNode::compute()
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
 
-  _out_ports[1].out_value = std::make_shared<ImageData>(tile->getAlphamapImage(tex));
+  _out_ports[1].out_value =
+      std::make_shared<ImageData>(tile->getAlphamapImage(tex));
   _node->onDataUpdated(1);
 }
 
-
-NodeValidationState TileGetAlphaLayerTextureNode::validate()
-{
-  if (!static_cast<TileData*>(_in_ports[1].in_value.lock().get()))
-  {
+NodeValidationState TileGetAlphaLayerTextureNode::validate() {
+  if (!static_cast<TileData *>(_in_ports[1].in_value.lock().get())) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate tile input.");
     return _validation_state;
@@ -57,4 +54,3 @@ NodeValidationState TileGetAlphaLayerTextureNode::validate()
 
   return ContextLogicNodeBase::validate();
 }
-

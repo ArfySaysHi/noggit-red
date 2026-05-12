@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "DeleteSelectedObjectInstances.hpp"
 
@@ -8,8 +9,7 @@
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 DeleteSelectedObjectInstancesNode::DeleteSelectedObjectInstancesNode()
-: ContextLogicNodeBase()
-{
+    : ContextLogicNodeBase() {
   setName("Selection :: DeleteSelectedObjectInstances");
   setCaption("Selection :: DeleteSelectedObjectInstances");
   _validation_state = NodeValidationState::Valid;
@@ -18,16 +18,14 @@ DeleteSelectedObjectInstancesNode::DeleteSelectedObjectInstancesNode()
   addPort<LogicData>(PortType::Out, "Logic", true);
 }
 
-void DeleteSelectedObjectInstancesNode::compute()
-{
-  World* world = gCurrentContext->getWorld();
+void DeleteSelectedObjectInstancesNode::compute() {
+  World *world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _(
+      ::gl, gCurrentContext->getViewport()->context());
 
   world->delete_selected_models();
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
-
 }
-

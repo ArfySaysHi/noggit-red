@@ -1,225 +1,215 @@
 #ifndef NOGGIT_BASENODE_HPP
 #define NOGGIT_BASENODE_HPP
 
-#include <external/NodeEditor/include/nodes/NodeDataModel>
-#include <external/NodeEditor/include/nodes/NodeData>
-#include <external/NodeEditor/include/nodes/Node>
 #include <external/NodeEditor/include/nodes/Connection>
+#include <external/NodeEditor/include/nodes/Node>
+#include <external/NodeEditor/include/nodes/NodeData>
+#include <external/NodeEditor/include/nodes/NodeDataModel>
 
-#include <vector>
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
-#include <QObject>
+#include <QCheckBox>
+#include <QDoubleSpinBox>
 #include <QJsonObject>
 #include <QLabel>
 #include <QLineEdit>
-#include <QDoubleSpinBox>
+#include <QObject>
 #include <QSpinBox>
-#include <QCheckBox>
 
 #include <QVBoxLayout>
 
-using QtNodes::PortType;
-using QtNodes::PortIndex;
-using QtNodes::NodeData;
-using QtNodes::Node;
-using QtNodes::NodeDataType;
-using QtNodes::NodeDataModel;
-using QtNodes::NodeValidationState;
 using QtNodes::Connection;
+using QtNodes::Node;
+using QtNodes::NodeData;
+using QtNodes::NodeDataModel;
+using QtNodes::NodeDataType;
+using QtNodes::NodeValidationState;
+using QtNodes::PortIndex;
+using QtNodes::PortType;
 using ConnectionPolicy = QtNodes::NodeDataModel::ConnectionPolicy;
 
+namespace Noggit {
+namespace Ui::Tools::NodeEditor::Nodes {
+struct InNodePort {
+  InNodePort(QString const &caption_, bool caption_visible_);
+  QString caption;
+  bool caption_visible = true;
+  std::unique_ptr<NodeData> data_type;
+  std::weak_ptr<NodeData> in_value;
+  QWidget *default_widget = nullptr;
+  bool connected = false;
+};
 
-namespace Noggit
-{
-    namespace Ui::Tools::NodeEditor::Nodes
-    {
-        struct InNodePort
-        {
-            InNodePort(QString const& caption_, bool caption_visible_);
-            QString caption;
-            bool caption_visible = true;
-            std::unique_ptr<NodeData> data_type;
-            std::weak_ptr<NodeData> in_value;
-            QWidget* default_widget = nullptr;
-            bool connected = false;
-        };
+struct OutNodePort {
+  OutNodePort(QString const &caption_, bool caption_visible_);
+  QString caption;
+  bool caption_visible = true;
+  std::unique_ptr<NodeData> data_type;
+  std::shared_ptr<NodeData> out_value;
+  ConnectionPolicy connection_policy = ConnectionPolicy::Many;
+  QWidget *default_widget = nullptr;
+  bool connected = false;
+};
 
-        struct OutNodePort
-        {
-            OutNodePort(QString const& caption_, bool caption_visible_);
-            QString caption;
-            bool caption_visible = true;
-            std::unique_ptr<NodeData> data_type;
-            std::shared_ptr<NodeData> out_value;
-            ConnectionPolicy connection_policy = ConnectionPolicy::Many;
-            QWidget* default_widget = nullptr;
-            bool connected = false;
-        };
+enum NodeInterpreterTokens {
+  NONE,
+  BEGIN,
+  RETURN,
+  RETURN_NO_DATA,
+  FOR,
+  WHILE,
+  BREAK,
+  CONTINUE
+};
 
-        enum NodeInterpreterTokens
-        {
-            NONE,
-            BEGIN,
-            RETURN,
-            RETURN_NO_DATA,
-            FOR,
-            WHILE,
-            BREAK,
-            CONTINUE
-        };
+class BaseNode : public NodeDataModel {
+  Q_OBJECT
 
+public:
+  BaseNode();
+  virtual ~BaseNode() {}
 
-        class BaseNode : public NodeDataModel
-        {
-        Q_OBJECT
+public:
+  NodeInterpreterTokens getInterpreterToken() { return _token; };
+  void setInterpreterToken(NodeInterpreterTokens token) { _token = token; };
 
-        public:
-            BaseNode();
-            virtual ~BaseNode() {}
+  unsigned int nPorts(PortType port_type) const override;
 
-        public:
+  NodeDataType dataType(PortType port_type,
+                        PortIndex port_index) const override;
 
-            NodeInterpreterTokens getInterpreterToken() { return _token; };
-            void setInterpreterToken(NodeInterpreterTokens token) { _token = token; };
+  std::shared_ptr<NodeData> outData(PortIndex port) override;
 
-            unsigned int nPorts(PortType port_type) const override;
+  void setInData(std::shared_ptr<NodeData> data, PortIndex port_index) override;
 
-            NodeDataType dataType(PortType port_type, PortIndex port_index) const override;
+  std::unique_ptr<NodeData> &dataModel(PortType port_type,
+                                       PortIndex port_index);
 
-            std::shared_ptr<NodeData> outData(PortIndex port) override;
+  QWidget *embeddedWidget() override { return &_embedded_widget; }
 
-            void setInData(std::shared_ptr<NodeData> data, PortIndex port_index) override;
+  NodeValidationState validationState() const override {
+    return _validation_state;
+  };
 
-            std::unique_ptr<NodeData>& dataModel(PortType port_type, PortIndex port_index);
+  QString validationMessage() const override { return _validation_error; };
 
-            QWidget* embeddedWidget() override { return &_embedded_widget; }
+  QString portCaption(PortType port_type, PortIndex port_index) const override;
 
-            NodeValidationState validationState() const override { return _validation_state; };
+  QString name() const override { return _name; }
 
-            QString validationMessage() const override { return _validation_error; };
+  QString caption() const override { return _caption; };
 
-            QString portCaption(PortType port_type, PortIndex port_index) const override;
+  void setCaption(QString const &caption) { _caption = caption; };
 
-            QString name() const override { return _name; }
+  bool portCaptionVisible(PortType port_type,
+                          PortIndex port_index) const override;
 
-            QString caption() const override { return _caption; };
+  ConnectionPolicy portOutConnectionPolicy(PortIndex port_index) const override;
 
-            void setCaption(QString const& caption){_caption = caption;};
+  QWidget *portDefaultValueWidget(PortType port_type,
+                                  PortIndex port_index) override;
 
-            bool portCaptionVisible(PortType port_type, PortIndex port_index) const override;
+  QJsonObject save() const override;
+  void restore(QJsonObject const &json_obj) override;
 
-            ConnectionPolicy portOutConnectionPolicy(PortIndex port_index) const override;
+  virtual bool isLogicNode() { return false; };
 
-            QWidget* portDefaultValueWidget(PortType port_type, PortIndex port_index) override;
+  void setValidationMessage(QString const &message) {
+    _validation_error = message;
+    Q_EMIT visualsNeedUpdate();
+  };
+  void setValidationState(NodeValidationState state) {
+    _validation_state = state;
+  };
 
-            QJsonObject save() const override;
-            void restore(QJsonObject const& json_obj) override;
+  virtual void compute() = 0;
+  virtual NodeValidationState validate() { return _validation_state; };
 
-            virtual bool isLogicNode() { return false; };
+  bool isComputed() { return _is_computed; };
+  void setComputed(bool state) { _is_computed = state; };
 
-            void setValidationMessage(QString const& message){_validation_error = message; Q_EMIT visualsNeedUpdate();};
-            void setValidationState(NodeValidationState state){_validation_state = state;};
+public Q_SLOTS:
 
-            virtual void compute() = 0;
-            virtual NodeValidationState validate() { return _validation_state; };
+  void inputConnectionCreated(Connection const &connection) override;
+  void inputConnectionDeleted(Connection const &connection) override;
+  void outputConnectionCreated(Connection const &connection) override;
+  void outputConnectionDeleted(Connection const &connection) override;
 
-            bool isComputed() { return _is_computed; };
-            void setComputed(bool state) { _is_computed = state; };
+  void captionDoubleClicked() override;
 
-        public Q_SLOTS:
+protected:
+  void setName(QString const &name) { _name = name; };
 
-            void inputConnectionCreated(Connection const& connection) override;
-            void inputConnectionDeleted(Connection const& connection) override;
-            void outputConnectionCreated(Connection const& connection) override;
-            void outputConnectionDeleted(Connection const& connection) override;
+  void addWidgetTop(QWidget *widget);
+  void addWidgetBottom(QWidget *widget);
+  void addDefaultWidget(QWidget *widget, PortType port_type,
+                        PortIndex port_index);
 
-            void captionDoubleClicked() override;
+  template <typename T>
+  void addPort(PortType port_type, QString const &caption, bool caption_visible,
+               ConnectionPolicy out_policy = ConnectionPolicy::Many);
 
-        protected:
+  template <typename T>
+  void addPort(PortType port_type, PortIndex port_index, QString const &caption,
+               bool caption_visible,
+               ConnectionPolicy out_policy = ConnectionPolicy::Many);
 
-            void setName(QString const& name) {_name = name;};
+  template <typename T>
+  void addPortDynamic(PortType port_type, PortIndex port_index,
+                      QString const &caption, bool caption_visible,
+                      ConnectionPolicy out_policy = ConnectionPolicy::Many);
 
-            void addWidgetTop(QWidget* widget);
-            void addWidgetBottom(QWidget* widget);
-            void addDefaultWidget(QWidget* widget, PortType port_type, PortIndex port_index);
+  template <typename T>
+  void addPortDefault(PortType port_type, QString const &caption,
+                      bool caption_visible,
+                      ConnectionPolicy out_policy = ConnectionPolicy::Many);
 
+  template <typename T>
+  void addPortDefault(PortType port_type, PortIndex port_index,
+                      QString const &caption, bool caption_visible,
+                      ConnectionPolicy out_policy = ConnectionPolicy::Many);
 
+  template <typename T>
+  void
+  addPortDefaultDynamic(PortType port_type, PortIndex port_index,
+                        QString const &caption, bool caption_visible,
+                        ConnectionPolicy out_policy = ConnectionPolicy::Many);
 
-            template<typename T>
-            void addPort(PortType port_type,
-                         QString const& caption,
-                         bool caption_visible,
-                         ConnectionPolicy out_policy = ConnectionPolicy::Many);
+  void deletePort(PortType port_type, PortIndex port_index);
+  void deleteDefaultWidget(PortType port_type, PortIndex port_index);
 
-            template<typename T>
-            void addPort(PortType port_type,
-                         PortIndex port_index,
-                         QString const& caption,
-                         bool caption_visible,
-                         ConnectionPolicy out_policy = ConnectionPolicy::Many);
+  void defaultWidgetToJson(PortType port_type, PortIndex port_index,
+                           QJsonObject &json_obj, QString const &name) const;
+  void defaultWidgetFromJson(PortType port_type, PortIndex port_index,
+                             const QJsonObject &json_obj, QString const &name);
 
-            template <typename T>
-            void addPortDynamic(PortType port_type,
-                         PortIndex port_index,
-                         QString const& caption,
-                         bool caption_visible,
-                         ConnectionPolicy out_policy = ConnectionPolicy::Many);
+  template <typename T>
+  std::shared_ptr<T> defaultPortData(PortType port_type, PortIndex port_index);
 
+protected:
+  QString _name;
+  QString _caption;
 
-            template<typename T>
-            void addPortDefault(PortType port_type,
-                         QString const& caption,
-                         bool caption_visible,
-                         ConnectionPolicy out_policy = ConnectionPolicy::Many);
+  std::vector<InNodePort> _in_ports;
+  std::vector<OutNodePort> _out_ports;
 
-            template<typename T>
-            void addPortDefault(PortType port_type,
-                         PortIndex port_index,
-                         QString const& caption,
-                         bool caption_visible,
-                         ConnectionPolicy out_policy = ConnectionPolicy::Many);
+  QWidget _embedded_widget;
+  QVBoxLayout *_embedded_widget_layout;
+  QVBoxLayout *_embedded_widget_layout_top;
+  QVBoxLayout *_embedded_widget_layout_bottom;
 
-            template <typename T>
-            void addPortDefaultDynamic(PortType port_type,
-                                      PortIndex port_index,
-                                      QString const& caption,
-                                      bool caption_visible,
-                                      ConnectionPolicy out_policy = ConnectionPolicy::Many);
+  NodeValidationState _validation_state = NodeValidationState::Warning;
+  QString _validation_error = QString("Missing or incorrect inputs");
 
-            void deletePort(PortType port_type, PortIndex port_index);
-            void deleteDefaultWidget(PortType port_type, PortIndex port_index);
+  bool _is_computed = false;
 
-            void defaultWidgetToJson(PortType port_type, PortIndex port_index, QJsonObject& json_obj, QString const& name) const;
-            void defaultWidgetFromJson(PortType port_type, PortIndex port_index, const QJsonObject& json_obj, QString const& name);
+  NodeInterpreterTokens _token = NodeInterpreterTokens::NONE;
+};
 
-            template <typename T>
-            std::shared_ptr<T> defaultPortData(PortType port_type, PortIndex port_index);
+} // namespace Ui::Tools::NodeEditor::Nodes
 
-        protected:
+} // namespace Noggit
 
-            QString _name;
-            QString _caption;
-
-            std::vector<InNodePort> _in_ports;
-            std::vector<OutNodePort> _out_ports;
-
-            QWidget _embedded_widget;
-            QVBoxLayout* _embedded_widget_layout;
-            QVBoxLayout* _embedded_widget_layout_top;
-            QVBoxLayout* _embedded_widget_layout_bottom;
-
-            NodeValidationState _validation_state = NodeValidationState::Warning;
-            QString _validation_error = QString("Missing or incorrect inputs");
-
-            bool _is_computed = false;
-
-            NodeInterpreterTokens _token = NodeInterpreterTokens::NONE;
-        };
-
-    }
-
-}
-
-#endif //NOGGIT_BASENODE_HPP
+#endif // NOGGIT_BASENODE_HPP

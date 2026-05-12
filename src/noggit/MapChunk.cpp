@@ -12,10 +12,10 @@
 #include <noggit/MapChunk.h>
 #include <noggit/MapHeaders.h>
 #include <noggit/Misc.h>
+#include <noggit/TextureSet.hpp>
 #include <noggit/TileWater.hpp>
+#include <noggit/ToolEnums.hpp>
 #include <noggit/World.h>
-#include <noggit/texture_set.hpp>
-#include <noggit/tool_enums.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <opengl/scoped.hpp>
 
@@ -26,7 +26,7 @@
 #include <map>
 
 MapChunk::MapChunk(MapTile *maintile, BlizzardArchive::ClientFile *f,
-                   bool bigAlpha, tile_mode mode,
+                   bool bigAlpha, TileMode mode,
                    Noggit::NoggitRenderContext context, bool init_empty,
                    int chunk_idx, bool load_textures)
     : _mode(mode), mt(maintile), use_big_alphamap(bigAlpha), _context(context),
@@ -151,7 +151,7 @@ MapChunk::MapChunk(MapTile *maintile, BlizzardArchive::ClientFile *f,
   texture_set =
       std::make_unique<TextureSet>(this, f, base, maintile, bigAlpha,
                                    !!header_flags.flags.do_not_fix_alpha_map,
-                                   mode == tile_mode::uid_fix_all, _context);
+                                   mode == TileMode::uid_fix_all, _context);
 
   // - MCVT ----------------------------------------------
   {

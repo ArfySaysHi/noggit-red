@@ -3,30 +3,26 @@
 
 #include "noggit/ui/tools/NodeEditor/Nodes/LogicNodeBase.hpp"
 
-using QtNodes::PortType;
-using QtNodes::PortIndex;
 using QtNodes::NodeData;
-using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
+using QtNodes::NodeDataType;
 using QtNodes::NodeValidationState;
+using QtNodes::PortIndex;
+using QtNodes::PortType;
 
+namespace Noggit {
+namespace Ui::Tools::NodeEditor::Nodes {
+class LogicIfNode : public LogicNodeBase {
+  Q_OBJECT
 
-namespace Noggit
-{
-    namespace Ui::Tools::NodeEditor::Nodes
-    {
-        class LogicIfNode : public LogicNodeBase
-        {
-        Q_OBJECT
+public:
+  LogicIfNode();
+  void compute() override;
+  NodeValidationState validate() override;
+};
 
-        public:
-            LogicIfNode();
-            void compute() override;
-            NodeValidationState validate() override;
-        };
+} // namespace Ui::Tools::NodeEditor::Nodes
 
-    }
+} // namespace Noggit
 
-}
-
-#endif //NOGGIT_LOGICIFNODE_HPP
+#endif // NOGGIT_LOGICIFNODE_HPP

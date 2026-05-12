@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "ImageRotateNode.hpp"
 
@@ -7,9 +8,7 @@
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-ImageRotateNode::ImageRotateNode()
-: LogicNodeBase()
-{
+ImageRotateNode::ImageRotateNode() : LogicNodeBase() {
   setName("Image :: Rotate");
   setCaption("Image :: Rotate");
   _validation_state = NodeValidationState::Valid;
@@ -26,39 +25,36 @@ ImageRotateNode::ImageRotateNode()
   addPort<ImageData>(PortType::Out, "Image", true);
 }
 
-void ImageRotateNode::compute()
-{
+void ImageRotateNode::compute() {
   double angle = defaultPortData<DecimalData>(PortType::In, 2)->value();
 
   _out_ports[1].out_value = std::make_shared<ImageData>(
-      std::move(static_cast<ImageData*>(_in_ports[1].in_value.lock().get())->value().transformed(
-          QTransform().rotate(angle), static_cast<Qt::TransformationMode>(_mode->currentIndex()))));
+      std::move(static_cast<ImageData *>(_in_ports[1].in_value.lock().get())
+                    ->value()
+                    .transformed(QTransform().rotate(angle),
+                                 static_cast<Qt::TransformationMode>(
+                                     _mode->currentIndex()))));
   _node->onDataUpdated(1);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
 }
 
-
-QJsonObject ImageRotateNode::save() const
-{
+QJsonObject ImageRotateNode::save() const {
   QJsonObject json_obj = BaseNode::save();
   json_obj["mode"] = _mode->currentIndex();
   defaultWidgetToJson(PortType::In, 2, json_obj, "angle");
   return json_obj;
 }
 
-void ImageRotateNode::restore(const QJsonObject& json_obj)
-{
+void ImageRotateNode::restore(const QJsonObject &json_obj) {
   BaseNode::restore(json_obj);
   defaultWidgetFromJson(PortType::In, 2, json_obj, "angle");
   _mode->setCurrentIndex(json_obj["mode"].toInt());
 }
 
-NodeValidationState ImageRotateNode::validate()
-{
-  if (!static_cast<ImageData*>(_in_ports[1].in_value.lock().get()))
-  {
+NodeValidationState ImageRotateNode::validate() {
+  if (!static_cast<ImageData *>(_in_ports[1].in_value.lock().get())) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate image input.");
     return _validation_state;

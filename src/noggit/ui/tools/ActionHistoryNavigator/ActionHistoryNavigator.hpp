@@ -1,43 +1,37 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #ifndef NOGGIT_ACTIONHISTORYNAVIGATOR_HPP
 #define NOGGIT_ACTIONHISTORYNAVIGATOR_HPP
 
-#include <QWidget>
-#include <QListWidget>
 #include <QButtonGroup>
+#include <QListWidget>
+#include <QWidget>
 
+namespace Noggit {
+class Action;
 
+namespace Ui::Tools {
+class ActionHistoryNavigator : public QWidget {
+  Q_OBJECT
+public:
+  ActionHistoryNavigator(QWidget *parent = nullptr);
 
-namespace Noggit
-{
-  class Action;
+public slots:
+  void pushAction(Noggit::Action *action);
+  void popFront();
+  void popBack();
+  void purge();
+  void changeCurrentAction(unsigned index);
 
-  namespace Ui::Tools
-  {
-    class ActionHistoryNavigator : public QWidget
-    {
-      Q_OBJECT
-    public:
-      ActionHistoryNavigator(QWidget* parent = nullptr);
+signals:
+  void currentActionChanged(unsigned index);
 
-    public slots:
-      void pushAction(Noggit::Action* action);
-      void popFront();
-      void popBack();
-      void purge();
-      void changeCurrentAction(unsigned index);
+private:
+  QListWidget *_action_stack;
+  QButtonGroup *_active_action_button_group;
+};
+} // namespace Ui::Tools
+} // namespace Noggit
 
-    signals:
-      void currentActionChanged(unsigned index);
-
-    private:
-      QListWidget* _action_stack;
-      QButtonGroup* _active_action_button_group;
-
-
-    };
-  }
-}
-
-#endif //NOGGIT_ACTIONHISTORYNAVIGATOR_HPP
+#endif // NOGGIT_ACTIONHISTORYNAVIGATOR_HPP

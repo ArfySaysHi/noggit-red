@@ -13,8 +13,8 @@
 #include <noggit/MapView.h>
 #include <noggit/Misc.h>
 #include <noggit/TabletManager.hpp>
+#include <noggit/ToolEnums.hpp>
 #include <noggit/World.h>
-#include <noggit/tool_enums.hpp>
 #include <noggit/ui/Checkbox.hpp>
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/texture_swapper.hpp>
@@ -365,9 +365,9 @@ texturing_tool::texturing_tool(const glm::vec3 *camera_pos, MapView *map_view,
   });
 
   connect(anim_speed_slider, &QSlider::valueChanged, &_anim_speed_prop,
-          &Noggit::unsigned_int_property::set);
+          &Noggit::UnsignedIntProperty::set);
   connect(anim_orientation_dial, &QDial::valueChanged, &_anim_rotation_prop,
-          &Noggit::unsigned_int_property::set);
+          &Noggit::UnsignedIntProperty::set);
 
   connect(tabs, &QTabWidget::currentChanged, [this](int index) {
     switch (index) {

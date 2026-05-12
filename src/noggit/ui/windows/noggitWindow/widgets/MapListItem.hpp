@@ -1,51 +1,48 @@
 #ifndef NOGGIT_WIGDET_MAP_LIST_ITEM_HPP
 #define NOGGIT_WIGDET_MAP_LIST_ITEM_HPP
 
-#include <QMenuBar>
 #include <QAction>
-#include <qgraphicseffect.h>
 #include <QGridLayout>
+#include <QMenuBar>
 #include <QString>
 #include <QWidget>
 #include <noggit/project/ApplicationProject.h>
+#include <qgraphicseffect.h>
 
-namespace Noggit::Ui::Widget
-{
-    struct MapListData
-    {
-        QString map_name;
-        int map_id;
-        int map_type_id;
-        int expansion_id;
-        bool pinned;
-        bool wmo_map;
-    };
+namespace Noggit::Ui::Widget {
+struct MapListData {
+  QString map_name;
+  int map_id;
+  int map_type_id;
+  int expansion_id;
+  bool pinned;
+  bool wmo_map;
+};
 
-    class MapListItem : public QWidget
-    {
-        Q_OBJECT
-    private:
-        QLabel* _map_icon;
-        QLabel* _map_name;
-        QLabel* _map_id;
-        QLabel* _map_instance_type;
-        QLabel* _map_pinned_label;
-        int _max_width;
-        MapListData _map_data;
+class MapListItem : public QWidget {
+  Q_OBJECT
+private:
+  QLabel *_map_icon;
+  QLabel *_map_name;
+  QLabel *_map_id;
+  QLabel *_map_instance_type;
+  QLabel *_map_pinned_label;
+  int _max_width;
+  MapListData _map_data;
 
-    public:
-        MapListItem(const MapListData& data, QWidget* parent);
-        QSize minimumSizeHint() const override;
+public:
+  MapListItem(const MapListData &data, QWidget *parent);
+  QSize minimumSizeHint() const override;
 
-        const QString name() { return _map_data.map_name; };
-        int id() { return _map_data.map_id; };
-        int type() { return _map_data.map_type_id; };
-        int expansion() { return _map_data.expansion_id; };
-        bool wmo_map() { return _map_data.wmo_map; };
+  const QString name() { return _map_data.map_name; };
+  int id() { return _map_data.map_id; };
+  int type() { return _map_data.map_type_id; };
+  int expansion() { return _map_data.expansion_id; };
+  bool wmo_map() { return _map_data.wmo_map; };
 
-    private:
-        QString toCamelCase(const QString& s);
-    };
-}
+private:
+  QString toCamelCase(const QString &s);
+};
+} // namespace Noggit::Ui::Widget
 
-#endif //NOGGIT_WIGDET_MAP_LIST_ITEM_HPP
+#endif // NOGGIT_WIGDET_MAP_LIST_ITEM_HPP

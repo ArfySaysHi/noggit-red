@@ -1,14 +1,13 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #pragma once
 
-namespace OpenGL
-{
-  struct shader;
-  struct program;
+namespace OpenGL {
+struct shader;
+struct program;
 
-  namespace Scoped
-  {
-    struct use_program;
-  }
+namespace Scoped {
+struct use_program;
 }
+} // namespace OpenGL

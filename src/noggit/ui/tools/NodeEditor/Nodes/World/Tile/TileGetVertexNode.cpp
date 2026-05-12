@@ -1,16 +1,15 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "TileGetVertexNode.hpp"
 
+#include <noggit/ToolEnums.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-#include <noggit/tool_enums.hpp>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-TileGetVertexNode::TileGetVertexNode()
-: ContextLogicNodeBase()
-{
+TileGetVertexNode::TileGetVertexNode() : ContextLogicNodeBase() {
   setName("Tile :: GetVertex");
   setCaption("Tile :: GetVertex");
   _validation_state = NodeValidationState::Valid;
@@ -23,16 +22,16 @@ TileGetVertexNode::TileGetVertexNode()
   addPort<Vector3DData>(PortType::Out, "Vertex<Vector3D>", true);
 }
 
-void TileGetVertexNode::compute()
-{
-  World* world = gCurrentContext->getWorld();
+void TileGetVertexNode::compute() {
+  World *world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _(
+      ::gl, gCurrentContext->getViewport()->context());
 
-  MapTile* tile = defaultPortData<TileData>(PortType::In, 1)->value();
+  MapTile *tile = defaultPortData<TileData>(PortType::In, 1)->value();
 
   auto xy_data = defaultPortData<Vector2DData>(PortType::In, 2);
-  glm::vec2 const& xy = xy_data->value();
+  glm::vec2 const &xy = xy_data->value();
 
   glm::vec3 n_pos(0.0f, 0.0f, 0.0f);
 
@@ -41,15 +40,13 @@ void TileGetVertexNode::compute()
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
 
-  _out_ports[1].out_value = std::make_shared<Vector3DData>(glm::vec3(n_pos.x, n_pos.y, n_pos.z));
+  _out_ports[1].out_value =
+      std::make_shared<Vector3DData>(glm::vec3(n_pos.x, n_pos.y, n_pos.z));
   _node->onDataUpdated(1);
-
 }
 
-NodeValidationState TileGetVertexNode::validate()
-{
-  if (!static_cast<TileData*>(_in_ports[1].in_value.lock().get()))
-  {
+NodeValidationState TileGetVertexNode::validate() {
+  if (!static_cast<TileData *>(_in_ports[1].in_value.lock().get())) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate tile input.");
     return _validation_state;

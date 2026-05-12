@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "LogicWhileLoopNode.hpp"
 
@@ -7,9 +8,7 @@
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-LogicWhileLoopNode::LogicWhileLoopNode()
-: LogicNodeBase()
-{
+LogicWhileLoopNode::LogicWhileLoopNode() : LogicNodeBase() {
   setName("Logic :: WhileLoop");
   setCaption("Logic :: WhileLoop");
   _validation_state = NodeValidationState::Valid;
@@ -23,17 +22,15 @@ LogicWhileLoopNode::LogicWhileLoopNode()
   setIsIterable(true);
 }
 
-void LogicWhileLoopNode::compute()
-{
-  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
+void LogicWhileLoopNode::compute() {
+  auto logic = static_cast<LogicData *>(_in_ports[0].in_value.lock().get());
 
-  if(!logic->value())
+  if (!logic->value())
     return;
 
-  auto in_bool = static_cast<BooleanData*>(_in_ports[1].in_value.lock().get());
+  auto in_bool = static_cast<BooleanData *>(_in_ports[1].in_value.lock().get());
 
-  if (!in_bool->value())
-  {
+  if (!in_bool->value()) {
     setIterationIndex(-1);
     _out_ports[0].out_value = std::make_shared<LogicData>(false);
     _node->onDataUpdated(0);
@@ -41,17 +38,14 @@ void LogicWhileLoopNode::compute()
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
-
 }
 
-NodeValidationState LogicWhileLoopNode::validate()
-{
+NodeValidationState LogicWhileLoopNode::validate() {
   setValidationState(NodeValidationState::Valid);
 
-  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
+  auto logic = static_cast<LogicData *>(_in_ports[0].in_value.lock().get());
 
-  if (!logic)
-  {
+  if (!logic) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Failed to evaluate logic input.");
 
@@ -59,10 +53,9 @@ NodeValidationState LogicWhileLoopNode::validate()
     _node->onDataUpdated(0);
   }
 
-  auto in_bool = static_cast<BooleanData*>(_in_ports[1].in_value.lock().get());
+  auto in_bool = static_cast<BooleanData *>(_in_ports[1].in_value.lock().get());
 
-  if (!in_bool)
-  {
+  if (!in_bool) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Failed to evaluate boolean input.");
 
@@ -70,8 +63,7 @@ NodeValidationState LogicWhileLoopNode::validate()
     _node->onDataUpdated(0);
   }
 
-  if (!in_bool->value())
-  {
+  if (!in_bool->value()) {
     setIterationIndex(-1);
   }
 

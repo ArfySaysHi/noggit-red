@@ -1,24 +1,21 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "TerrainFlattenNode.hpp"
 
+#include <noggit/ToolEnums.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-#include <noggit/tool_enums.hpp>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-TerrainFlattenNode::TerrainFlattenNode()
-: ContextLogicNodeBase()
-{
+TerrainFlattenNode::TerrainFlattenNode() : ContextLogicNodeBase() {
   setName("Terrain :: Flatten");
   setCaption("Terrain :: Flatten");
   _validation_state = NodeValidationState::Valid;
 
   _mode = new QComboBox(&_embedded_widget);
-  _mode->addItems({"Flat",
-                   "Linear",
-                   "Smooth"});
+  _mode->addItems({"Flat", "Linear", "Smooth"});
   addWidgetTop(_mode);
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -34,33 +31,31 @@ TerrainFlattenNode::TerrainFlattenNode()
   addPort<LogicData>(PortType::Out, "Logic", true);
 }
 
-void TerrainFlattenNode::compute()
-{
-  World* world = gCurrentContext->getWorld();
+void TerrainFlattenNode::compute() {
+  World *world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _(
+      ::gl, gCurrentContext->getViewport()->context());
 
   glm::vec3 pos = defaultPortData<Vector3DData>(PortType::In, 1)->value();
   glm::vec3 origin = defaultPortData<Vector3DData>(PortType::In, 6)->value();
 
-  world->flattenTerrain({pos.x, pos.y, pos.z},
-                       defaultPortData<DecimalData>(PortType::In, 2)->value(),
-                       defaultPortData<DecimalData>(PortType::In, 3)->value(),
-                       _mode->currentIndex(),
-                       {defaultPortData<BooleanData>(PortType::In, 4)->value(),
-                        defaultPortData<BooleanData>(PortType::In, 5)->value()},
-                        {origin.x, origin.y, origin.z},
-                        math::degrees(defaultPortData<DecimalData>(PortType::In, 7)->value()),
-                        math::degrees(defaultPortData<DecimalData>(PortType::In, 8)->value()));
+  world->flattenTerrain(
+      {pos.x, pos.y, pos.z},
+      defaultPortData<DecimalData>(PortType::In, 2)->value(),
+      defaultPortData<DecimalData>(PortType::In, 3)->value(),
+      _mode->currentIndex(),
+      {defaultPortData<BooleanData>(PortType::In, 4)->value(),
+       defaultPortData<BooleanData>(PortType::In, 5)->value()},
+      {origin.x, origin.y, origin.z},
+      math::degrees(defaultPortData<DecimalData>(PortType::In, 7)->value()),
+      math::degrees(defaultPortData<DecimalData>(PortType::In, 8)->value()));
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
-
 }
 
-
-QJsonObject TerrainFlattenNode::save() const
-{
+QJsonObject TerrainFlattenNode::save() const {
   QJsonObject json_obj = ContextLogicNodeBase::save();
 
   json_obj["mode"] = _mode->currentIndex();
@@ -68,8 +63,7 @@ QJsonObject TerrainFlattenNode::save() const
   return json_obj;
 }
 
-void TerrainFlattenNode::restore(const QJsonObject& json_obj)
-{
+void TerrainFlattenNode::restore(const QJsonObject &json_obj) {
   ContextLogicNodeBase::restore(json_obj);
   _mode->setCurrentIndex(json_obj["mode"].toInt());
 }

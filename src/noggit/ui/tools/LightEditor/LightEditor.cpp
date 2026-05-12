@@ -2,17 +2,14 @@
 // (version 3).
 
 #include "LightEditor.hpp"
-#include <format>
-#include <noggit/DBC.h>
-// #include <iostream>
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QGridLayout>
+#include <QtWidgets/qtreewidget.h>
 #include <map>
+#include <noggit/DBC.h>
 #include <noggit/MapView.h>
 #include <noggit/World.h>
 #include <string>
-// #include <QtWidgets/QLabel>
-#include <QtWidgets/qtreewidget.h>
 
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QGroupBox>
@@ -21,11 +18,6 @@ using namespace Noggit::Ui::Tools;
 
 LightEditor::LightEditor(MapView *map_view, QWidget *parent)
     : QWidget(parent), _map_view(map_view), _world(map_view->getWorld()) {
-  // auto Skies = _map_view->getWorld()->renderer()->skies()->skies;
-  // Sky CurrSky = Skies[0];
-  // get curent sky from camera position
-  // Sky* CurrSky =
-  // _map_view->getWorld()->renderer()->skies()->findSkyWeights(map_view->getCamera()->position);
 
   setMinimumWidth(250);
   setMaximumWidth(250);
@@ -71,11 +63,6 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
   light_selection_layout->addWidget(_light_tree);
   _light_tree->setHeaderLabel("Current map lights");
   _light_tree->setColumnCount(1);
-  // _light_tree->setMaximumHeight(400); // TODO : editing the height fucks up
-  // the layout
-
-  // for (auto& sky : _world->renderer()->skies()->skies) // bad idea, renderer
-  // needs to be loaded first
   for (DBCFile::Iterator i = gLightDB.begin(); i != gLightDB.end(); ++i) {
     if (i->getInt(LightDB::Map) == _world->getMapID()) {
       QTreeWidgetItem *item = new QTreeWidgetItem();
@@ -155,8 +142,8 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
 
   global_values_layout->addWidget(new QLabel("Inner Radius:", this), 4, 0);
   auto inner_radius_spin = new QDoubleSpinBox(this);
-  inner_radius_spin->setRange(
-      0, 100000); // max seen in dbc is 3871 (139363 ・36 )
+  inner_radius_spin->setRange(0,
+                              100000); // max seen in dbc is 3871 (139363 ・36 )
   inner_radius_spin->setValue(0);
   inner_radius_spin->setSingleStep(50);
   inner_radius_spin->setEnabled(false);
@@ -164,8 +151,8 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
 
   global_values_layout->addWidget(new QLabel("Outer Radius:", this), 5, 0);
   auto outer_radius_spin = new QDoubleSpinBox(this);
-  outer_radius_spin->setRange(
-      0, 100000); // max seen in dbc is 3871 (139363 ・36 )
+  outer_radius_spin->setRange(0,
+                              100000); // max seen in dbc is 3871 (139363 ・36 )
   outer_radius_spin->setValue(0);
   outer_radius_spin->setSingleStep(50);
   outer_radius_spin->setEnabled(false);

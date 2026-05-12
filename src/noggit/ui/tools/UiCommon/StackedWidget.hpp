@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #ifndef NOGGIT_STACKEDWIDGET_HPP
 #define NOGGIT_STACKEDWIDGET_HPP
@@ -6,9 +7,8 @@
 #include <QList>
 #include <QWidget>
 
-class StackedWidget : public QWidget
-{
-Q_OBJECT
+class StackedWidget : public QWidget {
+  Q_OBJECT
 
 public:
   StackedWidget(QWidget * = 0, Qt::WindowFlags = Qt::WindowFlags{});
@@ -16,10 +16,9 @@ public:
   void addWidget(QWidget *);
   void removeLast();
   int count();
-  QWidget * currentWidget();
+  QWidget *currentWidget();
 
-  void setAutoResize(bool yes)
-  { auto_resize = yes; }
+  void setAutoResize(bool yes) { auto_resize = yes; }
 
   QSize sizeHint();
 
@@ -35,4 +34,4 @@ public slots:
   void setCurrentIndex(int);
 };
 
-#endif //NOGGIT_STACKEDWIDGET_HPP
+#endif // NOGGIT_STACKEDWIDGET_HPP

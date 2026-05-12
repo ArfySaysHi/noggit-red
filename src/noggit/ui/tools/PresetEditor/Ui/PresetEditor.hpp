@@ -4,36 +4,32 @@
 #include <ui_PresetEditor.h>
 #include <ui_PresetEditorOverlay.h>
 
-#include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
 #include <noggit/ui/tools/PresetEditor/ModelView.hpp>
+#include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
 
-#include <QWidget>
-#include <QMainWindow>
 #include <QFileSystemModel>
+#include <QMainWindow>
 #include <QSortFilterProxyModel>
+#include <QWidget>
 
-namespace Noggit
-{
-    namespace Ui::Tools::PresetEditor::Ui
-    {
-      class PresetEditorWidget : public QMainWindow
-      {
-      public:
-        PresetEditorWidget(std::shared_ptr<Project::NoggitProject> project, QWidget* parent = nullptr);
-        ~PresetEditorWidget();
+namespace Noggit {
+namespace Ui::Tools::PresetEditor::Ui {
+class PresetEditorWidget : public QMainWindow {
+public:
+  PresetEditorWidget(std::shared_ptr<Project::NoggitProject> project,
+                     QWidget *parent = nullptr);
+  ~PresetEditorWidget();
 
-      private:
-        void setupConnectsCommon();
-        std::shared_ptr<Project::NoggitProject> _project;
-        ::Ui::PresetEditor* ui;
-        ::Ui::PresetEditorOverlay* viewport_overlay_ui;
-        QFileSystemModel* _model;
-        QSortFilterProxyModel* _sort_model;
-        PreviewRenderer* _preview_renderer;
+private:
+  void setupConnectsCommon();
+  std::shared_ptr<Project::NoggitProject> _project;
+  ::Ui::PresetEditor *ui;
+  ::Ui::PresetEditorOverlay *viewport_overlay_ui;
+  QFileSystemModel *_model;
+  QSortFilterProxyModel *_sort_model;
+  PreviewRenderer *_preview_renderer;
+};
+} // namespace Ui::Tools::PresetEditor::Ui
+} // namespace Noggit
 
-
-      };
-    }
-}
-
-#endif //NOGGIT_PRESETEDITOR_HPP
+#endif // NOGGIT_PRESETEDITOR_HPP

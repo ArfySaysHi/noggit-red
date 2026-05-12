@@ -9,16 +9,16 @@
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
+#include <noggit/TextureSet.hpp>
 #include <noggit/World.h>
-#include <noggit/texture_set.hpp>
 #include <sstream>
 
 TextureSet::TextureSet(MapChunk *chunk, BlizzardArchive::ClientFile *f,
                        size_t base, MapTile *tile, bool use_big_alphamaps,
-                       bool do_not_fix_alpha_map, bool do_not_convert_alphamaps,
+                       bool do_not_fix_alpha_map, bool do_not_convertAlphamaps,
                        Noggit::NoggitRenderContext context)
     : nTextures(chunk->header.nLayers),
-      _do_not_convert_alphamaps(do_not_convert_alphamaps), _context(context),
+      _do_not_convertAlphamaps(do_not_convertAlphamaps), _context(context),
       _chunk(chunk) {
 
   auto &header = chunk->header;
@@ -49,7 +49,7 @@ TextureSet::TextureSet(MapChunk *chunk, BlizzardArchive::ClientFile *f,
     }
 
     // always use big alpha for editing / rendering
-    if (!use_big_alphamaps && !_do_not_convert_alphamaps) {
+    if (!use_big_alphamaps && !_do_not_convertAlphamaps) {
       convertToBigAlpha();
     }
 
@@ -854,7 +854,7 @@ std::vector<std::vector<uint8_t>> TextureSet::save_alpha(bool big_alphamap) {
     } else {
       uint8_t tab[4096 * 3];
 
-      if (_do_not_convert_alphamaps) {
+      if (_do_not_convertAlphamaps) {
         for (size_t k = 0; k < nTextures - 1; k++) {
           memcpy(tab + (k * 64 * 64), alphamaps[k]->getAlpha(), 64 * 64);
         }

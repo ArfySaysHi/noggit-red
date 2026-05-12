@@ -533,7 +533,7 @@ void WorldRender::draw(
       ModelManager::resetAnim();
     }
     /*
-    if (_world->need_model_updates)
+    if (_world->need_ModelUpdates)
     {
       _world->update_models_by_filename();
     }*/
@@ -922,7 +922,7 @@ void WorldRender::upload() {
     _world->_model_instance_storage.add_wmo_instance(std::move(inst), false);
   } else {
     _horizon_render =
-        std::make_unique<Noggit::map_horizon::render>(_world->horizon);
+        std::make_unique<Noggit::MapHorizon::render>(_world->horizon);
   }
 
   _skies = std::make_unique<Skies>(_world->mapIndex._map_id, _world->_context);
@@ -1447,7 +1447,7 @@ void WorldRender::drawMinimap(MapTile *tile, glm::mat4x4 const &model_view,
   TileIndex m_tile = TileIndex(camera_pos);
   m_tile.z -= 1;
 
-  bool unload = !_world->mapIndex.has_unsaved_changes(m_tile);
+  bool unload = !_world->mapIndex.hasUnsavedChanges(m_tile);
 
   MapTile *mTile = _world->mapIndex.loadTile(m_tile);
 
@@ -1487,13 +1487,13 @@ bool WorldRender::saveMinimap(TileIndex const &tile_idx,
   gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // Load tile
-  bool unload = !_world->mapIndex.has_unsaved_changes(tile_idx);
+  bool unload = !_world->mapIndex.hasUnsavedChanges(tile_idx);
 
   if (!_world->mapIndex.tileLoaded(tile_idx) &&
       !_world->mapIndex.tileAwaitingLoading(tile_idx)) {
     MapTile *tile = _world->mapIndex.loadTile(tile_idx);
     tile->wait_until_loaded();
-    _world->wait_for_all_tile_updates();
+    _world->waitForAllTileUpdates();
     tile->waitForChildrenLoaded();
   }
 

@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #ifndef NOGGIT_LISTDECLARENODE_HPP
 #define NOGGIT_LISTDECLARENODE_HPP
@@ -6,37 +7,32 @@
 #include "ListNodeBase.hpp"
 #include <QComboBox>
 
-using QtNodes::PortType;
-using QtNodes::PortIndex;
 using QtNodes::NodeData;
-using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
+using QtNodes::NodeDataType;
 using QtNodes::NodeValidationState;
+using QtNodes::PortIndex;
+using QtNodes::PortType;
 
+namespace Noggit {
+namespace Ui::Tools::NodeEditor::Nodes {
+class ListDeclareNode : public ListNodeBase {
+  Q_OBJECT
 
-namespace Noggit
-{
-    namespace Ui::Tools::NodeEditor::Nodes
-    {
-        class ListDeclareNode : public ListNodeBase
-        {
-        Q_OBJECT
+public:
+  ListDeclareNode();
+  void compute() override;
+  NodeValidationState validate() override;
+  QJsonObject save() const override;
+  void restore(QJsonObject const &json_obj) override;
+  bool isLogicNode() override { return false; };
 
-        public:
-            ListDeclareNode();
-            void compute() override;
-            NodeValidationState validate() override;
-            QJsonObject save() const override;
-            void restore(QJsonObject const& json_obj) override;
-            bool isLogicNode() override { return false; };
+private:
+  QComboBox *_type;
+};
 
-        private:
-            QComboBox* _type;
+} // namespace Ui::Tools::NodeEditor::Nodes
 
-        };
+} // namespace Noggit
 
-    }
-
-}
-
-#endif //NOGGIT_LISTDECLARENODE_HPP
+#endif // NOGGIT_LISTDECLARENODE_HPP

@@ -7,7 +7,7 @@
 #include <noggit/TextureManager.h>
 #include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
 #include <noggit/ui/tools/UiCommon/ImageMaskSelector.hpp>
-#include <noggit/unsigned_int_property.hpp>
+#include <noggit/UnsignedIntProperty.hpp>
 
 #include <QJsonObject>
 #include <QtWidgets/QCheckBox>
@@ -125,8 +125,8 @@ private:
   float _spray_pressure;
 
   BoolToggleProperty _anim_prop;
-  unsigned_int_property _anim_speed_prop;
-  unsigned_int_property _anim_rotation_prop;
+  UnsignedIntProperty _anim_speed_prop;
+  UnsignedIntProperty _anim_rotation_prop;
   BoolToggleProperty _overbright_prop;
 
   texturing_mode _texturing_mode;

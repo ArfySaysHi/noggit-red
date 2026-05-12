@@ -1,35 +1,37 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "ReorderableVerticalBox.hpp"
-#include <QVBoxLayout>
-#include <QMouseEvent>
 #include <QApplication>
-#include <QStyleOption>
+#include <QMouseEvent>
 #include <QPainter>
+#include <QStyleOption>
+#include <QVBoxLayout>
 
 using namespace Noggit::Ui::Tools;
 
-void ReorderableVerticalBox::mouseMoveEvent(QMouseEvent* event)
-{
+void ReorderableVerticalBox::mouseMoveEvent(QMouseEvent *event) {
   if (!dragInitiated)
     return;
 
   if (!(event->buttons() & Qt::LeftButton))
     return;
 
-  if (!IsMinimumDistanceRiched(event))
-  {
+  if (!IsMinimumDistanceRiched(event)) {
     return;
   }
   int y = event->globalY() - mouseClickY + oldY;
-  int BottomBorder = reinterpret_cast<QWidget*>(parent())->geometry().height() - this->geometry().height();
-  if(y < 0) y = 0;
-  else if(y > BottomBorder) y = BottomBorder;
+  int BottomBorder =
+      reinterpret_cast<QWidget *>(parent())->geometry().height() -
+      this->geometry().height();
+  if (y < 0)
+    y = 0;
+  else if (y > BottomBorder)
+    y = BottomBorder;
   move(oldX, y);
 }
 
-void ReorderableVerticalBox::mousePressEvent(QMouseEvent* event)
-{
+void ReorderableVerticalBox::mousePressEvent(QMouseEvent *event) {
   if (event->buttons() & Qt::LeftButton)
     dragStartPosition = event->globalPos();
 
@@ -44,44 +46,40 @@ void ReorderableVerticalBox::mousePressEvent(QMouseEvent* event)
   mouseClickY = event->globalY();
 }
 
-bool ReorderableVerticalBox::IsMinimumDistanceRiched(QMouseEvent* event)
-{
-  return (event->globalPos() - dragStartPosition).manhattanLength() >= QApplication::startDragDistance();
+bool ReorderableVerticalBox::IsMinimumDistanceRiched(QMouseEvent *event) {
+  return (event->globalPos() - dragStartPosition).manhattanLength() >=
+         QApplication::startDragDistance();
 }
 
-
-void ReorderableVerticalBox::paintEvent(QPaintEvent *)
-{
+void ReorderableVerticalBox::paintEvent(QPaintEvent *) {
   QStyleOption o;
   o.initFrom(this);
   QPainter p(this);
   style()->drawPrimitive(QStyle::PE_Widget, &o, &p, this);
 }
 
-void ReorderableVerticalBox::mouseReleaseEvent(QMouseEvent* event)
-{
+void ReorderableVerticalBox::mouseReleaseEvent(QMouseEvent *event) {
   if (!dragInitiated)
     return;
 
-  QVBoxLayout* myLayout = qobject_cast<QVBoxLayout*>(reinterpret_cast<QWidget*>(parent())->layout());
+  QVBoxLayout *myLayout = qobject_cast<QVBoxLayout *>(
+      reinterpret_cast<QWidget *>(parent())->layout());
   int y = geometry().y();
 
   int idx = 0;
   int cur_height = 0;
-  while(idx < myLayout->count())
-  {
+  while (idx < myLayout->count()) {
     cur_height += myLayout->itemAt(idx)->widget()->height();
 
     if (cur_height > y)
       break;
-    else
-    {
+    else {
       idx++;
     }
   }
 
   myLayout->removeWidget(this);
-  myLayout->insertWidget(idx , this);
+  myLayout->insertWidget(idx, this);
 
   update();
   myLayout->update();
@@ -90,7 +88,6 @@ void ReorderableVerticalBox::mouseReleaseEvent(QMouseEvent* event)
   dragInitiated = false;
 }
 
-void ReorderableVerticalBox::setActiveRectWidget(QWidget* widget)
-{
+void ReorderableVerticalBox::setActiveRectWidget(QWidget *widget) {
   activeRectWidget = widget;
 }

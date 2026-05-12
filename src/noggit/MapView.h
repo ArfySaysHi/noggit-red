@@ -10,7 +10,8 @@
 #include <noggit/Misc.h>
 #include <noggit/Selection.h>
 #include <noggit/TabletManager.hpp>
-#include <noggit/tool_enums.hpp>
+#include <noggit/ToolEnums.hpp>
+#include <noggit/UnsignedIntProperty.hpp>
 #include <noggit/ui/MinimapCreator.hpp>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/UidFixWindow.hpp>
@@ -18,7 +19,6 @@
 #include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
 #include <noggit/ui/tools/ViewportGizmo/ViewportGizmo.hpp>
 #include <noggit/ui/tools/ViewportManager/ViewportManager.hpp>
-#include <noggit/unsigned_int_property.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/texture.hpp>
 #include <optional>
@@ -34,11 +34,7 @@
 
 #include <array>
 #include <forward_list>
-#include <map>
 #include <optional>
-#include <thread>
-#include <unordered_map>
-#include <unordered_set>
 
 #include <ui_MapViewOverlay.h>
 
@@ -393,7 +389,7 @@ private:
   Noggit::BoolToggleProperty _rotate_along_ground_random = {false};
   Noggit::BoolToggleProperty _use_median_pivot_point = {true};
   Noggit::BoolToggleProperty _display_all_water_layers = {true};
-  Noggit::unsigned_int_property _displayed_water_layer = {0};
+  Noggit::UnsignedIntProperty _displayed_water_layer = {0};
   Noggit::object_paste_params _object_paste_params;
 
   Noggit::BoolToggleProperty _show_node_editor = {false};

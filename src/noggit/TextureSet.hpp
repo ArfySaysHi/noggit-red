@@ -32,7 +32,7 @@ public:
   TextureSet() = delete;
   TextureSet(MapChunk *chunk, BlizzardArchive::ClientFile *f, size_t base,
              MapTile *tile, bool use_big_alphamaps, bool do_not_fix_alpha_map,
-             bool do_not_convert_alphamaps,
+             bool do_not_convertAlphamaps,
              Noggit::NoggitRenderContext context);
 
   int addTexture(scoped_blp_texture_reference texture);
@@ -134,7 +134,7 @@ private:
 
   std::optional<tmp_edit_alpha_values> tmp_edit_values;
 
-  bool _do_not_convert_alphamaps;
+  bool _do_not_convertAlphamaps;
 
   Noggit::NoggitRenderContext _context;
 };

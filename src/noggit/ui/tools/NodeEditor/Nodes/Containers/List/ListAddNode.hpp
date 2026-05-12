@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #ifndef NOGGIT_LISTADDNODE_HPP
 #define NOGGIT_LISTADDNODE_HPP
@@ -7,39 +8,35 @@
 
 #include <QComboBox>
 
-using QtNodes::PortType;
-using QtNodes::PortIndex;
 using QtNodes::NodeData;
-using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
+using QtNodes::NodeDataType;
 using QtNodes::NodeValidationState;
+using QtNodes::PortIndex;
+using QtNodes::PortType;
 
+namespace Noggit {
+namespace Ui::Tools::NodeEditor::Nodes {
+class ListAddNode : public LogicNodeBase {
+  Q_OBJECT
 
-namespace Noggit
-{
-    namespace Ui::Tools::NodeEditor::Nodes
-    {
-        class ListAddNode : public LogicNodeBase
-        {
-        Q_OBJECT
+public:
+  ListAddNode();
+  void compute() override;
+  NodeValidationState validate() override;
+  QJsonObject save() const override;
+  void restore(QJsonObject const &json_obj) override;
 
-        public:
-          ListAddNode();
-          void compute() override;
-          NodeValidationState validate() override;
-          QJsonObject save() const override;
-          void restore(QJsonObject const& json_obj) override;
+public Q_SLOTS:
+  void inputConnectionCreated(const Connection &connection) override;
+  void inputConnectionDeleted(const Connection &connection) override;
 
-        public Q_SLOTS:
-          void inputConnectionCreated(const Connection& connection) override;
-          void inputConnectionDeleted(const Connection& connection) override;
+private:
+  QComboBox *_operation;
+};
 
-        private:
-          QComboBox* _operation;
-        };
+} // namespace Ui::Tools::NodeEditor::Nodes
 
-    }
+} // namespace Noggit
 
-}
-
-#endif //NOGGIT_LISTADDNODE_HPP
+#endif // NOGGIT_LISTADDNODE_HPP

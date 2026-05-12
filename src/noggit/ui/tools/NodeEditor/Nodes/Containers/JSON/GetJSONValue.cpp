@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "GetJSONValue.hpp"
 
@@ -7,9 +8,7 @@
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-GetJSONValueNode::GetJSONValueNode()
-: BaseNode()
-{
+GetJSONValueNode::GetJSONValueNode() : BaseNode() {
   setName("JSON :: GetJSONValue");
   setCaption("JSON :: GetJSONValue");
   _validation_state = NodeValidationState::Valid;
@@ -23,35 +22,33 @@ GetJSONValueNode::GetJSONValueNode()
   addPort<IntegerData>(PortType::Out, "Integer", true);
   addPort<JSONData>(PortType::Out, "JSONObject", true);
   addPort<JSONArrayData>(PortType::Out, "JSONArray", true);
-
 }
 
-void GetJSONValueNode::compute()
-{
-  QJsonObject* json_obj = static_cast<JSONData*>(_in_ports[0].in_value.lock().get())->value_ptr();
+void GetJSONValueNode::compute() {
+  QJsonObject *json_obj =
+      static_cast<JSONData *>(_in_ports[0].in_value.lock().get())->value_ptr();
 
   auto name_data = defaultPortData<StringData>(PortType::In, 1);
-  std::string const& name = name_data->value();
+  std::string const &name = name_data->value();
   QJsonValueRef value = (*json_obj)[name.c_str()];
 
-  if (value.isUndefined())
-  {
+  if (value.isUndefined()) {
     setValidationState(NodeValidationState::Error);
-    setValidationMessage("Error: value is undefined. Possibly non-existing key.");
+    setValidationMessage(
+        "Error: value is undefined. Possibly non-existing key.");
     return;
   }
 
-  if (_out_ports[0].connected)
-  {
+  if (_out_ports[0].connected) {
     if (!value.isString())
       goto _ERROR;
 
-    _out_ports[0].out_value = std::make_shared<StringData>(value.toString().toStdString());
+    _out_ports[0].out_value =
+        std::make_shared<StringData>(value.toString().toStdString());
     _node->onDataUpdated(0);
   }
 
-  if (_out_ports[1].connected)
-  {
+  if (_out_ports[1].connected) {
     if (!value.isBool())
       goto _ERROR;
 
@@ -59,8 +56,7 @@ void GetJSONValueNode::compute()
     _node->onDataUpdated(1);
   }
 
-  if (_out_ports[2].connected)
-  {
+  if (_out_ports[2].connected) {
     if (!value.isDouble())
       goto _ERROR;
 
@@ -68,8 +64,7 @@ void GetJSONValueNode::compute()
     _node->onDataUpdated(2);
   }
 
-  if (_out_ports[3].connected)
-  {
+  if (_out_ports[3].connected) {
     if (!value.isDouble())
       goto _ERROR;
 
@@ -77,8 +72,7 @@ void GetJSONValueNode::compute()
     _node->onDataUpdated(3);
   }
 
-  if (_out_ports[4].connected)
-  {
+  if (_out_ports[4].connected) {
     if (!value.isObject())
       goto _ERROR;
 
@@ -86,8 +80,7 @@ void GetJSONValueNode::compute()
     _node->onDataUpdated(4);
   }
 
-  if (_out_ports[5].connected)
-  {
+  if (_out_ports[5].connected) {
     if (!value.isArray())
       goto _ERROR;
 
@@ -97,15 +90,13 @@ void GetJSONValueNode::compute()
 
   return;
 
-  _ERROR:
+_ERROR:
   setValidationState(NodeValidationState::Error);
   setValidationMessage("Error: type mismatch.");
   return;
-
 }
 
-QJsonObject GetJSONValueNode::save() const
-{
+QJsonObject GetJSONValueNode::save() const {
   QJsonObject json_obj = BaseNode::save();
 
   defaultWidgetToJson(PortType::In, 1, json_obj, "var_name");
@@ -113,18 +104,14 @@ QJsonObject GetJSONValueNode::save() const
   return json_obj;
 }
 
-void GetJSONValueNode::restore(const QJsonObject& json_obj)
-{
+void GetJSONValueNode::restore(const QJsonObject &json_obj) {
   BaseNode::restore(json_obj);
 
   defaultWidgetFromJson(PortType::In, 1, json_obj, "var_name");
 }
 
-
-NodeValidationState GetJSONValueNode::validate()
-{
-  if (!static_cast<JSONData*>(_in_ports[0].in_value.lock().get()))
-  {
+NodeValidationState GetJSONValueNode::validate() {
+  if (!static_cast<JSONData *>(_in_ports[0].in_value.lock().get())) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate json input.");
     return _validation_state;

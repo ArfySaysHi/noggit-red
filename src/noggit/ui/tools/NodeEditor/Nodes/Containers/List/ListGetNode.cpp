@@ -1,4 +1,5 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "ListGetNode.hpp"
 
@@ -12,9 +13,7 @@ using QtNodes::Node;
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-ListGetNode::ListGetNode()
-: LogicNodeBase()
-{
+ListGetNode::ListGetNode() : LogicNodeBase() {
   setName("List :: Get");
   setCaption("List :: Get");
   _validation_state = NodeValidationState::Valid;
@@ -26,27 +25,30 @@ ListGetNode::ListGetNode()
   addDefaultWidget(new QLabel(&_embedded_widget), PortType::In, 1);
 
   addPort<UnsignedIntegerData>(PortType::In, "Index<UInteger>", true);
-  addDefaultWidget(_in_ports[2].data_type->default_widget(&_embedded_widget), PortType::In, 2);
+  addDefaultWidget(_in_ports[2].data_type->default_widget(&_embedded_widget),
+                   PortType::In, 2);
 
   addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
   addPort<UndefinedData>(PortType::Out, "Value<Undefined>", true);
-
 }
 
-void ListGetNode::compute()
-{
-  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
+void ListGetNode::compute() {
+  auto logic = static_cast<LogicData *>(_in_ports[0].in_value.lock().get());
 
   if (!logic->value())
     return;
 
-  auto list = static_cast<ListData*>(_in_ports[1].in_value.lock().get())->value();
-  auto index_ptr = static_cast<UnsignedIntegerData*>(_in_ports[2].in_value.lock().get());;
+  auto list =
+      static_cast<ListData *>(_in_ports[1].in_value.lock().get())->value();
+  auto index_ptr =
+      static_cast<UnsignedIntegerData *>(_in_ports[2].in_value.lock().get());
+  ;
 
-  auto index = index_ptr ? index_ptr->value() : static_cast<QSpinBox*>(_in_ports[2].default_widget)->value();
+  auto index =
+      index_ptr ? index_ptr->value()
+                : static_cast<QSpinBox *>(_in_ports[2].default_widget)->value();
 
-  if (index < 0 || index >= list->size())
-  {
+  if (index < 0 || index >= list->size()) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: invalid index.");
     return;
@@ -58,17 +60,14 @@ void ListGetNode::compute()
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
-
 }
 
-NodeValidationState ListGetNode::validate()
-{
+NodeValidationState ListGetNode::validate() {
   LogicNodeBase::validate();
 
-  auto list = static_cast<ListData*>(_in_ports[1].in_value.lock().get());
+  auto list = static_cast<ListData *>(_in_ports[1].in_value.lock().get());
 
-  if (!list)
-  {
+  if (!list) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Failed to evaluate list input.");
 
@@ -79,8 +78,7 @@ NodeValidationState ListGetNode::validate()
   return _validation_state;
 }
 
-QJsonObject ListGetNode::save() const
-{
+QJsonObject ListGetNode::save() const {
   QJsonObject json_obj = LogicNodeBase::save();
 
   json_obj["list_type"] = _in_ports[1].data_type->type().parameter_type_id;
@@ -88,8 +86,7 @@ QJsonObject ListGetNode::save() const
   return json_obj;
 }
 
-void ListGetNode::restore(const QJsonObject& json_obj)
-{
+void ListGetNode::restore(const QJsonObject &json_obj) {
   LogicNodeBase::restore(json_obj);
 
   auto type_id = json_obj["list_type"].toString();
@@ -98,54 +95,53 @@ void ListGetNode::restore(const QJsonObject& json_obj)
   _in_ports[1].data_type->set_parameter_type(type_id);
   _in_ports[1].caption = "List<" + type->type().name + ">";
 
-  if (!type_id.isEmpty())
-  {
+  if (!type_id.isEmpty()) {
     _out_ports[1].data_type.reset(type);
-    _out_ports[1].caption = "Value<" + _out_ports[1].data_type->type().name + ">";
+    _out_ports[1].caption =
+        "Value<" + _out_ports[1].data_type->type().name + ">";
   }
-
 }
 
-void ListGetNode::inputConnectionCreated(const Connection& connection)
-{
+void ListGetNode::inputConnectionCreated(const Connection &connection) {
   BaseNode::inputConnectionCreated(connection);
 
   auto port_index = connection.getPortIndex(PortType::In);
-  if (port_index == 1)
-  {
+  if (port_index == 1) {
     auto parameter_type = connection.dataType(PortType::Out).parameter_type_id;
 
     _in_ports[1].data_type->set_parameter_type(parameter_type);
-    _in_ports[1].caption = connection.getNode(PortType::Out)->nodeDataModel()->portCaption(PortType::Out, connection.getPortIndex(PortType::Out));
+    _in_ports[1].caption =
+        connection.getNode(PortType::Out)
+            ->nodeDataModel()
+            ->portCaption(PortType::Out,
+                          connection.getPortIndex(PortType::Out));
 
-    _out_ports[1].data_type.reset(TypeFactory::create(parameter_type.toStdString()));
-    _out_ports[1].caption = "Value<" + _out_ports[1].data_type->type().name + ">";
+    _out_ports[1].data_type.reset(
+        TypeFactory::create(parameter_type.toStdString()));
+    _out_ports[1].caption =
+        "Value<" + _out_ports[1].data_type->type().name + ">";
 
     // clean up connections if list type changes
-    if (_out_ports[1].connected && _out_ports[1].data_type->type().id != parameter_type)
-    {
+    if (_out_ports[1].connected &&
+        _out_ports[1].data_type->type().id != parameter_type) {
       auto this_node = connection.getNode(PortType::In);
       auto connections = this_node->nodeState().connections(PortType::Out, 1);
 
-      for (auto& pair : connections)
-      {
-        if (pair.second->dataType(PortType::In).id != parameter_type)
-        {
-          static_cast<NodeScene*>(this_node->nodeGraphicsObject().scene())->deleteConnection(*pair.second);
+      for (auto &pair : connections) {
+        if (pair.second->dataType(PortType::In).id != parameter_type) {
+          static_cast<NodeScene *>(this_node->nodeGraphicsObject().scene())
+              ->deleteConnection(*pair.second);
         }
       }
     }
   }
-
 }
 
-void ListGetNode::inputConnectionDeleted(const Connection& connection)
-{
+void ListGetNode::inputConnectionDeleted(const Connection &connection) {
   BaseNode::inputConnectionDeleted(connection);
 
   auto port_index = connection.getPortIndex(PortType::In);
-  if  (port_index == 1)
-  {
+  if (port_index == 1) {
     _in_ports[1].data_type->set_parameter_type("");
     _in_ports[1].caption = "List[Any]";
 
@@ -153,17 +149,14 @@ void ListGetNode::inputConnectionDeleted(const Connection& connection)
     _out_ports[1].caption = "Value<Undefined>";
 
     // clean up connections if list type changes
-    if (_out_ports[1].connected)
-    {
+    if (_out_ports[1].connected) {
       auto this_node = connection.getNode(PortType::In);
       auto connections = this_node->nodeState().connections(PortType::Out, 1);
 
-      for (auto& pair : connections)
-      {
-        static_cast<NodeScene*>(this_node->nodeGraphicsObject().scene())->deleteConnection(*pair.second);
+      for (auto &pair : connections) {
+        static_cast<NodeScene *>(this_node->nodeGraphicsObject().scene())
+            ->deleteConnection(*pair.second);
       }
     }
-
   }
-
 }

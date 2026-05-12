@@ -1,23 +1,24 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #pragma once
-#include <math/frustum.hpp>
+#include <ClientFile.hpp>
 #include <glm/mat4x4.hpp>
+#include <math/frustum.hpp>
 #include <math/ray.hpp>
-#include <noggit/Animated.h> // Animation::M2Value
+#include <noggit/Animated.h>    // Animation::M2Value
 #include <noggit/AsyncObject.h> // AsyncObject
+#include <noggit/ContextObject.hpp>
 #include <noggit/ModelHeaders.h>
 #include <noggit/Particle.h>
 #include <noggit/TextureManager.h>
-#include <noggit/tool_enums.hpp>
-#include <noggit/ContextObject.hpp>
+#include <noggit/ToolEnums.hpp>
+#include <noggit/rendering/ModelRender.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.fwd.hpp>
-#include <ClientFile.hpp>
 #include <optional>
 #include <string>
 #include <vector>
-#include <noggit/rendering/ModelRender.hpp>
 
 class Bone;
 class Model;
@@ -25,12 +26,10 @@ class ModelInstance;
 class ParticleSystem;
 class RibbonEmitter;
 
-namespace Noggit::Rendering
-{
-  class ModelRender;
-  struct ModelRenderPass;
-}
-
+namespace Noggit::Rendering {
+class ModelRender;
+struct ModelRenderPass;
+} // namespace Noggit::Rendering
 
 glm::vec3 fixCoordSystem(glm::vec3 v);
 
@@ -43,8 +42,7 @@ public:
   glm::vec3 pivot;
   int parent;
 
-  typedef struct
-  {
+  typedef struct {
     uint32_t flag_0x1 : 1;
     uint32_t flag_0x2 : 1;
     uint32_t flag_0x4 : 1;
@@ -63,20 +61,12 @@ public:
   glm::mat4x4 mrot = glm::mat4x4();
 
   bool calc;
-  void calcMatrix(glm::mat4x4 const& model_view
-                 , Bone* allbones
-                 , int anim
-                 , int time
-                 , int animtime
-                 );
-  Bone ( const BlizzardArchive::ClientFile& f,
-         const ModelBoneDef &b,
-         int *global,
-         const std::vector<std::unique_ptr<BlizzardArchive::ClientFile>>& animation_files
-       );
-
+  void calcMatrix(glm::mat4x4 const &model_view, Bone *allbones, int anim,
+                  int time, int animtime);
+  Bone(const BlizzardArchive::ClientFile &f, const ModelBoneDef &b, int *global,
+       const std::vector<std::unique_ptr<BlizzardArchive::ClientFile>>
+           &animation_files);
 };
-
 
 class TextureAnim {
   Animation::M2Value<glm::vec3> trans;
@@ -87,26 +77,27 @@ public:
   glm::mat4x4 mat;
 
   void calc(int anim, int time, int animtime);
-  TextureAnim(const BlizzardArchive::ClientFile& f, const ModelTexAnimDef &mta, int *global);
+  TextureAnim(const BlizzardArchive::ClientFile &f, const ModelTexAnimDef &mta,
+              int *global);
 };
 
 struct ModelColor {
   Animation::M2Value<glm::vec3> color;
   Animation::M2Value<float, int16_t> opacity;
 
-  ModelColor(const BlizzardArchive::ClientFile& f, const ModelColorDef &mcd, int *global);
+  ModelColor(const BlizzardArchive::ClientFile &f, const ModelColorDef &mcd,
+             int *global);
 };
 
 struct ModelTransparency {
   Animation::M2Value<float, int16_t> trans;
 
-  ModelTransparency(const BlizzardArchive::ClientFile& f, const ModelTransDef &mtd, int *global);
+  ModelTransparency(const BlizzardArchive::ClientFile &f,
+                    const ModelTransDef &mtd, int *global);
 };
 
-
-struct FakeGeometry
-{
-  FakeGeometry(Model* m);
+struct FakeGeometry {
+  FakeGeometry(Model *m);
 
   std::vector<glm::vec3> vertices;
   std::vector<uint16_t> indices;
@@ -117,29 +108,30 @@ struct ModelLight {
   glm::vec3 pos, tpos, dir, tdir;
   Animation::M2Value<glm::vec3> diffColor, ambColor;
   Animation::M2Value<float> diffIntensity, ambIntensity;
-  //Animation::M2Value<float> attStart,attEnd;
-  //Animation::M2Value<bool> Enabled;
+  // Animation::M2Value<float> attStart,attEnd;
+  // Animation::M2Value<bool> Enabled;
 
-  ModelLight(const BlizzardArchive::ClientFile&  f, const ModelLightDef &mld, int *global);
+  ModelLight(const BlizzardArchive::ClientFile &f, const ModelLightDef &mld,
+             int *global);
   void setup(int time, OpenGL::light l, int animtime);
 };
 
-class Model : public AsyncObject
-{
+class Model : public AsyncObject {
   friend class Noggit::Rendering::ModelRender;
   friend struct Noggit::Rendering::ModelRenderPass;
 
 public:
-  template<typename T>
-  static std::vector<T> M2Array(BlizzardArchive::ClientFile const& f, uint32_t offset, uint32_t count)
-  {
-    T const* start = reinterpret_cast<T const*>(f.getBuffer() + offset);
+  template <typename T>
+  static std::vector<T> M2Array(BlizzardArchive::ClientFile const &f,
+                                uint32_t offset, uint32_t count) {
+    T const *start = reinterpret_cast<T const *>(f.getBuffer() + offset);
     return std::vector<T>(start, start + count);
   }
 
-  Model(const std::string& name, Noggit::NoggitRenderContext context );
+  Model(const std::string &name, Noggit::NoggitRenderContext context);
 
-  std::vector<std::pair<float, std::tuple<int, int, int>>> intersect (glm::mat4x4 const& model_view, math::ray const&, int animtime);
+  std::vector<std::pair<float, std::tuple<int, int, int>>>
+  intersect(glm::mat4x4 const &model_view, math::ray const &, int animtime);
 
   void updateEmitters(float dt);
 
@@ -147,26 +139,33 @@ public:
   void waitForChildrenLoaded() override;
 
   [[nodiscard]]
-  bool is_hidden() const { return _hidden; }
+  bool is_hidden() const {
+    return _hidden;
+  }
 
   void toggle_visibility() { _hidden = !_hidden; }
-  void show() { _hidden = false ; }
+  void show() { _hidden = false; }
   void hide() { _hidden = true; }
 
   [[nodiscard]]
-  bool use_fake_geometry() const { return !!_fake_geometry; }
+  bool use_fake_geometry() const {
+    return !!_fake_geometry;
+  }
 
   [[nodiscard]]
-  bool animated_mesh() const { return (animGeometry || animBones); }
+  bool animated_mesh() const {
+    return (animGeometry || animBones);
+  }
 
   [[nodiscard]]
-  bool is_required_when_saving() const override
-  {
+  bool is_required_when_saving() const override {
     return true;
   }
 
   [[nodiscard]]
-  Noggit::Rendering::ModelRender* renderer() { return &_renderer; }
+  Noggit::Rendering::ModelRender *renderer() {
+    return &_renderer;
+  }
 
   // ===============================
   // Toggles
@@ -214,17 +213,16 @@ private:
 
   Noggit::NoggitRenderContext _context;
 
-  void initCommon(const BlizzardArchive::ClientFile& f);
-  bool isAnimated(const BlizzardArchive::ClientFile& f);
-  void initAnimated(const BlizzardArchive::ClientFile& f);
+  void initCommon(const BlizzardArchive::ClientFile &f);
+  bool isAnimated(const BlizzardArchive::ClientFile &f);
+  void initAnimated(const BlizzardArchive::ClientFile &f);
 
-  void animate(glm::mat4x4 const& model_view, int anim_id, int anim_time);
-  void calcBones(glm::mat4x4 const& model_view, int anim, int time, int animation_time);
+  void animate(glm::mat4x4 const &model_view, int anim_id, int anim_time);
+  void calcBones(glm::mat4x4 const &model_view, int anim, int time,
+                 int animation_time);
 
   void lightsOn(OpenGL::light lbase);
   void lightsOff(OpenGL::light lbase);
-
-
 
   // ===============================
   // Animation
@@ -257,4 +255,3 @@ private:
 
   bool _hidden = false;
 };
-

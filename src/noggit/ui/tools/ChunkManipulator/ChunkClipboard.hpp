@@ -18,8 +18,8 @@
 #include <noggit/Alphamap.hpp>
 #include <noggit/LiquidLayer.hpp>
 #include <noggit/MapHeaders.h>
+#include <noggit/TextureSet.hpp>
 #include <noggit/TileIndex.hpp>
-#include <noggit/texture_set.hpp>
 
 class World;
 

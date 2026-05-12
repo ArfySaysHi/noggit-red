@@ -1,17 +1,16 @@
-// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License
+// (version 3).
 
 #include "GetChunk.hpp"
 
+#include <noggit/Action.hpp>
+#include <noggit/ActionManager.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-#include <noggit/ActionManager.hpp>
-#include <noggit/Action.hpp>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
-GetChunkNode::GetChunkNode()
-: ContextLogicNodeBase()
-{
+GetChunkNode::GetChunkNode() : ContextLogicNodeBase() {
   setName("Coordinates :: GetChunk");
   setCaption("Coordinates :: GetChunk");
   _validation_state = NodeValidationState::Valid;
@@ -24,20 +23,20 @@ GetChunkNode::GetChunkNode()
   addPort<ChunkData>(PortType::Out, "Chunk", true);
 }
 
-void GetChunkNode::compute()
-{
-  World* world = gCurrentContext->getWorld();
+void GetChunkNode::compute() {
+  World *world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _(
+      ::gl, gCurrentContext->getViewport()->context());
 
-  MapTile* tile = defaultPortData<TileData>(PortType::In, 1)->value();
+  MapTile *tile = defaultPortData<TileData>(PortType::In, 1)->value();
 
   auto xy_data = defaultPortData<Vector2DData>(PortType::In, 2);
-  glm::vec2 const& xy = xy_data->value();
+  glm::vec2 const &xy = xy_data->value();
 
-  MapChunk* chunk;
-  if (xy.x < 0 || xy.x > 15.4f || xy.y < 0 || xy.y > 15.4f || !(chunk = tile->getChunk(xy.x, xy.y)))
-  {
+  MapChunk *chunk;
+  if (xy.x < 0 || xy.x > 15.4f || xy.y < 0 || xy.y > 15.4f ||
+      !(chunk = tile->getChunk(xy.x, xy.y))) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: chunk coordinates are out of range.");
     return;
@@ -50,13 +49,10 @@ void GetChunkNode::compute()
 
   _out_ports[1].out_value = std::make_shared<ChunkData>(chunk);
   _node->onDataUpdated(1);
-
 }
 
-NodeValidationState GetChunkNode::validate()
-{
-  if (!static_cast<TileData*>(_in_ports[1].in_value.lock().get()))
-  {
+NodeValidationState GetChunkNode::validate() {
+  if (!static_cast<TileData *>(_in_ports[1].in_value.lock().get())) {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate tile input.");
     return _validation_state;
