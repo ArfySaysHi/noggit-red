@@ -147,7 +147,7 @@ AssetBrowserWidget::AssetBrowserWidget(MapView* map_view, QWidget *parent)
   }
 
   connect(ui->listfileTree->selectionModel(), &QItemSelectionModel::selectionChanged
-      ,[=] (const QItemSelection& selected, const QItemSelection& deselected)
+      ,[=, this] (const QItemSelection& selected, const QItemSelection& deselected)
         {
             for (auto const& index : selected.indexes())
             {
@@ -168,7 +168,7 @@ AssetBrowserWidget::AssetBrowserWidget(MapView* map_view, QWidget *parent)
   );
 
   connect(ui->viewport, &ModelViewer::model_set
-      , [=](const std::string& filename)
+      , [=, this](const std::string& filename)
       {
         viewport_overlay_ui->doodadSetSelector->clear();
         viewport_overlay_ui->doodadSetSelector->insertItems(0, ui->viewport->getDoodadSetNames(filename));
@@ -179,7 +179,7 @@ AssetBrowserWidget::AssetBrowserWidget(MapView* map_view, QWidget *parent)
       }
   );
 
-  connect(ui->viewport, &ModelViewer::gl_data_unloaded,[=] () { emit gl_data_unloaded(); });
+  connect(ui->viewport, &ModelViewer::gl_data_unloaded,[=, this] () { emit gl_data_unloaded(); });
 
   // Handle preview rendering and drag
   connect(ui->listfileTree, &QTreeView::expanded

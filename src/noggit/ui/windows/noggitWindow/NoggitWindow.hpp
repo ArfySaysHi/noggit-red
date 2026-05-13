@@ -11,7 +11,20 @@
 
 #include <memory>
 #include <string>
-#include <unordered_set>
+
+#include <QLabel>
+#include <QWidget>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QStackedWidget>
+#include <math/trig.hpp>
+#include <memory>
+#include <noggit/MapView.h>
+#include <noggit/World.h>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+#include <noggit/project/ApplicationProject.h>
+#include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
+#include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
+#include <string>
 
 class MapView;
 class StackedWidget;

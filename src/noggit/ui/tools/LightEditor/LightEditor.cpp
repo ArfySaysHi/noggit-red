@@ -512,7 +512,7 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 				ActiveEditor.push_back(Editor);
 				Editor->show();
 
-				connect(Editor, &LightViewEditor::Delete, [=](LightViewEditor* self)
+				connect(Editor, &LightViewEditor::Delete, [=, this](LightViewEditor* self)
 					{
 						for (int i = 0; i < ActiveEditor.size(); ++i)
 							if (ActiveEditor[i] == self)
@@ -529,12 +529,12 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 	light_editing_layout->addWidget(color_values_group);
 
 
-	connect(lightningInfoDialogButton, &QPushButton::clicked, [=]() {
+	connect(lightningInfoDialogButton, &QPushButton::clicked, [=, this]() {
 
 		_lightning_info_dialog->show();
 		});
 
-	connect(_active_lights_tree, &QListWidget::itemDoubleClicked, this, [=](QListWidgetItem* item)
+	connect(_active_lights_tree, &QListWidget::itemDoubleClicked, this, [=, this](QListWidgetItem* item)
 		{
 			unsigned int selected_light_id = item->data(Qt::UserRole + 1).toUInt();
 
@@ -544,7 +544,7 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 		});
 
 
-	// connect(GetCurrentSkyButton, &QPushButton::clicked, [=]() {
+	// connect(GetCurrentSkyButton, &QPushButton::clicked, [=, this]() {
 	// 
 	// 	// Sky* new_sky = _map_view->getWorld()->renderer()->skies()->findSkyWeights(map_view->getCamera()->position); // this just returns the global sky
 	// 	// Sky* new_sky = _map_view->getWorld()->renderer()->skies()->findClosestSkyByDistance(map_view->getCamera()->position);
@@ -557,7 +557,7 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 	// 	}
 	// 	});
 
-	connect(_light_tree_filter, &QLineEdit::textChanged, [=](const QString& text)
+	connect(_light_tree_filter, &QLineEdit::textChanged, [=, this](const QString& text)
 		{
 			if (text.isEmpty())
 			{
@@ -579,7 +579,7 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 			}
 		});
 
-	connect(GetSelectedSkyButton, &QPushButton::clicked, [=]() 
+	connect(GetSelectedSkyButton, &QPushButton::clicked, [=, this]() 
 		{
 			auto const& selected_items = _light_tree->selectedItems();
 			if (selected_items.size())
@@ -592,7 +592,7 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 			}
 		});
 
-	connect(_light_tree, &QListWidget::itemDoubleClicked, this, [=](QListWidgetItem* item)
+	connect(_light_tree, &QListWidget::itemDoubleClicked, this, [=, this](QListWidgetItem* item)
 		{
 			unsigned int selected_light_id = item->data(Qt::UserRole + 1).toUInt();
 
@@ -602,7 +602,7 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 		});
 
 
-	connect(addNewSkyButton, &QPushButton::clicked, [=]() {
+	connect(addNewSkyButton, &QPushButton::clicked, [=, this]() {
 
 		// get selected sky to duplicate
 		Sky* old_sky = nullptr;
@@ -700,11 +700,11 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 
 		});
 
-	connect(deleteSkyButton, &QPushButton::clicked, [=]() {
+	connect(deleteSkyButton, &QPushButton::clicked, [=, this]() {
 
 		});
 
-	connect(portToSkyButton, &QPushButton::clicked, [=]() {
+	connect(portToSkyButton, &QPushButton::clicked, [=, this]() {
 					// 
 					// _map_view->_camera.position = _curr_sky->pos;
 					// _map_view->_camera.position.z += 100;
@@ -737,7 +737,7 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 
 		});
 
-	connect(save_current_sky_button, &QPushButton::clicked, [=]() {
+	connect(save_current_sky_button, &QPushButton::clicked, [=, this]() {
 		Sky* curr_sky = get_selected_sky();
 		if (!curr_sky)
 		{
@@ -805,7 +805,7 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 
 	// connect(skybox_model_lineedit, &QLineEdit::textChanged, [&](std::string v) {
 	QLineEdit::connect(skybox_model_lineedit, &QLineEdit::textChanged
-	, [=]
+	, [=, this]
 	{
 	auto text = skybox_model_lineedit->text().toStdString();
 	if (text.empty())
@@ -830,7 +830,7 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 		get_selected_sky()->getParam(param_combobox->currentIndex()).value()->skyboxFlags &= ~(1 << (1));
 	});
 
-	// connect(floats_editor_button, &QPushButton::clicked, [=]() {
+	// connect(floats_editor_button, &QPushButton::clicked, [=, this]() {
 	// LightFloatsEditor * Editor = new LightFloatsEditor(_map_view, _curr_sky->skyParams[param_combobox->currentIndex()], this);
 	// 
 	// 	Editor->show();
@@ -1270,7 +1270,7 @@ Noggit::Ui::Tools::LightningInfoDialog::LightningInfoDialog(LightEditor* editor,
 		}
 	);
 
-	connect(TimeSelectorHour, &QSpinBox::textChanged, [=](QString)
+	connect(TimeSelectorHour, &QSpinBox::textChanged, [=, this](QString)
 		{
 
 			int Time = ((TimeSelectorHour->value() * 60) + TimeSelectorMin->value()) * MAX_TIME_VALUE / (23 * 60 + 59);
@@ -1284,7 +1284,7 @@ Noggit::Ui::Tools::LightningInfoDialog::LightningInfoDialog(LightEditor* editor,
 			_editor->UpdateWorldTime();
 		});
 
-	connect(TimeSelectorMin, &QSpinBox::textChanged, [=](QString)
+	connect(TimeSelectorMin, &QSpinBox::textChanged, [=, this](QString)
 		{
 			int Time = ((TimeSelectorHour->value() * 60) + TimeSelectorMin->value()) * MAX_TIME_VALUE / (23 * 60 + 59);
 

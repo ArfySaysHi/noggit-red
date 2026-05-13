@@ -32,7 +32,7 @@ BrushStackItem::BrushStackItem(QWidget* parent)
   _expanded_icon = Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::caretdown);
   _ui.expanderButton->setIcon(_expanded_icon);
   connect(_ui.expanderButton, &QPushButton::clicked,
-          [=](bool state)
+          [=, this](bool state)
           {
             _ui.contentWidget->setVisible(state);
             _ui.expanderButton->setIcon(state ? _expanded_icon : _collapsed_icon);
@@ -43,7 +43,7 @@ BrushStackItem::BrushStackItem(QWidget* parent)
   _disabled_icon = Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::eyeslash);
   _ui.enabledButton->setIcon(_enabled_icon);
   connect(_ui.enabledButton, &QPushButton::clicked,
-          [=](bool state)
+          [=, this](bool state)
           {
             _ui.contentWidget->setEnabled(state);
             _ui.enabledButton->setIcon(_enabled_icon);
@@ -56,22 +56,22 @@ BrushStackItem::BrushStackItem(QWidget* parent)
   _is_radius_affecting = new QCheckBox("Inherit radius", _settings_popup);
   _is_radius_affecting->setChecked(true);
   _settings_popup_layout->addWidget(_is_radius_affecting);
-  connect(_is_radius_affecting, &QCheckBox::clicked, [=](bool checked) { emit settingsChanged(this); });
+  connect(_is_radius_affecting, &QCheckBox::clicked, [=, this](bool checked) { emit settingsChanged(this); });
 
   _is_inner_radius_affecting = new QCheckBox("Inherit inner radius", _settings_popup);
   _is_inner_radius_affecting->setChecked(true);
   _settings_popup_layout->addWidget(_is_inner_radius_affecting);
-  connect(_is_inner_radius_affecting, &QCheckBox::clicked, [=](bool checked) { emit settingsChanged(this); });
+  connect(_is_inner_radius_affecting, &QCheckBox::clicked, [=, this](bool checked) { emit settingsChanged(this); });
 
   _is_mask_rotation_affecting = new QCheckBox("Inherit rotation", _settings_popup);
   _is_mask_rotation_affecting->setChecked(true);
   _settings_popup_layout->addWidget(_is_mask_rotation_affecting);
-  connect(_is_mask_rotation_affecting, &QCheckBox::clicked, [=](bool checked) { emit settingsChanged(this); });
+  connect(_is_mask_rotation_affecting, &QCheckBox::clicked, [=, this](bool checked) { emit settingsChanged(this); });
 
   _is_speed_affecting = new QCheckBox("Inherit speed", _settings_popup);
   _is_mask_rotation_affecting->setChecked(true);
   _settings_popup_layout->addWidget(_is_speed_affecting);
-  connect(_is_speed_affecting, &QCheckBox::clicked, [=](bool checked) { emit settingsChanged(this); });
+  connect(_is_speed_affecting, &QCheckBox::clicked, [=, this](bool checked) { emit settingsChanged(this); });
 
   _settings_popup->updateGeometry();
   _settings_popup->adjustSize();
@@ -98,9 +98,9 @@ BrushStackItem::BrushStackItem(QWidget* parent)
 
   // Delete
   _ui.deleteButton->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::times));
-  connect(_ui.deleteButton, &QPushButton::clicked, [=]{ emit requestDelete(this); });
+  connect(_ui.deleteButton, &QPushButton::clicked, [=, this]{ emit requestDelete(this); });
 
-  connect(_ui.brushNameLabel, &QToolButton::clicked, [=](bool checked) { if (checked) emit activated(this);});
+  connect(_ui.brushNameLabel, &QToolButton::clicked, [=, this](bool checked) { if (checked) emit activated(this);});
 
   setActiveRectWidget(_ui.headerWidget);
 
@@ -136,7 +136,7 @@ void BrushStackItem::setTool(operation_type tool)
       });
 
       connect(_texture_palette, &Noggit::Ui::tileset_chooser::selected
-        , [=](std::string const& filename)
+        , [=, this](std::string const& filename)
               {
                 std::get<Noggit::Ui::texturing_tool*>(_tool_widget)->_current_texture->set_texture(filename);
                 _is_texture_dirty = true;
@@ -209,6 +209,7 @@ QJsonObject BrushStackItem::toJSON()
   }
 
   assert(false);
+  return {}; // unreachable; silences -Wreturn-type
 }
 
 void BrushStackItem::fromJSON(QJsonObject const& json)
@@ -512,6 +513,7 @@ bool BrushStackItem::isMaskEnabled()
     case eShader:
       return std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->getImageMaskSelector()->isEnabled();
   }
+  return false; // unreachable; silences -Wreturn-type
 }
 
 void BrushStackItem::updateMask()

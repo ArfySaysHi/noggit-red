@@ -16,14 +16,14 @@ namespace Noggit
         : Tool{ mapView }
     {
         addHotkey("setAreaId"_hash, {
-            .onPress = [=] {
+            .onPress = [=, this] {
               if (_selectedAreaId != -1)
               {
                 NOGGIT_ACTION_MGR->beginAction(mapView, Noggit::ActionFlags::eCHUNKS_AREAID);
                 mapView->getWorld()->setAreaID(mapView->getCamera()->position, _selectedAreaId, true);
                 NOGGIT_ACTION_MGR->endAction();
               }},
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::areaid && !NOGGIT_CUR_ACTION; }
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::areaid && !NOGGIT_CUR_ACTION; }
             });
     }
 
@@ -65,7 +65,7 @@ namespace Noggit
     void AreaTool::registerMenuItems(QMenu* menu)
     {
         addMenuTitle(menu, "Area Designator");
-        addMenuItem(menu, "Set Area ID", [=] {
+        addMenuItem(menu, "Set Area ID", [=, this] {
             if (_selectedAreaId == -1)
             {
                 return;

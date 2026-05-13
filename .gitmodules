@@ -1,3 +1,6 @@
 [submodule "src/external/blizzard-database-library"]
 	path = src/external/blizzard-database-library
 	url = https://github.com/ArfySaysHi/blizzard-database-library
+[submodule "src/external/blizzard-archive-library"]
+	path = src/external/blizzard-archive-library
+	url = https://github.com/ArfySaysHi/blizzard-archive-library.git

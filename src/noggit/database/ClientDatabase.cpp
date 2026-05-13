@@ -51,7 +51,7 @@ namespace Noggit
 
 		// insert if fresh_table, otherwise replace?
 
-		auto& row_definition = GetRecordDefinition();
+		auto row_definition = GetRecordDefinition();
 		auto sql_record_format = recordFormat();
 
 		auto client_table_iterator = getClientTable().Records();
@@ -91,7 +91,7 @@ namespace Noggit
 			QStringList colValues;
 			colValues.reserve(column_names.size());
 
-			for (auto& column_def : row_definition.ColumnDefinitions)
+			for (auto& column_def : row_definition)
 			{
 				if (column_def.Type == "int" && column_def.isID)
 				{
@@ -218,7 +218,7 @@ namespace Noggit
 		const std::string sql_table_name = getSqlTableName();
 
 		auto db_record_format = recordFormat();
-		assert(db_record_format.size() == getClientTable().ColumnCount());
+		assert(db_record_format.size() == GetRecordDefinition().size()); // verify def matches format
 
 		std::string statement = std::format("CREATE TABLE IF NOT EXISTS `{}` (", sql_table_name);
 
@@ -292,10 +292,10 @@ namespace Noggit
 	{
 		auto record_format = std::vector<DbColumnFormat>();
 
-		auto& row_definition = GetRecordDefinition();
-		for (int col_idx = 0; col_idx < row_definition.ColumnDefinitions.size(); col_idx++)
+		auto row_definition = GetRecordDefinition();
+		for (int col_idx = 0; col_idx < static_cast<int>(row_definition.size()); col_idx++)
 		{
-			auto& column_def = row_definition.ColumnDefinitions[col_idx];
+			auto& column_def = row_definition[col_idx];
 
 			bool is_locstring = false;
 
@@ -353,7 +353,9 @@ namespace Noggit
 				assert(!(column_def.isID && array_size > 1));
 				db_col_format.isID = column_def.isID;
 				db_col_format.isRelation = column_def.isRelation;
-				db_col_format.isSigned = column_def.isSigned;
+				// BlizzardDatabaseRowDefiniton does not expose sign info; default to signed.
+				// ID columns in DBC are always unsigned; everything else defaults to signed.
+				db_col_format.isSigned = !column_def.isID;
 
 				record_format.push_back(db_col_format);
 			}
@@ -434,15 +436,15 @@ namespace Noggit
 	Structures::BlizzardDatabaseRow ClientDatabaseTable::sqlRecordToDatabaseRow(QSqlQuery& record) const
 
 	{
-		auto& row_definition = GetRecordDefinition();
+		auto row_definition = GetRecordDefinition();
 
 		auto database_row = Structures::BlizzardDatabaseRow(-1);
 
 		int Id = -1;
 		int field_idx = 0;
-		for (int column_def_idx = 0; column_def_idx < row_definition.ColumnDefinitions.size(); ++column_def_idx)
+		for (int column_def_idx = 0; column_def_idx < static_cast<int>(row_definition.size()); ++column_def_idx)
 		{
-			auto& column_def = row_definition.ColumnDefinitions[column_def_idx];
+			auto& column_def = row_definition[column_def_idx];
 			auto database_column = Structures::BlizzardDatabaseColumn();
 
 			if (column_def.Type == "locstring")
@@ -511,9 +513,10 @@ namespace Noggit
 	int ClientDatabaseTable::ColumnCount() const
 	{
 		// get from parsed definition
-		int def_column_count = recordFormat().size();
+		int def_column_count = static_cast<int>(recordFormat().size());
 
-		int client_count = getClientTable().ColumnCount();
+		// BlizzardDatabaseTable has no ColumnCount(); use GetRecordDefinition().size() instead
+		int client_count = static_cast<int>(getClientTable().GetRecordDefinition().size());
 		assert(def_column_count == client_count);
 
 		if (ClientDatabase::databaseMode() == DatabaseMode::Sql)
@@ -562,20 +565,21 @@ namespace Noggit
 		return std::optional<Structures::BlizzardDatabaseRow>();
 	}*/
 
-	Structures::BlizzardDatabaseRowDefinition& ClientDatabaseTable::GetRecordDefinition() const
+	std::vector<Structures::BlizzardDatabaseRowDefiniton> ClientDatabaseTable::GetRecordDefinition() const
 	{
-		return Noggit::Project::CurrentProject::get()->ClientDatabase->TableRecordDefinition(_tableName);
+		return getClientTable().GetRecordDefinition();
 	}
 
 	BlizzardDatabaseLib::BlizzardDatabaseTable& ClientDatabaseTable::getClientTable() const
 	{
-		return Noggit::Project::CurrentProject::get()->ClientDatabase->LoadTable(_tableName, readFileAsIMemStream);
+		return const_cast<BlizzardDatabaseLib::BlizzardDatabaseTable&>(
+			Noggit::Project::CurrentProject::get()->ClientDatabase->LoadTable(_tableName, readFileAsIMemStream));
 	}
 
 	// get from local dbc data memory stream in BlizzardDatabaseLib::BlizzardDatabase
 	Structures::BlizzardDatabaseRow ClientDatabaseTable::clientRowById(unsigned int id) const
 	{
-		auto record = getClientTable().RecordById(id);
+		auto record = getClientTable().Record(id);
 		return record;
 	}
 

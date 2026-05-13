@@ -155,7 +155,7 @@ namespace Noggit
                          }
                        );
       connect ( filter, &QComboBox::currentTextChanged
-              , [=] (QString text)
+              , [=, this] (QString text)
                 {
                   search_filter->setFilterRegExp (text);
                 }
@@ -167,7 +167,7 @@ namespace Noggit
           texture_filter_box->setText("only with height texture variant");
 
       connect(texture_filter_box, &QCheckBox::toggled
-          , [=](bool on)
+          , [=, this](bool on)
           {
               texture_filter->setFilterRegExp(on ? "true" : "");
           }
@@ -186,7 +186,7 @@ namespace Noggit
       list->setModel (search_filter);
 
       connect(list->selectionModel(), &QItemSelectionModel::selectionChanged,
-        [=]() 
+        [=, this]() 
         {
           QModelIndexList selectedIndexes = list->selectionModel()->selectedIndexes();
           if (!selectedIndexes.isEmpty()) 
@@ -200,7 +200,7 @@ namespace Noggit
       size_slider->setRange (64, 256);
       size_slider->setValue (128);
       connect ( size_slider, &QSlider::valueChanged
-              , [=] (int size)
+              , [=, this] (int size)
                 {
                   list->setIconSize ({size, size});
                 }

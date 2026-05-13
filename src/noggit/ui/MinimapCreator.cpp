@@ -442,7 +442,7 @@ namespace Noggit
 
       // M2 model filter
       connect(add_btn, &QPushButton::clicked,
-          [=]()
+          [=, this]()
                 {
                   if (!world->has_selection())
                   {
@@ -467,7 +467,7 @@ namespace Noggit
       );
 
       connect(remove_btn, &QPushButton::clicked,
-              [=]()
+              [=, this]()
               {
 
                 if (!world->get_selected_model_count())
@@ -500,7 +500,7 @@ namespace Noggit
 
 
       connect(clear_btn, &QPushButton::clicked,
-              [=]()
+              [=, this]()
               {
                 _m2_model_filter_include->clear();
               }
@@ -508,7 +508,7 @@ namespace Noggit
 
       // M2 instance filter
       connect(add_btn_m2i, &QPushButton::clicked,
-          [=]()
+          [=, this]()
                 {
                   if (!world->has_selection())
                   {
@@ -533,7 +533,7 @@ namespace Noggit
       );
 
       connect(remove_btn_m2i, &QPushButton::clicked,
-              [=]()
+              [=, this]()
               {
 
                 if (!world->get_selected_model_count())
@@ -565,7 +565,7 @@ namespace Noggit
       );
 
       connect(clear_btn_m2i, &QPushButton::clicked,
-              [=]()
+              [=, this]()
               {
                 _m2_instance_filter_include->clear();
               }
@@ -573,7 +573,7 @@ namespace Noggit
 
       // WMO model filter
       connect(add_btn_wmo, &QPushButton::clicked,
-              [=]()
+              [=, this]()
               {
                 if (!world->has_selection())
                 {
@@ -599,7 +599,7 @@ namespace Noggit
       );
 
       connect(remove_btn_wmo, &QPushButton::clicked,
-              [=]()
+              [=, this]()
               {
 
                 if (!world->get_selected_model_count())
@@ -632,7 +632,7 @@ namespace Noggit
       );
 
       connect(clear_btn_wmo, &QPushButton::clicked,
-              [=]()
+              [=, this]()
               {
                 _wmo_model_filter_exclude->clear();
               }
@@ -640,7 +640,7 @@ namespace Noggit
 
       // WMO instance filter
       connect(add_btn_wmo_i, &QPushButton::clicked,
-              [=]()
+              [=, this]()
               {
                 if (!world->has_selection())
                 {
@@ -665,7 +665,7 @@ namespace Noggit
       );
 
       connect(remove_btn_wmo_i, &QPushButton::clicked,
-              [=]()
+              [=, this]()
               {
 
                 if (!world->get_selected_model_count())
@@ -697,7 +697,7 @@ namespace Noggit
       );
 
       connect(clear_btn_wmo_i, &QPushButton::clicked,
-              [=]()
+              [=, this]()
               {
                 _wmo_instance_filter_exclude->clear();
               }
@@ -844,27 +844,27 @@ namespace Noggit
       });
 
       // Buttons
-      connect(cur_adt_btn, &QPushButton::clicked, [=]() {
+      connect(cur_adt_btn, &QPushButton::clicked, [=, this]() {
         _render_settings.export_mode = MinimapGenMode::CURRENT_ADT;
         emit onSave();
       });
 
-      connect(sel_adts_btn, &QPushButton::clicked, [=]() {
+      connect(sel_adts_btn, &QPushButton::clicked, [=, this]() {
         _render_settings.export_mode = MinimapGenMode::SELECTED_ADTS;
         emit onSave();
       });
 
-      connect(all_adts_btn, &QPushButton::clicked, [=]() {
+      connect(all_adts_btn, &QPushButton::clicked, [=, this]() {
         _render_settings.export_mode = MinimapGenMode::MAP;
         emit onSave();
       });
 
-      connect(maptexture_btn, &QPushButton::clicked, [=]() {
+      connect(maptexture_btn, &QPushButton::clicked, [=, this]() {
         _render_settings.export_mode = MinimapGenMode::LOD_MAPTEXTURES;
         emit onSave();
       });
 
-      connect(maptexture_n_btn, &QPushButton::clicked, [=]() {
+      connect(maptexture_n_btn, &QPushButton::clicked, [=, this]() {
         _render_settings.export_mode = MinimapGenMode::LOD_MAPTEXTURES_N;
         emit onSave();
       });

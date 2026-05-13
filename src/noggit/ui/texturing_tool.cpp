@@ -1,4 +1,4 @@
-﻿// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/application/NoggitApplication.hpp>
@@ -152,7 +152,7 @@ namespace Noggit
           _show_unpaintable_chunks_cb->hide();
       tool_layout->addWidget(_show_unpaintable_chunks_cb);
 
-      connect(_show_unpaintable_chunks_cb, &QCheckBox::toggled, [=](bool checked)
+      connect(_show_unpaintable_chunks_cb, &QCheckBox::toggled, [=, this](bool checked)
           {
               _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = checked;
               _map_view->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
@@ -442,14 +442,14 @@ namespace Noggit
               );
 
       connect ( quick_palette_btn, &QPushButton::clicked
-              , [=] ()
+              , [=, this] ()
                 {
                   emit texturePaletteToggled();
                 }
               );
 
       connect(geffect_tools_btn, &QPushButton::clicked
-          , [=]()
+          , [=, this]()
           {
               _ground_effect_tool->show();
           }
@@ -479,7 +479,7 @@ namespace Noggit
       if (modern_features)
       {
           connect(_current_texture, &Noggit::Ui::current_texture::texture_updated
-              , [=]()
+              , [=, this]()
               {
                   auto proj = Noggit::Project::CurrentProject::get();
                   auto foundTexture = proj->ExtraMapData.TextureHeightData_Global.find(_current_texture->filename());
@@ -494,7 +494,7 @@ namespace Noggit
           );
 
           connect(_heightmapping_copy_btn, &QPushButton::pressed
-              , [=]()
+              , [=, this]()
               {
                   std::ostringstream oss;
                   oss << "{\r\n    \"" << _current_texture->filename() << "\": {\r\n"

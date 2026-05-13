@@ -332,7 +332,7 @@ namespace Noggit
 
             // Get list of ground effect id this texture uses in this ADT.
             connect(button_scan_adt, &QPushButton::clicked
-                , [=]()
+                , [=, this]()
                 {
                     _loaded_effects.clear();
                     scanTileForEffects(TileIndex(_map_view->getCamera()->position));
@@ -341,7 +341,7 @@ namespace Noggit
             );
 
             connect(button_scan_adt_loaded, &QPushButton::clicked
-                , [=]()
+                , [=, this]()
                 {
                     _loaded_effects.clear();
 
@@ -354,7 +354,7 @@ namespace Noggit
             );
 
             connect(_cbbox_effect_sets, qOverload<int>(&QComboBox::currentIndexChanged)
-                , [=](int index)
+                , [=, this](int index)
                 {
                     // unsigned int effect_id = _cbbox_effect_sets->currentData().toUInt();
 
@@ -392,7 +392,7 @@ namespace Noggit
             // for (int i = 0; i < 4; i++)
             // {
             //     connect(_button_effect_doodad[i], &QPushButton::clicked
-            //         , [=]()
+            //         , [=, this]()
             //         {
             //             active_doodad_widget = i;
             //             _map_view->getAssetBrowserWidget()->set_browse_mode(Tools::AssetBrowser::asset_browse_mode::detail_doodads);
@@ -401,7 +401,7 @@ namespace Noggit
             //     );
             // }
 
-            connect(_object_list, &QListWidget::itemClicked, this, [=](QListWidgetItem* item)
+            connect(_object_list, &QListWidget::itemClicked, this, [=, this](QListWidgetItem* item)
                 {
                     _map_view->getAssetBrowserWidget()->set_browse_mode(Tools::AssetBrowser::asset_browse_mode::detail_doodads);
                     _map_view->getAssetBrowser()->setVisible(true);
@@ -409,7 +409,7 @@ namespace Noggit
             );
 
             using AssetBrowser = Noggit::Ui::Tools::AssetBrowser::Ui::AssetBrowserWidget;
-            connect(map_view->getAssetBrowserWidget(), &AssetBrowser::selectionChanged, this, [=](std::string const& path) {
+            connect(map_view->getAssetBrowserWidget(), &AssetBrowser::selectionChanged, this, [=, this](std::string const& path) {
                 if (isVisible()) setDoodadSlotFromBrowser(path.c_str());
                 });
         }
@@ -518,7 +518,7 @@ namespace Noggit
                 QColor color = QColor::fromRgbF(_effects_colors[count].r, _effects_colors[count].g, _effects_colors[count].b);
                 QListWidgetItem* list_item = new QListWidgetItem(effect_set.Name.c_str());
                 _effect_sets_list->addItem(list_item);
-                list_item->setBackgroundColor(color);
+                list_item->setBackground(color);
                 QPixmap pixmap(_effect_sets_list->iconSize());
                 pixmap.fill(color);
                 QIcon icon(pixmap);
@@ -549,9 +549,9 @@ namespace Noggit
                 // Same formula as in the shader.
                 float partr, partg, partb;
                 // TODO : Can use id instead of count?
-                float r = modf(sin(glm::dot(glm::vec2(color_count), glm::vec2(12.9898, 78.233))) * 43758.5453, &partr);
-                float g = modf(sin(glm::dot(glm::vec2(color_count), glm::vec2(11.5591, 70.233))) * 43569.5451, &partg);
-                float b = modf(sin(glm::dot(glm::vec2(color_count), glm::vec2(13.1234, 76.234))) * 43765.5452, &partg);
+                float r = modff(static_cast<float>(sin(glm::dot(glm::vec2(color_count), glm::vec2(12.9898, 78.233))) * 43758.5453), &partr);
+                float g = modff(static_cast<float>(sin(glm::dot(glm::vec2(color_count), glm::vec2(11.5591, 70.233))) * 43569.5451), &partg);
+                float b = modff(static_cast<float>(sin(glm::dot(glm::vec2(color_count), glm::vec2(13.1234, 76.234))) * 43765.5452), &partb);
                 color_count++;
                 _effects_colors.push_back(glm::vec3(r, g, b));
             }

@@ -66,7 +66,7 @@ namespace Noggit
       layout->addWidget(fix_all_fuckporting_edition);      
 
       connect ( get_max, &QPushButton::clicked
-              , [=]
+              , [=, this]
                 {
                   hide();
                   emit fix_uid(pos, camera_pitch, camera_yaw, uid_fix_mode::max_uid);
@@ -75,7 +75,7 @@ namespace Noggit
               );
 
       connect ( fix_all, &QPushButton::clicked
-              , [=]
+              , [=, this]
                 {
                   hide();
                   emit fix_uid(pos, camera_pitch, camera_yaw, uid_fix_mode::fix_all_fail_on_model_loading_error);
@@ -84,7 +84,7 @@ namespace Noggit
               );
 
       connect ( fix_all_fuckporting_edition, &QPushButton::clicked
-              , [=]
+              , [=, this]
                 {
                   hide();
                   emit fix_uid(pos, camera_pitch, camera_yaw, uid_fix_mode::fix_all_fuckporting_edition);

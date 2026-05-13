@@ -137,12 +137,12 @@ namespace Noggit
   slider->setSliderPosition((int)std::round(def *dp1));                                    \
   auto label = new QLabel(this);                                                           \
   label->setText(name.c_str());                                                                    \
-  connect(spinner, qOverload<double>(&QDoubleSpinBox::valueChanged), [=](double v) { \
+  connect(spinner, qOverload<double>(&QDoubleSpinBox::valueChanged), [=, this](double v) { \
     set_json<T>(path, (T)v);                                                        \
     QSignalBlocker const blocker(slider);                                                  \
     slider->setSliderPosition((int)std::round(v *dp1));                                    \
   });                                                                                      \
-  connect(slider, &QSlider::valueChanged, [=](int v) {                               \
+  connect(slider, &QSlider::valueChanged, [=, this](int v) {                               \
     double t = double(v) / dp1;                                                            \
     set_json<T>(path, t);                                                           \
     QSignalBlocker const blocker(spinner);                                                 \
@@ -211,7 +211,7 @@ namespace Noggit
       auto tline = new QLineEdit(this);
       auto label = new QLabel(this);
       label->setText(name.c_str());
-      connect(tline, &QLineEdit::textChanged, this, [=](auto text) {
+      connect(tline, &QLineEdit::textChanged, this, [=, this](auto text) {
         set_json<std::string>(name, text.toUtf8().constData());
       });
       _widgets.push_back(label);
@@ -225,7 +225,7 @@ namespace Noggit
       auto checkbox = new QCheckBox(this);
       auto label = new QLabel(this);
       label->setText(name.c_str());
-      connect(checkbox, &QCheckBox::stateChanged, this, [=](auto value) {
+      connect(checkbox, &QCheckBox::stateChanged, this, [=, this](auto value) {
         set_json<bool>(name, value ? true : false);
       });
 
@@ -251,7 +251,7 @@ namespace Noggit
         auto box = new QComboBox(this);
         auto label = new QLabel(this);
 
-        connect(box, QOverload<int>::of(&QComboBox::activated), this, [=](auto index) {
+        connect(box, QOverload<int>::of(&QComboBox::activated), this, [=, this](auto index) {
           set_json<std::string>(name, box->itemText(index).toUtf8().constData());
         });
 

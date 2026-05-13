@@ -437,7 +437,7 @@ void MapCreationWizard::createWmoEntryTab()
 
     _wmoEntryTab.disableTerrain = new QCheckBox(_map_settings);
     _wmoEntryTab.disableTerrain->setChecked(false);
-    connect(_wmoEntryTab.disableTerrain, &QCheckBox::toggled, [=](bool state) {
+    connect(_wmoEntryTab.disableTerrain, &QCheckBox::toggled, [=, this](bool state) {
         _wmoEntryTab.wmoPath->setDisabled(!state);
         // Is there any value in exposing these?
         //_wmoEntryTab.nameId->setDisabled(!state);
@@ -453,7 +453,7 @@ void MapCreationWizard::createWmoEntryTab()
     _wmoEntryTab.wmoPath = new QLineEdit(_map_settings);
     _wmoEntryTab.wmoPath->setDisabled(true);
     auto defaultStylesheet = _wmoEntryTab.wmoPath->styleSheet();
-    connect(_wmoEntryTab.wmoPath, &QLineEdit::textChanged, [=](QString text) {
+    connect(_wmoEntryTab.wmoPath, &QLineEdit::textChanged, [=, this](QString text) {
         if (!_wmoEntryTab.disableTerrain->isChecked())
         {
             return;
@@ -479,7 +479,7 @@ void MapCreationWizard::createWmoEntryTab()
     _wmoEntryTab.nameId->setDisabled(true);
     _wmoEntryTab.nameId->setMinimum(std::numeric_limits<std::int32_t>::min());
     _wmoEntryTab.nameId->setMaximum(std::numeric_limits<std::int32_t>::max()); 
-    connect(_wmoEntryTab.nameId, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=](int value) {
+    connect(_wmoEntryTab.nameId, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=, this](int value) {
         _wmoEntryTab.wmoEntry.nameID = value;
         });
     layout->addRow("Name Id:", _wmoEntryTab.nameId);
@@ -488,14 +488,14 @@ void MapCreationWizard::createWmoEntryTab()
     _wmoEntryTab.uniqueId->setDisabled(true);
     _wmoEntryTab.uniqueId->setMinimum(std::numeric_limits<std::int32_t>::min());
     _wmoEntryTab.uniqueId->setMaximum(std::numeric_limits<std::int32_t>::max());
-    connect(_wmoEntryTab.uniqueId, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=](int value) {
+    connect(_wmoEntryTab.uniqueId, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=, this](int value) {
         _wmoEntryTab.wmoEntry.uniqueID = value;
         });
     layout->addRow("Unique Id:", _wmoEntryTab.uniqueId);
 
     _wmoEntryTab.position = new Vector3fWidget(_map_settings);
     _wmoEntryTab.position->setDisabled(true);
-    connect(_wmoEntryTab.position, &Vector3fWidget::valueChanged , [=](glm::vec3 const& value) {
+    connect(_wmoEntryTab.position, &Vector3fWidget::valueChanged , [=, this](glm::vec3 const& value) {
         _wmoEntryTab.wmoEntry.pos[0] = value.x;
         _wmoEntryTab.wmoEntry.pos[1] = value.y;
         _wmoEntryTab.wmoEntry.pos[2] = value.z;
@@ -504,7 +504,7 @@ void MapCreationWizard::createWmoEntryTab()
 
     _wmoEntryTab.rotation = new Vector3fWidget(_map_settings);
     _wmoEntryTab.rotation->setDisabled(true);
-    connect(_wmoEntryTab.rotation, &Vector3fWidget::valueChanged, [=](glm::vec3 const& value) {
+    connect(_wmoEntryTab.rotation, &Vector3fWidget::valueChanged, [=, this](glm::vec3 const& value) {
         _wmoEntryTab.wmoEntry.rot[0] = value.x;
         _wmoEntryTab.wmoEntry.rot[1] = value.y;
         _wmoEntryTab.wmoEntry.rot[2] = value.z;
@@ -515,14 +515,14 @@ void MapCreationWizard::createWmoEntryTab()
     _wmoEntryTab.flags->setDisabled(true);
     _wmoEntryTab.flags->setMinimum(std::numeric_limits<std::uint16_t>::min());
     _wmoEntryTab.flags->setMaximum(std::numeric_limits<std::uint16_t>::max());
-    connect(_wmoEntryTab.flags, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=](int value) {
+    connect(_wmoEntryTab.flags, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=, this](int value) {
         _wmoEntryTab.wmoEntry.flags = static_cast<uint16_t>(value);
         });
     layout->addRow("Flags:", _wmoEntryTab.flags);
 
     _wmoEntryTab.doodadSet = new QComboBox(_map_settings);
     _wmoEntryTab.doodadSet->setDisabled(true);
-    connect(_wmoEntryTab.doodadSet, &QComboBox::currentTextChanged, [=](QString)
+    connect(_wmoEntryTab.doodadSet, &QComboBox::currentTextChanged, [=, this](QString)
         {
             _wmoEntryTab.wmoEntry.doodadSet = _wmoEntryTab.doodadSet->currentIndex();
         });
@@ -530,7 +530,7 @@ void MapCreationWizard::createWmoEntryTab()
 
     _wmoEntryTab.nameSet = new QComboBox(_map_settings);
     _wmoEntryTab.nameSet->setDisabled(true);
-    connect(_wmoEntryTab.nameSet, &QComboBox::currentTextChanged, [=](QString)
+    connect(_wmoEntryTab.nameSet, &QComboBox::currentTextChanged, [=, this](QString)
         {
             _wmoEntryTab.wmoEntry.nameSet = _wmoEntryTab.nameSet->currentIndex();
         });

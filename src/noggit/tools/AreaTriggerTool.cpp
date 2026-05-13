@@ -47,8 +47,8 @@ namespace Noggit
     : Tool{ mapView }
   {
     addHotkey("deleteSelection"_hash, {
-        .onPress = [=] { _editor->deleteSelectedTrigger(); },
-        .condition = [=] { return mapView->get_editing_mode() == editing_mode::area_trigger && !NOGGIT_CUR_ACTION; }
+        .onPress = [=, this] { _editor->deleteSelectedTrigger(); },
+        .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::area_trigger && !NOGGIT_CUR_ACTION; }
       });
   }
 
@@ -77,7 +77,7 @@ namespace Noggit
     _editor = new  AreaTriggerEditor{ mapView() };
     toolPanel->registerTool(this, _editor);
 
-    QObject::connect(_editor, &AreaTriggerEditor::selectionChanged, [=](uint32_t current) { _selected_area_trigger = current; });
+    QObject::connect(_editor, &AreaTriggerEditor::selectionChanged, [=, this](uint32_t current) { _selected_area_trigger = current; });
   }
 
   ToolDrawParameters AreaTriggerTool::drawParameters() const

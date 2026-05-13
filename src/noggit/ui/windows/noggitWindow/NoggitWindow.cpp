@@ -1,3 +1,4 @@
+#include "NoggitWindow.hpp"
 #include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
 
 #include <noggit/ContextObject.hpp>
@@ -12,7 +13,11 @@
 #include <noggit/database/SqlUIDStorage.h>
 #include <noggit/project/ApplicationProject.h>
 #include <noggit/ui/FontAwesome.hpp>
+
+#ifdef WIN32
 #include <noggit/ui/FramelessWindow.hpp>
+#endif
+
 #include <noggit/ui/UidFixWindow.hpp>
 #include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
@@ -26,8 +31,8 @@
 #include <noggit/uid_storage.hpp>
 
 #include <blizzard-archive-library/include/Exception.hpp>
-#include <string>
 
+#include <QApplication>
 #include <QCheckBox>
 #include <QFileInfo>
 #include <QFormLayout>
@@ -48,12 +53,8 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
-#include <chrono>
-#include <sstream>
-
 #include "revision.h"
 
-#include "ui_TitleBar.h"
 #include <noggit/ui/tools/ViewportManager/ViewportManager.hpp>
 
 namespace Noggit::Ui::Windows {
@@ -120,6 +121,7 @@ NoggitWindow::NoggitWindow(
 
   _menuBar = menuBar();
 
+#ifdef WIN32
   if (!settings.value("systemWindowFrame", true).toBool()) {
     QWidget *widget = new QWidget(this);
     ::Ui::TitleBar *titleBarWidget =
@@ -127,6 +129,7 @@ NoggitWindow::NoggitWindow(
     titleBarWidget->horizontalLayout->insertWidget(2, _menuBar);
     setMenuWidget(widget);
   }
+#endif
 
   _menuBar->setNativeMenuBar(settings.value("nativeMenubar", true).toBool());
 
@@ -744,7 +747,7 @@ void NoggitWindow::patchWowClient() {
       new QPushButton("Save Project to Client MPQ", mpq_patch_params);
   mpq_patch_params_layout->addWidget(mpq_patch_params_okay);
 
-  connect(mpq_patch_params_okay, &QPushButton::clicked, [=]() {
+  connect(mpq_patch_params_okay, &QPushButton::clicked, [=, this]() {
     // check if mpq name is allowed
     if (!Noggit::Application::NoggitApplication::instance()
              ->clientData()
@@ -753,7 +756,7 @@ void NoggitWindow::patchWowClient() {
                  true)) {
       QMessageBox::warning(
           this, "Name Error",
-          "MPQ Name is not allowed.\This name is already used by base client patches, or the client can't load it.\
+          "MPQ Name is not allowed.\nThis name is already used by base client patches, or the client can't load it.\
                      \nYour patch must be named \"patch-[4-9].MPQ\" or \"patch-[A-Z].MPQ\".");
     } else {
       QSettings settings;

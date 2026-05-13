@@ -51,7 +51,7 @@ namespace Noggit
         _minimapTool = new Noggit::Ui::MinimapCreator(mv, mv->getWorld(), mv);
         toolPanel->registerTool(this, _minimapTool);
 
-        QObject::connect(_minimapTool, &Ui::MinimapCreator::onSave, [=] {
+        QObject::connect(_minimapTool, &Ui::MinimapCreator::onSave, [=, this] {
             saving_minimap = true;
             });
     }
@@ -100,7 +100,7 @@ namespace Noggit
         static QProgressBar* progress;
         static QPushButton* cancel_btn;
 
-        auto init = [=](int max) {
+        auto init = [=, this](int max) {
             progress = new QProgressBar(nullptr);
             progress->setMinimum(0);
             progress->setMaximum(max);
@@ -110,7 +110,7 @@ namespace Noggit
             cancel_btn->setText("Cancel");
 
             QObject::connect(cancel_btn, &QPushButton::clicked,
-                [=]
+                [=, this]
                 {
                     _mmap_async_index = 0;
                     _mmap_render_index = 0;
@@ -123,7 +123,7 @@ namespace Noggit
             mv->mainWindow()->statusBar()->addPermanentWidget(cancel_btn);
 
             QObject::connect(mv, &MapView::updateProgress,
-                [=](int value)
+                [=, this](int value)
                 {
                     // This weirdness is required due to a bug on Linux when QT repaint crashes due to too many events
                     // being passed through. TODO: this potentially only masks the issue, which may reappear on faster
@@ -140,7 +140,7 @@ namespace Noggit
             }
             };
 
-        auto save = [=, &mmap_render_success]()
+        auto save = [=, this, &mmap_render_success]()
             {
                 while (!world->mapIndex.hasTile({ _mmap_async_index / 64, _mmap_async_index % 64 }))
                 {

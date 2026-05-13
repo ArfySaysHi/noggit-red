@@ -47,7 +47,7 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
 
 
   connect(okay_button, &QPushButton::clicked,
-          [=]()
+          [=, this]()
           {
             auto brush_stack_item = new BrushStackItem(this);
             _ui.brushList->layout()->addWidget(brush_stack_item);
@@ -78,7 +78,7 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
   _add_popup->setVisible(false);
 
   connect(_ui.addBrushButton, &QPushButton::clicked,
-          [=]()
+          [=, this]()
           {
             QPoint new_pos = mapToGlobal(
               QPoint(_ui.addBrushButton->pos().x() - _add_popup->width() - 12,
@@ -94,7 +94,7 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
           });
 
   connect(_ui.clearBrushesButton, &QPushButton::clicked,
-          [=]()
+          [=, this]()
           {
             QLayoutItem* item;
             while( (item = _ui.brushList->layout()->takeAt(0)) != nullptr)

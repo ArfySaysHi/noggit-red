@@ -444,22 +444,22 @@ object_editor::object_editor(MapView *mapView, World *world,
   );*/
 
   connect(rotRangeStart, qOverload<double>(&QDoubleSpinBox::valueChanged),
-          [=](double v) { paste_params->minRotation = v; });
+          [=, this](double v) { paste_params->minRotation = v; });
 
   connect(rotRangeEnd, qOverload<double>(&QDoubleSpinBox::valueChanged),
-          [=](double v) { paste_params->maxRotation = v; });
+          [=, this](double v) { paste_params->maxRotation = v; });
 
   connect(tiltRangeStart, qOverload<double>(&QDoubleSpinBox::valueChanged),
-          [=](double v) { paste_params->minTilt = v; });
+          [=, this](double v) { paste_params->minTilt = v; });
 
   connect(tiltRangeEnd, qOverload<double>(&QDoubleSpinBox::valueChanged),
-          [=](double v) { paste_params->maxTilt = v; });
+          [=, this](double v) { paste_params->maxTilt = v; });
 
   connect(scaleRangeStart, qOverload<double>(&QDoubleSpinBox::valueChanged),
-          [=](double v) { paste_params->minScale = v; });
+          [=, this](double v) { paste_params->minScale = v; });
 
   connect(scaleRangeEnd, qOverload<double>(&QDoubleSpinBox::valueChanged),
-          [=](double v) { paste_params->maxScale = v; });
+          [=, this](double v) { paste_params->maxScale = v; });
 
   copyAttributesCheck->setChecked(_copy_model_stats);
   connect(copyAttributesCheck, &QCheckBox::stateChanged,
@@ -471,7 +471,7 @@ object_editor::object_editor(MapView *mapView, World *world,
           [this](bool b) { _use_median_pivot_point = b; });
 
   paste_override_rotate_cb->setChecked(paste_params->rotate_on_terrain);
-  connect(paste_override_rotate_cb, &QCheckBox::stateChanged, [=](int s) {
+  connect(paste_override_rotate_cb, &QCheckBox::stateChanged, [=, this](int s) {
     paste_params->rotate_on_terrain = s;
     _settings->setValue("paste_params/rotate_on_terrain", (bool)s);
     _settings->sync();
@@ -481,36 +481,36 @@ object_editor::object_editor(MapView *mapView, World *world,
           [&](int id) { pasteMode = id; });
 
   connect(rotEditorButton, &QPushButton::clicked,
-          [=]() { rotationEditor->show(); });
+          [=, this]() { rotationEditor->show(); });
   /*
-  connect(visToggleButton, &QPushButton::clicked, [=]() {
+  connect(visToggleButton, &QPushButton::clicked, [=, this]() {
       mapView->_draw_hidden_models.set
         (!mapView->_draw_hidden_models.get());
   });
   */
 
-  connect(clearListButton, &QPushButton::clicked, [=]() {
+  connect(clearListButton, &QPushButton::clicked, [=, this]() {
     ModelManager::clear_hidden_models();
     WMOManager::clear_hidden_wmos();
   });
 
   connect(clearGroupsButton, &QPushButton::clicked,
-          [=]() { _map_view->getWorld()->clear_selection_groups(); });
+          [=, this]() { _map_view->getWorld()->clear_selection_groups(); });
 
-  connect(toTxt, &QPushButton::clicked, [=]() { SaveObjecttoTXT(world); });
+  connect(toTxt, &QPushButton::clicked, [=, this]() { SaveObjecttoTXT(world); });
 
-  connect(fromTxt, &QPushButton::clicked, [=]() { showImportModels(); });
+  connect(fromTxt, &QPushButton::clicked, [=, this]() { showImportModels(); });
 
   connect(last_m2_from_wmv, &QPushButton::clicked,
-          [=]() { import_last_model_from_wmv(eMODEL); });
+          [=, this]() { import_last_model_from_wmv(eMODEL); });
 
   connect(last_wmo_from_wmv, &QPushButton::clicked,
-          [=]() { import_last_model_from_wmv(eWMO); });
+          [=, this]() { import_last_model_from_wmv(eWMO); });
 
   connect(helper_models_btn, &QPushButton::clicked,
-          [=]() { helper_models_widget->show(); });
+          [=, this]() { helper_models_widget->show(); });
 
-  connect(asset_browser_btn, &QPushButton::clicked, [=]() {
+  connect(asset_browser_btn, &QPushButton::clicked, [=, this]() {
     _map_view->getAssetBrowserWidget()->set_browse_mode(
         Tools::AssetBrowser::asset_browse_mode::world);
     // mapView->getAssetBrowser()->setVisible(mapView->getAssetBrowser()->isHidden());
@@ -521,7 +521,7 @@ object_editor::object_editor(MapView *mapView, World *world,
   });
 
   connect(object_palette_btn, &QPushButton::clicked,
-          [=]() { emit objectPaletteBtnPressed(); });
+          [=, this]() { emit objectPaletteBtnPressed(); });
 
   connect(_doodadSetSelector, qOverload<int>(&QComboBox::currentIndexChanged),
           [this](int index) {

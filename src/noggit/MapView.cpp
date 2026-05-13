@@ -98,6 +98,7 @@
 #include <QClipboard>
 #include <QCursor>
 #include <QDateTime>
+#include <QDesktopServices>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QOpenGLContext>
@@ -105,6 +106,7 @@
 #include <QProgressDialog>
 #include <QScrollBar>
 #include <QSurfaceFormat>
+#include <QUrl>
 #include <QWidgetAction>
 #include <QtCore/QTimer>
 #include <QtGui/QMouseEvent>
@@ -138,6 +140,13 @@
     NOGGIT_ACTION_MGR->purge();                                                \
     ACTION_CODE                                                                \
   }
+
+// Helper: combine Qt::Modifier and Qt::Key without triggering the
+// -Wdeprecated-enum-enum-conversion warning introduced in Qt 5.15.
+// Cast both sides to int so the arithmetic is unambiguous.
+static inline QKeySequence makeKeySeq(int modifier, Qt::Key key) {
+  return QKeySequence(modifier | static_cast<int>(key));
+}
 
 // add action no shortcut
 #define ADD_ACTION_NS(menu, name, on_action)                                   \
@@ -826,17 +835,18 @@ void MapView::setupFileMenu() {
                 [this] { _force_uid_check = true; });
   file_menu->addSeparator();
 
-  ADD_ACTION(file_menu, "Add bookmark", Qt::CTRL | Qt::Key_F5, [this] {
-    auto bookmark = Noggit::Project::NoggitProjectBookmarkMap();
-    bookmark.position = _camera.position;
-    bookmark.camera_pitch = _camera.pitch()._;
-    bookmark.camera_yaw = _camera.yaw()._;
-    bookmark.map_id = _world->getMapID();
-    bookmark.name =
-        gAreaDB.getAreaFullName(_world->getAreaID(_camera.position));
+  ADD_ACTION(file_menu, "Add bookmark", makeKeySeq(Qt::CTRL, Qt::Key_F5),
+             [this] {
+               auto bookmark = Noggit::Project::NoggitProjectBookmarkMap();
+               bookmark.position = _camera.position;
+               bookmark.camera_pitch = _camera.pitch()._;
+               bookmark.camera_yaw = _camera.yaw()._;
+               bookmark.map_id = _world->getMapID();
+               bookmark.name =
+                   gAreaDB.getAreaFullName(_world->getAreaID(_camera.position));
 
-    _project->createBookmark(bookmark);
-  });
+               _project->createBookmark(bookmark);
+             });
 
   ADD_ACTION(
       file_menu, "Write coordinates to port.txt and copy to clipboard",
@@ -1676,15 +1686,15 @@ void MapView::setupViewMenu() {
   ADD_TOGGLE(view_menu, "Draw fog", Qt::Key_F12, _draw_fog);
 
   ADD_TOGGLE_POST(
-      view_menu, "Hole lines", Qt::SHIFT | Qt::Key_F1, _draw_hole_lines,
-      ([=, this] {
+      view_menu, "Hole lines", makeKeySeq(Qt::SHIFT, Qt::Key_F1),
+      _draw_hole_lines, ([=, this] {
         _world->renderer()->getTerrainParamsUniformBlock()->draw_hole_lines =
             _draw_hole_lines.get();
         _world->renderer()->markTerrainParamsUniformBlockDirty();
       }));
 
-  ADD_TOGGLE_POST(view_menu, "Climb", Qt::SHIFT | Qt::Key_F2, _draw_climb,
-                  ([=, this] {
+  ADD_TOGGLE_POST(view_menu, "Climb", makeKeySeq(Qt::SHIFT, Qt::Key_F2),
+                  _draw_climb, ([=, this] {
                     _world->renderer()
                         ->getTerrainParamsUniformBlock()
                         ->draw_impassible_climb = _draw_climb.get();
@@ -1692,16 +1702,16 @@ void MapView::setupViewMenu() {
                   }));
 
   ADD_TOGGLE_POST(
-      view_menu, "Vertex Color", Qt::SHIFT | Qt::Key_F3, _draw_vertex_color,
-      ([=, this] {
+      view_menu, "Vertex Color", makeKeySeq(Qt::SHIFT, Qt::Key_F3),
+      _draw_vertex_color, ([=, this] {
         _world->renderer()->getTerrainParamsUniformBlock()->draw_vertex_color =
             _draw_vertex_color.get();
         _world->renderer()->markTerrainParamsUniformBlockDirty();
       }));
 
   ADD_TOGGLE_POST(
-      view_menu, "Baked Shadows", Qt::SHIFT | Qt::Key_F4, _draw_baked_shadows,
-      ([=, this] {
+      view_menu, "Baked Shadows", makeKeySeq(Qt::SHIFT, Qt::Key_F4),
+      _draw_baked_shadows, ([=, this] {
         _world->renderer()->getTerrainParamsUniformBlock()->draw_shadows =
             _draw_baked_shadows.get();
         _world->renderer()->markTerrainParamsUniformBlockDirty();
@@ -1872,6 +1882,17 @@ void MapView::setupHelpMenu() {
   ADD_ACTION_NS(help_menu, "Noggit Red Discord", [] {
     ShellExecute(nullptr, "open", "https://discord.gg/Tk2TpN8CaF", nullptr,
                  nullptr, SW_SHOWNORMAL);
+  });
+#else
+  ADD_ACTION_NS(help_menu, "WoW Modding Discord", [] {
+    QDesktopServices::openUrl(QUrl("https://discord.gg/Dnrztg7dCZ"));
+  });
+  ADD_ACTION_NS(help_menu, "Noggit Red Repository", [] {
+    QDesktopServices::openUrl(
+        QUrl("https://gitlab.com/prophecy-rp/noggit-red/"));
+  });
+  ADD_ACTION_NS(help_menu, "Noggit Red Discord", [] {
+    QDesktopServices::openUrl(QUrl("https://discord.gg/Tk2TpN8CaF"));
   });
 #endif
 }

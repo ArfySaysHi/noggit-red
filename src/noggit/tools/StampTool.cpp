@@ -44,7 +44,7 @@ namespace Noggit
         _stampTool = new Noggit::Ui::Tools::BrushStack(mapView(), mapView());
         toolPanel->registerTool(this, _stampTool);
 
-        QObject::connect(mapView(), &MapView::trySetBrushTexture, [=](QImage* brush, QWidget* sender) {
+        QObject::connect(mapView(), &MapView::trySetBrushTexture, [=, this](QImage* brush, QWidget* sender) {
             auto mv = mapView();
             auto item = _stampTool->getActiveBrushItem();
 

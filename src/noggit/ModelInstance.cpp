@@ -363,7 +363,7 @@ std::array<glm::vec3, 2> const& ModelInstance::getExtents()
   return extents;
 }
 
-std::array<glm::vec3, 2> const& ModelInstance::getLocalExtents() const
+std::array<glm::vec3, 2> ModelInstance::getLocalExtents() const
 {
   return { model->bounding_box_min , model->bounding_box_max };
 }

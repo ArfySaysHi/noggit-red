@@ -188,7 +188,8 @@ void TileWater::setWatermapImage(QImage const& baseimage, float min_height, floa
 {
     auto image = baseimage.convertToFormat(QImage::Format_RGBA64);
 
-    auto color_table = image.colorTable().toStdVector();
+    auto qt_color_table = image.colorTable();
+    auto color_table = std::vector<unsigned int>(qt_color_table.begin(), qt_color_table.end());
 
     float height_range = max_height - min_height;
 

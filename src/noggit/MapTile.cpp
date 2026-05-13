@@ -1911,9 +1911,9 @@ Noggit::Rendering::FlightBoundsRender* MapTile::flightBoundsRenderer()
   return &_fl_bounds_render;
 }
 
-const texture_heightmapping_data& MapTile::GetTextureHeightMappingData(const std::string& name) const
+texture_heightmapping_data MapTile::GetTextureHeightMappingData(const std::string& name) const
 {
-    return Noggit::Project::CurrentProject::get()->ExtraMapData.GetTextureHeightDataForADT(_world->mapIndex._map_id, index,name);
+    return Noggit::Project::CurrentProject::get()->ExtraMapData.GetTextureHeightDataForADT(_world->mapIndex._map_id, index, name);
 }
 
 void MapTile::forceAlphaUpdate()

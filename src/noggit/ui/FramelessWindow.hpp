@@ -1,7 +1,9 @@
 #ifndef NOGGIT_FRAMELESSWINDOW_HPP
 #define NOGGIT_FRAMELESSWINDOW_HPP
 
+#ifdef WIN32
 #include <external/framelesshelper/framelesswindowsmanager.h>
+#endif
 #include <noggit/ui/FontAwesome.hpp>
 #include <ui_TitleBar.h>
 
@@ -59,6 +61,7 @@ namespace Noggit::Ui
                        }
                      });
 
+#ifdef WIN32
     FramelessWindowsManager::addWindow(window);
 
     FramelessWindowsManager::addIgnoreObject(window, titleBarWidget->minimizeButton);
@@ -67,6 +70,7 @@ namespace Noggit::Ui
     FramelessWindowsManager::setResizable(window, is_resizeable);
     FramelessWindowsManager::setMinimumSize(window, minimum_size);
     FramelessWindowsManager::setMaximumSize(window, maximum_size);
+#endif
 
     return titleBarWidget;
 

@@ -107,7 +107,7 @@ namespace Noggit
         // End Dock
 
         QObject::connect(_object_palette_dock, &QDockWidget::visibilityChanged,
-            [=](bool visible)
+            [=, this](bool visible)
             {
                 if (mv->isUiHidden())
                     return;
@@ -116,24 +116,24 @@ namespace Noggit
                 mv->settings()->sync();
             });
 
-        QObject::connect(mapView(), &MapView::rotationChanged, [=] {
+        QObject::connect(mapView(), &MapView::rotationChanged, [=, this] {
             updateRotationEditor();
             });
 
-        QObject::connect(_objectEditor, &Ui::object_editor::objectPaletteBtnPressed, [=] {
+        QObject::connect(_objectEditor, &Ui::object_editor::objectPaletteBtnPressed, [=, this] {
             _object_palette_dock->setVisible(_object_palette_dock->isHidden());
             });
 
-        QObject::connect(mapView(), &MapView::selectionUpdated, [=](auto) {
+        QObject::connect(mapView(), &MapView::selectionUpdated, [=, this](auto) {
             _objectEditor->update_selection_ui();
             });
 
         using AssetBrowser = Noggit::Ui::Tools::AssetBrowser::Ui::AssetBrowserWidget;
-        QObject::connect(mapView()->getAssetBrowserWidget(), &AssetBrowser::selectionChanged, [=](std::string const& path) {
+        QObject::connect(mapView()->getAssetBrowserWidget(), &AssetBrowser::selectionChanged, [=, this](std::string const& path) {
             if (_objectEditor->isVisible()) _objectEditor->copy(path);
             });
 
-        QObject::connect(_object_palette, &Ui::ObjectPalette::selected, [=](std::string str) {
+        QObject::connect(_object_palette, &Ui::ObjectPalette::selected, [=, this](std::string str) {
             _objectEditor->copy(str);
             });
     }
@@ -178,22 +178,22 @@ namespace Noggit
         bool has_selected_objects = world->get_selected_model_count();
         bool has_copied_objects = _objectEditor->clipboardSize();
 
-        addMenuItem(menu, "Copy Object(s)", QKeySequence::Copy, has_selected_objects, [=] { _objectEditor->copy_current_selection(world); });
-        addMenuItem(menu, "Paste Object(s)", QKeySequence::Paste, has_copied_objects, [=] {
+        addMenuItem(menu, "Copy Object(s)", QKeySequence::Copy, has_selected_objects, [=, this] { _objectEditor->copy_current_selection(world); });
+        addMenuItem(menu, "Paste Object(s)", QKeySequence::Paste, has_copied_objects, [=, this] {
             auto mv = mapView();
             NOGGIT_ACTION_MGR->beginAction(mv, Noggit::ActionFlags::eOBJECTS_ADDED);
             _objectEditor->pasteObject(mv->cursorPosition(), mv->getCamera()->position, world, &_object_paste_params);
             NOGGIT_ACTION_MGR->endAction();
             });
 
-        addMenuItem(menu, "Delete Object(s)", QKeySequence::Delete, has_selected_objects, [=] {
+        addMenuItem(menu, "Delete Object(s)", QKeySequence::Delete, has_selected_objects, [=, this] {
             auto mv = mapView();
             NOGGIT_ACTION_MGR->beginAction(mv, Noggit::ActionFlags::eOBJECTS_REMOVED);
             mv->DeleteSelectedObjects();
             NOGGIT_ACTION_MGR->endAction();
             });
 
-        addMenuItem(menu, "Duplicate Object(s)", { "CTRL+B" }, has_copied_objects, [=] {
+        addMenuItem(menu, "Duplicate Object(s)", { "CTRL+B" }, has_copied_objects, [=, this] {
             auto mv = mapView();
             NOGGIT_ACTION_MGR->beginAction(mv, Noggit::ActionFlags::eOBJECTS_ADDED);
             _objectEditor->copy_current_selection(world);
@@ -204,7 +204,7 @@ namespace Noggit
         addMenuSeperator(menu);
 
         addMenuItem(menu, "Select all Like Selected", "",
-            world->get_selected_model_count() == 1, [=] {
+            world->get_selected_model_count() == 1, [=, this] {
                 auto world = mapView()->getWorld();
 
                 auto last_entry = world->get_last_selected_model();
@@ -244,7 +244,7 @@ namespace Noggit
                 }
             });
 
-        addMenuItem(menu, "Hide Selected Objects", Qt::Key_H, has_selected_objects, [=] {
+        addMenuItem(menu, "Hide Selected Objects", Qt::Key_H, has_selected_objects, [=, this] {
             if (world->has_selection())
             {
                 for (auto& obj : world->get_selected_objects())
@@ -262,7 +262,7 @@ namespace Noggit
         // QAction action_2("Show Hidden", this);
 
         addMenuItem(menu, "Add Object To Palette", QKeySequence::UnknownKey, world->get_selected_model_count(),
-            [=] {
+            [=, this] {
                 auto last_entry = world->get_last_selected_model();
                 if (last_entry)
                 {
@@ -280,7 +280,7 @@ namespace Noggit
 
         // allow replacing all selected?
         addMenuItem(menu, "Replace Models (By Clipboard)", "Replace the currently selected objects by the object in the clipboard (There must only be one!). M2s can only be replaced by m2s",
-            has_selected_objects && _objectEditor->clipboardSize() == 1, [=] {
+            has_selected_objects && _objectEditor->clipboardSize() == 1, [=, this] {
                 auto mv = mapView();
 
                 mv->makeCurrent();
@@ -361,13 +361,13 @@ namespace Noggit
                 NOGGIT_ACTION_MGR->endAction();
             });
 
-        addMenuItem(menu, "Snap Selected To Ground", Qt::Key_PageDown, has_selected_objects, [=] {
+        addMenuItem(menu, "Snap Selected To Ground", Qt::Key_PageDown, has_selected_objects, [=, this] {
             NOGGIT_ACTION_MGR->beginAction(mapView(), Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
             mapView()->snap_selected_models_to_the_ground();
             NOGGIT_ACTION_MGR->endAction();
             });
 
-        addMenuItem(menu, "Save objects coords(to file)", QKeySequence::UnknownKey, has_selected_objects, [=] {
+        addMenuItem(menu, "Save objects coords(to file)", QKeySequence::UnknownKey, has_selected_objects, [=, this] {
             if (world->has_selection() && world->get_selected_model_count())
             {
                 std::stringstream obj_data;
@@ -435,7 +435,7 @@ namespace Noggit
                 }
             }
             // TODO
-            addMenuItem(menu, "Group Selected Objects", QKeySequence::UnknownKey, groupable, [=] {
+            addMenuItem(menu, "Group Selected Objects", QKeySequence::UnknownKey, groupable, [=, this] {
                 // remove all groups the objects are already in and create a new one
                 // for (auto obj : _world->get_selected_objects())
                 // {
@@ -467,7 +467,7 @@ namespace Noggit
                     break;
                 }
             }
-            addMenuItem(menu, "Ungroup Selected Objects", QKeySequence::UnknownKey, group_selected, [=] {
+            addMenuItem(menu, "Ungroup Selected Objects", QKeySequence::UnknownKey, group_selected, [=, this] {
               for (auto& group : world->_selection_groups)
               {
                 if (group.isSelected())
@@ -884,102 +884,102 @@ namespace Noggit
         auto mapView = this->mapView();
 
         addHotkey("copySelection"_hash, Hotkey{
-            .onPress = [=] { _objectEditor->copy_current_selection(mapView->getWorld()); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::object && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _objectEditor->copy_current_selection(mapView->getWorld()); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::object && !NOGGIT_CUR_ACTION; },
             });
 
         addHotkey("paste"_hash, Hotkey{
-            .onPress = [=] {
+            .onPress = [=, this] {
                 NOGGIT_ACTION_MGR->beginAction(mapView, Noggit::ActionFlags::eOBJECTS_ADDED);
                 _objectEditor->pasteObject(mapView->cursorPosition(), mapView->getCamera()->position, mapView->getWorld(), &_object_paste_params);
                 NOGGIT_ACTION_MGR->endAction();
             },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::object && !NOGGIT_CUR_ACTION; },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::object && !NOGGIT_CUR_ACTION; },
             });
 
         addHotkey("importM2FromWmv"_hash, Hotkey{
-            .onPress = [=] { _objectEditor->import_last_model_from_wmv(eMODEL); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::object && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _objectEditor->import_last_model_from_wmv(eMODEL); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::object && !NOGGIT_CUR_ACTION; },
             });
 
         addHotkey("importWmoFromWmv"_hash, Hotkey{
-            .onPress = [=] { _objectEditor->import_last_model_from_wmv(eWMO); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::object && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _objectEditor->import_last_model_from_wmv(eWMO); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::object && !NOGGIT_CUR_ACTION; },
             });
 
         addHotkey("duplacteSelection"_hash, Hotkey{
-            .onPress = [=] {
+            .onPress = [=, this] {
                NOGGIT_ACTION_MGR->beginAction(mapView, Noggit::ActionFlags::eOBJECTS_ADDED);
                _objectEditor->copy_current_selection(mapView->getWorld());
                _objectEditor->pasteObject(mapView->cursorPosition(), mapView->getCamera()->position, mapView->getWorld(), &_object_paste_params);
                NOGGIT_ACTION_MGR->endAction();
             },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::object && !NOGGIT_CUR_ACTION; },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::object && !NOGGIT_CUR_ACTION; },
             });
 
         addHotkey("togglePasteMode"_hash, Hotkey{
-            .onPress = [=] { _objectEditor->togglePasteMode(); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::object; },
+            .onPress = [=, this] { _objectEditor->togglePasteMode(); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::object; },
             });
 
         addHotkey("moveSelectedDown"_hash, Hotkey{
-            .onPress = [=] { _keyx = 1; },
-            .onRelease = [=] { _keyx = 0; },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::object; },
+            .onPress = [=, this] { _keyx = 1; },
+            .onRelease = [=, this] { _keyx = 0; },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::object; },
             });
 
         addHotkey("moveSelectedUp"_hash, Hotkey{
-            .onPress = [=] { _keyx = -1; },
-            .onRelease = [=] { _keyx = 0; },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::object; },
+            .onPress = [=, this] { _keyx = -1; },
+            .onRelease = [=, this] { _keyx = 0; },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::object; },
             });
 
         addHotkey("moveSelectedLeft"_hash, Hotkey{
-            .onPress = [=] { _keyz = 1; },
-            .onRelease = [=] { _keyz = 0; },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::object; },
+            .onPress = [=, this] { _keyz = 1; },
+            .onRelease = [=, this] { _keyz = 0; },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::object; },
             });
 
         addHotkey("moveSelectedRight"_hash, Hotkey{
-            .onPress = [=] { _keyz = -1; },
-            .onRelease = [=] { _keyz = 0; },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::object; },
+            .onPress = [=, this] { _keyz = -1; },
+            .onRelease = [=, this] { _keyz = 0; },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::object; },
             });
 
         addHotkey("rotateSelectedPitchCcw"_hash, Hotkey{
-            .onPress = [=] { _keyy = 1; },
-            .onRelease = [=] { _keyy = 0; },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::object; },
+            .onPress = [=, this] { _keyy = 1; },
+            .onRelease = [=, this] { _keyy = 0; },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::object; },
             });
 
         addHotkey("rotateSelectedPitchCw"_hash, Hotkey{
-            .onPress = [=] { _keyy = -1; },
-            .onRelease = [=] { _keyy = 0; },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::object; },
+            .onPress = [=, this] { _keyy = -1; },
+            .onRelease = [=, this] { _keyy = 0; },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::object; },
             });
 
         addHotkey("rotateSelectedYawCcw"_hash, Hotkey{
-            .onPress = [=] { _keyr = 1; },
-            .onRelease = [=] {_keyr = 0; },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::object; },
+            .onPress = [=, this] { _keyr = 1; },
+            .onRelease = [=, this] {_keyr = 0; },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::object; },
             });
 
         addHotkey("rotateSelectedYawCw"_hash, Hotkey{
-            .onPress = [=] {_keyr = -1; },
-            .onRelease = [=] {_keyr = 0; },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::object; },
+            .onPress = [=, this] {_keyr = -1; },
+            .onRelease = [=, this] {_keyr = 0; },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::object; },
             });
 
         addHotkey("increaseSelectedScale"_hash, Hotkey{
-            .onPress = [=] { _keys = 1; },
-            .onRelease = [=] { _keys = 0; },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::object; },
+            .onPress = [=, this] { _keys = 1; },
+            .onRelease = [=, this] { _keys = 0; },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::object; },
             });
 
         addHotkey("decreaseSelectedScale"_hash, Hotkey{
-            .onPress = [=] { _keys = -1; },
-            .onRelease = [=] { _keys = 0; },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::object; },
+            .onPress = [=, this] { _keys = -1; },
+            .onRelease = [=, this] { _keys = 0; },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::object; },
             });
     }
 

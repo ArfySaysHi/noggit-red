@@ -53,7 +53,7 @@ namespace Noggit
       {
         current_texture* click_label = new current_texture(false, this);
         connect ( click_label, &ClickableLabel::leftClicked
-                , [=]()
+                , [=, this]()
                   {
                     if (click_label->_is_swap_selected)
                         return;
@@ -71,7 +71,7 @@ namespace Noggit
                   }
                 );
 
-        connect(click_label, &ClickableLabel::rightClicked, [=]()
+        connect(click_label, &ClickableLabel::rightClicked, [=, this]()
                 {
                     if (click_label->_is_selected)
                         return;

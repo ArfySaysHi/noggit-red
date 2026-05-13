@@ -28,6 +28,7 @@
 
 #include <format>
 #include <fstream>
+#include <stdexcept>
 #include <vector>
 
 namespace Noggit::Ui::Tools
@@ -176,7 +177,7 @@ namespace Noggit::Ui::Tools
     std::ofstream file{ file_path, std::ios_base::out };
     if (!file)
     {
-      throw std::exception{ std::format("Could not open file {}!", file_path).c_str() };
+      throw std::runtime_error(std::format("Could not open file {}!", file_path));
     }
 
     file << "ID,Zone Name,Sub Category,Trigger Name,IsBuiltIn,\n";
@@ -198,14 +199,14 @@ namespace Noggit::Ui::Tools
     QFile file{ QString::fromStdString(file_path) };
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-      throw std::exception{ std::format("Could not open file {}!", file_path).c_str() };
+      throw std::runtime_error(std::format("Could not open file {}!", file_path));
     }
 
     QTextStream stream{ &file };
     if (auto header = stream.readLine(); header != expeceted_header)
     {
       auto foo = header.toStdString();
-      throw std::exception{ std::format("File {} uses invalid header `{}`!", file_path, header.toStdString()).c_str() };
+      throw std::runtime_error(std::format("File {} uses invalid header `{}`!", file_path, header.toStdString()));
     }
 
     int line = 1;
@@ -319,7 +320,7 @@ namespace Noggit::Ui::Tools
       _list_items[trigger.id] = item;
     }
 
-    connect(_list_widget, &QListWidget::currentItemChanged, [=](QListWidgetItem* current, QListWidgetItem* previous) {
+    connect(_list_widget, &QListWidget::currentItemChanged, [=, this](QListWidgetItem* current, QListWidgetItem* previous) {
       uint32_t previous_id = std::numeric_limits<uint32_t>::max();
       if (previous)
       {
@@ -337,7 +338,7 @@ namespace Noggit::Ui::Tools
 
     auto add_btn = new QPushButton("Add New", this);
     add_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::plus));
-    connect(add_btn, &QPushButton::pressed, [=] {
+    connect(add_btn, &QPushButton::pressed, [=, this] {
       auto dialog = new QDialog{ this };
       dialog->setWindowFlag(Qt::Dialog);
       dialog->setWindowTitle("Add new Area Trigger...");
@@ -360,14 +361,14 @@ namespace Noggit::Ui::Tools
       layout->addLayout(btn_layout);
 
       auto add_btn = new QPushButton{ "Add", dialog };
-      connect(add_btn, &QPushButton::pressed, [=] {
+      connect(add_btn, &QPushButton::pressed, [=, this] {
         addNewTrigger(radio1->isChecked() ? TriggerKind::Sphere : TriggerKind::Box);
         dialog->close();
         });
       btn_layout->addWidget(add_btn);
 
       auto cancel_btn = new QPushButton{ "Cancel", dialog };
-      connect(cancel_btn, &QPushButton::pressed, [=] { dialog->close(); });
+      connect(cancel_btn, &QPushButton::pressed, [=, this] { dialog->close(); });
       btn_layout->addWidget(cancel_btn);
       dialog->show();
       });
@@ -375,7 +376,7 @@ namespace Noggit::Ui::Tools
 
     auto remove_btn = new QPushButton("Remove Selected", this);
     remove_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::times));
-    connect(remove_btn, &QPushButton::pressed, [=] {
+    connect(remove_btn, &QPushButton::pressed, [=, this] {
       deleteSelectedTrigger();
       });
     btn_layout->addWidget(remove_btn);
@@ -431,7 +432,7 @@ namespace Noggit::Ui::Tools
     radius_layout->addRow("Map-ID", _selection_widgets.map_spinbox);
 
     _selection_widgets.position_widget = new Vector3fWidget{ group_box };
-    connect(_selection_widgets.position_widget, &Vector3fWidget::valueChanged, [=](glm::vec3 const& value) {
+    connect(_selection_widgets.position_widget, &Vector3fWidget::valueChanged, [=, this](glm::vec3 const& value) {
       if (_selected_trigger_id == std::numeric_limits<uint32_t>::max())
       {
         return;
@@ -448,7 +449,7 @@ namespace Noggit::Ui::Tools
     radius_layout->addRow("Position", _selection_widgets.position_widget);
 
     _selection_widgets.size_widget = new Vector3fWidget{ group_box };
-    connect(_selection_widgets.size_widget, &Vector3fWidget::valueChanged, [=](glm::vec3 const& value) {
+    connect(_selection_widgets.size_widget, &Vector3fWidget::valueChanged, [=, this](glm::vec3 const& value) {
       if (_selected_trigger_id == std::numeric_limits<uint32_t>::max())
       {
         return;
@@ -472,7 +473,7 @@ namespace Noggit::Ui::Tools
     radius_layout->addRow("Size", _selection_widgets.size_widget);
 
     _selection_widgets.rotation_widget = new QDoubleSpinBox{ group_box };
-    connect(_selection_widgets.rotation_widget, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
+    connect(_selection_widgets.rotation_widget, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=, this](double value) {
       if (_selected_trigger_id == std::numeric_limits<uint32_t>::max())
       {
         return;
@@ -496,7 +497,7 @@ namespace Noggit::Ui::Tools
     _selection_widgets.radius_widget = new QDoubleSpinBox{ group_box };
     _selection_widgets.radius_widget->setMinimum(0.001);
     _selection_widgets.radius_widget->setMaximum(500);
-    connect(_selection_widgets.radius_widget, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
+    connect(_selection_widgets.radius_widget, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=, this](double value) {
       if (_selected_trigger_id == std::numeric_limits<uint32_t>::max())
       {
         return;
@@ -665,7 +666,7 @@ namespace Noggit::Ui::Tools
     layout->addLayout(btn_layout);
 
     auto yes_btn = new QPushButton{ "Yes", dialog };
-    connect(yes_btn, &QPushButton::pressed, [=] {
+    connect(yes_btn, &QPushButton::pressed, [=, this] {
       _list_items.erase(_selected_trigger_id);
 
       _trigger_descriptions.Erase(_selected_trigger_id);
@@ -680,7 +681,7 @@ namespace Noggit::Ui::Tools
     btn_layout->addWidget(yes_btn);
 
     auto no_btn = new QPushButton{ "No", dialog };
-    connect(no_btn, &QPushButton::pressed, [=] {
+    connect(no_btn, &QPushButton::pressed, [=, this] {
       dialog->close();
       });
     btn_layout->addWidget(no_btn);

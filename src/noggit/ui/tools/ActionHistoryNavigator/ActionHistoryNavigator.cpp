@@ -45,7 +45,7 @@ ActionHistoryNavigator::ActionHistoryNavigator(QWidget* parent)
   connect(action_mgr, &Noggit::ActionManager::currentActionChanged, this, &ActionHistoryNavigator::changeCurrentAction);
 
   connect(_active_action_button_group, &QButtonGroup::idClicked
-          , [=](int index)
+          , [=, this](int index)
           {
             QSignalBlocker const blocker(action_mgr);
             emit currentActionChanged((_action_stack->count() - (_action_stack->count() - index)) - 1);

@@ -17,18 +17,18 @@ namespace Noggit
         : Tool{ mapView }
     {
         addHotkey("toggleAngled"_hash, Hotkey{
-            .onPress = [=] { _guiWater->toggle_angled_mode(); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::water && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _guiWater->toggle_angled_mode(); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::water && !NOGGIT_CUR_ACTION; },
             });
 
         addHotkey("toggleLock"_hash, Hotkey{
-            .onPress = [=] { _guiWater->toggle_lock(); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::water && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _guiWater->toggle_lock(); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::water && !NOGGIT_CUR_ACTION; },
             });
 
         addHotkey("lockCursor"_hash, Hotkey{
-            .onPress = [=] { _guiWater->lockPos(mapView->cursorPosition()); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::water && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _guiWater->lockPos(mapView->cursorPosition()); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::water && !NOGGIT_CUR_ACTION; },
             });
     }
 
@@ -60,7 +60,7 @@ namespace Noggit
         auto mv = mapView();
 
         QObject::connect(_guiWater, &Noggit::Ui::water::regenerate_water_opacity
-            , [=](float factor)
+            , [=, this](float factor)
             {
                 mv->makeCurrent();
                 OpenGL::context::scoped_setter const _(::gl, mv->context());
@@ -71,7 +71,7 @@ namespace Noggit
         );
 
         QObject::connect(_guiWater, &Noggit::Ui::water::crop_water
-            , [=]
+            , [=, this]
             {
                 mv->makeCurrent();
                 OpenGL::context::scoped_setter const _(::gl, mv->context());

@@ -3,6 +3,7 @@
 
 #include <noggit/DBC.h>
 #include <noggit/application/NoggitApplication.hpp>
+#include <cmath>
 #include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/ZoneIDBrowser.h>
 #include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
@@ -85,7 +86,7 @@ zone_id_browser::zone_id_browser(QWidget *parent) : QWidget(parent), mapID(-1) {
   // adjustSize();
 
   connect(_area_tree_filter, &QLineEdit::textChanged, this,
-          [=](const QString &text) {
+          [=, this](const QString &text) {
             // If the search text is empty, unhide and collapse all parents and
             // children
             if (text.isEmpty()) {
@@ -166,12 +167,12 @@ zone_id_browser::zone_id_browser(QWidget *parent) : QWidget(parent), mapID(-1) {
   });
 
   connect(edit_area_button, &QPushButton::clicked,
-          [=]() { open_area_editor(); });
+          [=, this]() { open_area_editor(); });
 
-  connect(add_zone_button, &QPushButton::clicked, [=]() { add_new_zone(); });
+  connect(add_zone_button, &QPushButton::clicked, [=, this]() { add_new_zone(); });
 
   connect(add_subzone_button, &QPushButton::clicked,
-          [=]() { add_new_subzone(); });
+          [=, this]() { add_new_subzone(); });
 }
 
 void zone_id_browser::setMapID(int id) {
@@ -314,7 +315,7 @@ void zone_id_browser::add_new_zone() {
       new QPushButton("Create new Zone", zone_create_params);
   zone_create_params_layout->addWidget(params_okay);
 
-  connect(params_okay, &QPushButton::clicked, [=]() {
+  connect(params_okay, &QPushButton::clicked, [=, this]() {
     // check if ID is valid
     if (!gAreaDB.CheckIfIdExists(params_id_spinbox->value())) {
       zone_create_params->accept();
@@ -404,7 +405,7 @@ void zone_id_browser::add_new_subzone() {
       new QPushButton("Create new Subzone", zone_create_params);
   zone_create_params_layout->addWidget(params_okay);
 
-  connect(params_okay, &QPushButton::clicked, [=]() {
+  connect(params_okay, &QPushButton::clicked, [=, this]() {
     // check if ID is valid
     int id = params_id_spinbox->value();
     bool exists = gAreaDB.CheckIfIdExists(params_id_spinbox->value());
@@ -551,7 +552,7 @@ AreaEditor::AreaEditor(QWidget *parent) : QWidget(parent) {
 
   _sound_ambiance_day_button = new QPushButton("-None-", this);
   _sound_ambiance_day_button->setProperty("id", 0);
-  connect(_sound_ambiance_day_button, &QPushButton::clicked, [=]() {
+  connect(_sound_ambiance_day_button, &QPushButton::clicked, [=, this]() {
     auto window =
         new SoundEntryPickerWindow(_sound_ambiance_day_button,
                                    SoundEntryTypes::ZONE_AMBIENCE, false, this);
@@ -560,7 +561,7 @@ AreaEditor::AreaEditor(QWidget *parent) : QWidget(parent) {
 
   _sound_ambiance_night_button = new QPushButton("-None-", this);
   _sound_ambiance_night_button->setProperty("id", 0);
-  connect(_sound_ambiance_night_button, &QPushButton::clicked, [=]() {
+  connect(_sound_ambiance_night_button, &QPushButton::clicked, [=, this]() {
     auto window =
         new SoundEntryPickerWindow(_sound_ambiance_night_button,
                                    SoundEntryTypes::ZONE_AMBIENCE, false, this);
@@ -569,14 +570,14 @@ AreaEditor::AreaEditor(QWidget *parent) : QWidget(parent) {
 
   _zone_music_button = new QPushButton("-None-", this);
   _zone_music_button->setProperty("id", 0);
-  connect(_zone_music_button, &QPushButton::clicked, [=]() {
+  connect(_zone_music_button, &QPushButton::clicked, [=, this]() {
     auto window = new ZoneMusicPickerWindow(_zone_music_button, this);
     window->show();
   });
 
   _zone_intro_music_button = new QPushButton("-None-", this);
   _zone_intro_music_button->setProperty("id", 0);
-  connect(_zone_intro_music_button, &QPushButton::clicked, [=]() {
+  connect(_zone_intro_music_button, &QPushButton::clicked, [=, this]() {
     auto window =
         new ZoneIntroMusicPickerWindow(_zone_intro_music_button, this);
     window->show();
@@ -641,7 +642,7 @@ AreaEditor::AreaEditor(QWidget *parent) : QWidget(parent) {
     flags_layout->addWidget(flag_checkbox);
 
     connect(flag_checkbox, &QCheckBox::stateChanged, [&, i](bool state) {
-      // connect(flag_checkbox, &QCheckBox::clicked, [=]() {
+      // connect(flag_checkbox, &QCheckBox::clicked, [=, this]() {
       // int old_value = _flags_value_spinbox->value();
       int new_value = _flags_value_spinbox->value();
       if (state) // set bit
@@ -680,7 +681,7 @@ AreaEditor::AreaEditor(QWidget *parent) : QWidget(parent) {
 
   // main_layout->addStretch();
 
-  connect(_set_parent_button, &QPushButton::clicked, [=]() {
+  connect(_set_parent_button, &QPushButton::clicked, [=, this]() {
     // Current design choice : Cannot change a zone to be a subzone or the
     // opposite, only current subzones can have a parent set.
     auto parent = static_cast<zone_id_browser *>(this->parentWidget());
@@ -734,7 +735,7 @@ AreaEditor::AreaEditor(QWidget *parent) : QWidget(parent) {
     }
   });
 
-  connect(save_area_button, &QPushButton::clicked, [=]() {
+  connect(save_area_button, &QPushButton::clicked, [=, this]() {
     save_area(); // save and write DBC
   });
 

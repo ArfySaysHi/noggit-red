@@ -18,8 +18,8 @@ namespace Noggit
         : Tool{ mapView }
     {
         addHotkey("addColor"_hash, Hotkey{
-            .onPress = [=] { _shaderTool->addColorToPalette(); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::mccv && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _shaderTool->addColorToPalette(); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::mccv && !NOGGIT_CUR_ACTION; },
             });
     }
 

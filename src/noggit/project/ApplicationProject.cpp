@@ -26,6 +26,8 @@ ApplicationProject::ApplicationProject(
   _configuration = configuration;
 }
 
+unsigned int buildId() { return 0; }
+
 void ApplicationProject::createProject(
     std::filesystem::path const &project_path,
     std::filesystem::path const &client_path, std::string const &client_version,
@@ -213,6 +215,7 @@ ClientVersionFactory::mapToEnumVersion(std::string const &projectVersion) {
     return ProjectVersion::SL;
 
   assert(false);
+  return ProjectVersion::WOTLK; // unreachable; silences -Wreturn-type
 }
 
 std::string
@@ -223,6 +226,7 @@ ClientVersionFactory::MapToStringVersion(ProjectVersion const &projectVersion) {
     return std::string("Shadowlands");
 
   assert(false);
+  return {}; // unreachable; silences -Wreturn-type
 }
 
 NoggitProject::NoggitProject() {

@@ -32,58 +32,58 @@ namespace Noggit
         : Tool{ mapView }
     {
         addHotkey("toggleTool"_hash, Hotkey{
-            .onPress = [=] { _texturingTool->toggle_tool(); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _texturingTool->toggle_tool(); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
             });
 
         addHotkey("setBrushLevelMinMax"_hash, Hotkey{
-            .onPress = [=] { _texturingTool->toggle_brush_level_min_max(); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _texturingTool->toggle_brush_level_min_max(); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
             });
 
         addHotkey("increaseRadius"_hash, Hotkey{
-            .onPress = [=] { _texturingTool->change_radius(0.1f); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _texturingTool->change_radius(0.1f); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
             });
 
         addHotkey("decreaseRadius"_hash, Hotkey{
-            .onPress = [=] { _texturingTool->change_radius(-0.1f); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _texturingTool->change_radius(-0.1f); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
             });
 
         addHotkey("setBrushLevel0Pct"_hash, Hotkey{
-            .onPress = [=] { _texturingTool->set_brush_level(0.0f); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _texturingTool->set_brush_level(0.0f); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
             });
 
         addHotkey("setBrushLevel25Pct"_hash, Hotkey{
-            .onPress = [=] { _texturingTool->set_brush_level(255.0f * 0.25f); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _texturingTool->set_brush_level(255.0f * 0.25f); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
             });
 
         addHotkey("setBrushLevel50Pct"_hash, Hotkey{
-            .onPress = [=] { _texturingTool->set_brush_level(255.0f * 0.5f); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _texturingTool->set_brush_level(255.0f * 0.5f); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
             });
 
         addHotkey("setBrushLevel75Pct"_hash, Hotkey{
-            .onPress = [=] { _texturingTool->set_brush_level(255.0f * 0.75f); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _texturingTool->set_brush_level(255.0f * 0.75f); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
             });
 
         addHotkey("setBrushLevel100Pct"_hash, Hotkey{
-            .onPress = [=] { _texturingTool->set_brush_level(255.0f); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _texturingTool->set_brush_level(255.0f); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
             });
 
         addHotkey("toggleTexturePalette"_hash, Hotkey{
-            .onPress = [=] { _show_texture_palette_window.toggle(); },
-            .condition = [=] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
+            .onPress = [=, this] { _show_texture_palette_window.toggle(); },
+            .condition = [=, this] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
             });
 
         QObject::connect(mapView
             , &MapView::selectionUpdated
-            , [=](std::vector<selection_type>& selection)
+            , [=, this](std::vector<selection_type>& selection)
             {
               if (mapView->isUiHidden() || _texturingTool->isHidden() || !_texturePickerNeedUpdate)
               {
@@ -143,7 +143,7 @@ namespace Noggit
         // Connects
         QObject::connect(_texturingTool->texture_swap_tool()->texture_display()
             , &Noggit::Ui::current_texture::texture_dropped
-            , [=](std::string const& filename)
+            , [=, this](std::string const& filename)
             {
                 mv->makeCurrent();
                 OpenGL::context::scoped_setter const _(::gl, mv->context());
@@ -154,7 +154,7 @@ namespace Noggit
 
         QObject::connect(_texturingTool->_current_texture
             , &Noggit::Ui::current_texture::texture_dropped
-            , [=](std::string const& filename)
+            , [=, this](std::string const& filename)
             {
                 mv->makeCurrent();
                 OpenGL::context::scoped_setter const _(::gl, mv->context());
@@ -164,14 +164,14 @@ namespace Noggit
         );
 
         QObject::connect(_texturingTool->_current_texture, &Noggit::Ui::current_texture::clicked
-            , [=]
+            , [=, this]
             {
                 _show_texture_browser_window.set(!_show_texture_browser_window.get());
             }
         );
 
         QObject::connect(_texturingTool, &Ui::texturing_tool::texturePaletteToggled,
-            [=]()
+            [=, this]()
             {
                 _show_texture_palette_window.set(!_show_texture_palette_window.get());
             });
@@ -193,7 +193,7 @@ namespace Noggit
       _textureBrowserDock->hide();
 
       QObject::connect(_textureBrowserDock, &QDockWidget::visibilityChanged,
-        [=](bool visible)
+        [=, this](bool visible)
         {
           if (mv->isUiHidden())
             return;
@@ -210,7 +210,7 @@ namespace Noggit
       QObject::connect(mv, &QObject::destroyed, _textureBrowser, &QObject::deleteLater);
 
       QObject::connect(_textureBrowser, &Noggit::Ui::tileset_chooser::selected
-        , [=](std::string const& filename)
+        , [=, this](std::string const& filename)
         {
           mv->makeCurrent();
           OpenGL::context::scoped_setter const _(::gl, mv->context());
@@ -260,7 +260,7 @@ namespace Noggit
       // End Dock
 
       QObject::connect(_texturePaletteDock, &QDockWidget::visibilityChanged,
-        [=](bool visible)
+        [=, this](bool visible)
         {
           if (mv->isUiHidden())
             return;
@@ -270,7 +270,7 @@ namespace Noggit
         });
 
       QObject::connect(_texturePalette, &Noggit::Ui::texture_palette_small::selected
-        , [=](std::string const& filename)
+        , [=, this](std::string const& filename)
         {
           mv->makeCurrent();
           OpenGL::context::scoped_setter const _(::gl, mv->context());
@@ -282,7 +282,7 @@ namespace Noggit
       QObject::connect(mv, &QObject::destroyed, _texturePalette, &QObject::deleteLater);
 
       QObject::connect(&_show_texture_palette_window, &Noggit::BoolToggleProperty::changed
-        , _texturePaletteDock, [=]
+        , _texturePaletteDock, [=, this]
         {
           if (mv->get_editing_mode() != editing_mode::paint || mv->isUiHidden())
           {
@@ -297,7 +297,7 @@ namespace Noggit
       );
 
       QObject::connect(_texturingTool->_current_texture, &Noggit::Ui::current_texture::texture_updated
-        , [=]()
+        , [=, this]()
         {
           mv->getWorld()->notifyTileRendererOnSelectedTextureChange();
           _texturingTool->getGroundEffectsTool()->TextureChanged();
@@ -325,7 +325,7 @@ namespace Noggit
 
       QObject::connect(_texturePicker
         , &Noggit::Ui::texture_picker::set_texture
-        , [=](scoped_blp_texture_reference texture)
+        , [=, this](scoped_blp_texture_reference texture)
         {
           mv->makeCurrent();
           OpenGL::context::scoped_setter const _(::gl, mv->context());
@@ -333,7 +333,7 @@ namespace Noggit
         }
       );
       QObject::connect(_texturePicker, &Noggit::Ui::texture_picker::shift_left
-        , [=]
+        , [=, this]
         {
           mv->makeCurrent();
           OpenGL::context::scoped_setter const _(::gl, mv->context());
@@ -341,7 +341,7 @@ namespace Noggit
         }
       );
       QObject::connect(_texturePicker, &Noggit::Ui::texture_picker::shift_right
-        , [=]
+        , [=, this]
         {
           mv->makeCurrent();
           OpenGL::context::scoped_setter const _(::gl, mv->context());

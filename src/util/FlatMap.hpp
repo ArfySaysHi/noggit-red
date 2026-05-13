@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <vector>
 #include <optional>
 #include <utility>
@@ -42,7 +43,7 @@ namespace util
     }
 
     template <typename FUNC>
-    [[nodiscard]] constexpr void Transform(KEY const& key, FUNC&& func)
+    constexpr void Transform(KEY const& key, FUNC&& func)
     {
       auto itr = std::find_if(std::begin(data), std::end(data), [&key](auto const& v) { return v.first == key; });
       if (itr != std::end(data))

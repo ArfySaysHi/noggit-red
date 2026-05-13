@@ -227,7 +227,7 @@ set_source_files_properties(
 # Includes
 target_include_directories(noggit
 PRIVATE
-src
+${CMAKE_SOURCE_DIR}/src
 include
 ${CMAKE_CURRENT_BINARY_DIR}
 ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
