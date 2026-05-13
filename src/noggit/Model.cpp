@@ -322,8 +322,7 @@ void Model::initCommon(const BlizzardArchive::ClientFile &f,
       _specialTextures[i] = texdef[i].type;
 
       if (texdef[i].type == 3) {
-        _textureFilenames[i] =
-            "Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP";
+        _textureFilenames[i] = "Item/ObjectComponents/Weapon/ArmorReflect4.BLP";
         // a fix for weapons with type-3 textures.
         _replaceTextures.emplace(texdef[i].type, _textureFilenames[i]);
       }

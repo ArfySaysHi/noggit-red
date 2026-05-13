@@ -26,7 +26,7 @@ ApplicationProject::ApplicationProject(
   _configuration = configuration;
 }
 
-unsigned int buildId() { return 0; }
+unsigned int NoggitProject::buildId() { return 0; }
 
 void ApplicationProject::createProject(
     std::filesystem::path const &project_path,

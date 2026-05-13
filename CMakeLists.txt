@@ -408,6 +408,12 @@ COMMAND ${CMAKE_COMMAND} -E copy_directory
 "$<TARGET_FILE_DIR:noggit>/definitions"
 )
 
+add_custom_command(TARGET noggit POST_BUILD
+COMMAND ${CMAKE_COMMAND} -E copy_directory
+"${PROJECT_SOURCE_DIR}/dist/noggit-definitions"
+"$<TARGET_FILE_DIR:noggit>/noggit-definitions"
+)
+
 # Git Revision
 set(_noggit_revision_output_dir "${CMAKE_BINARY_DIR}/revision_output")
 set(_noggit_revision_template_file "${CMAKE_SOURCE_DIR}/cmake/revision.h.in")
