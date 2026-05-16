@@ -25,9 +25,6 @@
 #include <QTextStream>
 #include <QtCore/QSettings>
 
-#include <cstdlib>
-#include <forward_list>
-
 MapIndex::MapIndex(const std::string &pBasename, int map_id, World *world,
                    Noggit::NoggitRenderContext context, bool create_empty)
     : basename(pBasename), _map_id(map_id),
