@@ -42,12 +42,16 @@ int main(int argc, char *argv[]) {
   q_application.setApplicationName("Noggit");
   q_application.setOrganizationName("Noggit");
 
-  auto parser = ProcessCommandLine();
-  parser->process(q_application);
+  QCommandLineParser parser;
+  parser.setApplicationDescription("Help");
+  parser.addHelpOption();
+  parser.addVersionOption();
+  parser.process(q_application);
 
   std::vector<bool> Command;
-  Command.push_back(parser->isSet("disable-update"));
-  Command.push_back(parser->isSet("force-changelog"));
+  Command.push_back(parser.isSet("disable-update"));
+  Command.push_back(parser.isSet("force-changelog"));
+  parser.process(q_application);
 
   auto noggit = Noggit::Application::NoggitApplication::instance();
   noggit->initalize(argc, argv, Command);
