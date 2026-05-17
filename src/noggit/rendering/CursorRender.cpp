@@ -2,7 +2,7 @@
 // (version 3).
 
 #include "CursorRender.hpp"
-#include "math/trig.hpp"
+#include "glm/ext/matrix_float4x4.hpp"
 #include "opengl/shader.hpp"
 
 namespace Noggit {
@@ -56,9 +56,12 @@ void CursorRender::create_circle_buffer(OpenGL::Scoped::use_program &shader) {
 
   int segment = 60;
 
-  for (int i = 0; i < segment; ++i) {
-    float x = glm::cos(math::radians(math::degrees(i * 360 / segment))._);
-    float z = glm::sin(math::radians(math::degrees(i * 360 / segment))._);
+  for (size_t i = 0; i < segment; ++i) {
+    float angle = glm::two_pi<float>() * static_cast<float>(i) /
+                  static_cast<float>(segment);
+    float x = glm::cos(angle);
+    float z = glm::sin(angle);
+
     vertices.emplace_back(x, 0.f, z);
     indices.emplace_back(i);
     indices.emplace_back((i + 1) % segment);
@@ -97,19 +100,22 @@ void CursorRender::create_sphere_buffer(OpenGL::Scoped::use_program &shader) {
   int id_ofs = 0;
 
   for (int r = 0; r <= rotation_plane; ++r) {
-    math::degrees rotation(360.f * r / static_cast<float>(rotation_plane));
+    float rotation = glm::two_pi<float>() * static_cast<float>(r) /
+                     static_cast<float>(rotation_plane);
 
-    glm::mat4x4 rotationMatrix = glm::mat4x4();
-    glm::mat4x4 m = glm::rotate(rotationMatrix, math::radians(rotation)._,
-                                glm::vec3(0, 0, 1));
+    glm::mat4x4 m = glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0, 0, 1));
 
-    for (int i = 0; i < segment; ++i) {
-      float x = glm::cos(math::radians(math::degrees(i * 360 / segment))._);
-      float z = glm::sin(math::radians(math::degrees(i * 360 / segment))._);
+    for (size_t i = 0; i < segment; ++i) {
+      float angle = glm::two_pi<float>() * static_cast<float>(i) /
+                    static_cast<float>(segment);
 
-      glm::vec4 v(x, 0.f, z, 0);
+      float x = glm::cos(angle);
+      float z = glm::sin(angle);
+
+      glm::vec4 v(x, 0.f, z, 0.f);
 
       vertices.emplace_back(m * v);
+
       if (r < rotation_plane) {
         indices.emplace_back(i + id_ofs);
         indices.emplace_back(((i + 1) % segment) + id_ofs);
@@ -119,8 +125,8 @@ void CursorRender::create_sphere_buffer(OpenGL::Scoped::use_program &shader) {
     id_ofs += segment;
   }
 
-  for (int i = 0; i < segment; ++i) {
-    for (int r = 0; r < rotation_plane; ++r) {
+  for (size_t i = 0; i < segment; ++i) {
+    for (size_t r = 0; r < rotation_plane; ++r) {
       indices.emplace_back(i + r * segment);
       indices.emplace_back(i + (r + 1) * segment);
     }
