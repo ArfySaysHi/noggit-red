@@ -6,6 +6,7 @@
 
 #include <QObject>
 #include <deque>
+#include <memory>
 #include <noggit/Action.hpp>
 
 class MapView;
@@ -21,7 +22,7 @@ public:
   }
 
   [[nodiscard]]
-  std::deque<Action *> *getActionStack();
+  std::deque<std::unique_ptr<Action>> *getActionStack();
 
   [[nodiscard]]
   Action *getCurrentAction() const;
@@ -59,7 +60,7 @@ signals:
 private:
   ActionManager() : QObject() {}
 
-  std::deque<Action *> _action_stack;
+  std::deque<std::unique_ptr<Action>> _action_stack;
   unsigned _limit = 30;
   Action *_cur_action = nullptr;
   unsigned _undo_index = 0;

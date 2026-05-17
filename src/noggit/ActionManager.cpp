@@ -3,11 +3,14 @@
 
 #include "ActionManager.hpp"
 #include <cmath>
+#include <memory>
 #include <noggit/MapView.h>
 
 using namespace Noggit;
 
-std::deque<Action *> *ActionManager::getActionStack() { return &_action_stack; }
+std::deque<std::unique_ptr<Action>> *ActionManager::getActionStack() {
+  return &_action_stack;
+}
 
 Action *ActionManager::getCurrentAction() const { return _cur_action; }
 
@@ -31,9 +34,6 @@ void ActionManager::setLimit(unsigned limit) { _limit = limit; }
 unsigned ActionManager::limit() const { return _limit; }
 
 void ActionManager::purge() {
-  for (auto &action : _action_stack) {
-    delete action;
-  }
   _action_stack.clear();
   _undo_index = 0;
   emit purged();
@@ -48,7 +48,6 @@ Action *ActionManager::beginAction(MapView *map_view, int flags,
     // clean canceled actions
     if (_undo_index) {
       for (unsigned i = 0; i < _undo_index; ++i) {
-        delete _action_stack.back();
         _action_stack.pop_back();
         emit popBack();
       }
@@ -57,15 +56,13 @@ Action *ActionManager::beginAction(MapView *map_view, int flags,
 
     // prevent undo stack overflow
     if (_action_stack.size() == _limit) {
-      Action *old_action = _action_stack.front();
-      delete old_action;
       _action_stack.pop_front();
       emit popFront();
     }
   }
 
-  auto action = new Action(map_view);
-  _action_stack.push_back(action);
+  _action_stack.push_back(std::make_unique<Action>(map_view));
+  Action *action = _action_stack.back().get();
 
   action->setFlags(flags);
   action->setModalityControllers(modality_controls);
@@ -85,12 +82,15 @@ void ActionManager::endAction() {
   if (!(_cur_action->getFlags() & eDO_NOT_WRITE_HISTORY)) {
     emit addedAction(_cur_action);
   } else {
+    _cur_action = nullptr;
     _action_stack.pop_back();
+    emit currentActionChanged(_undo_index);
+
+    return;
   }
 
   emit onActionEnd(_cur_action);
   _cur_action = nullptr;
-  emit currentActionChanged(_undo_index);
 }
 
 void ActionManager::endActionOnModalityMismatch(unsigned modality_controls) {
@@ -126,7 +126,7 @@ void ActionManager::undo() {
   if (index < 0)
     return;
 
-  Action *action = _action_stack.at(index);
+  Action *action = _action_stack.at(index).get();
   action->undo();
 
   _undo_index++;
@@ -146,17 +146,9 @@ void ActionManager::redo() {
   unsigned index =
       static_cast<int>(_action_stack.size()) - static_cast<int>(_undo_index);
 
-  Action *action = _action_stack.at(index);
+  Action *action = _action_stack.at(index).get();
   action->undo(true);
 
   _undo_index--;
   emit currentActionChanged(_undo_index);
-}
-
-ActionManager::~ActionManager() {
-  for (auto &action : _action_stack) {
-    delete action;
-  }
-
-  _action_stack.clear();
 }
