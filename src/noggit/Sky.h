@@ -91,13 +91,8 @@ public:
 
   explicit Sky(DBCFile::Iterator data, Noggit::NoggitRenderContext context);
 
-  SkyParam *skyParams[8];
+  std::array<std::unique_ptr<SkyParam>, 8> skyParams;
   int curr_sky_param = 0;
-
-  // std::vector<SkyColor> colorRows[36];
-  // std::vector<SkyFloatParam> floatParams[6];
-  // int mmin[36];
-  // int mmin_float[6];
 
   char name[32];
 
@@ -118,31 +113,11 @@ public:
       return r2 < s.r2;
   }
 
-  // bool highlight_sky() const { return _highlight_sky; }
-  // float river_shallow_alpha() const { return _river_shallow_alpha; }
-  // float river_deep_alpha() const { return _river_deep_alpha; }
-  // float ocean_shallow_alpha() const { return _ocean_shallow_alpha; }
-  // float ocean_deep_alpha() const { return _ocean_deep_alpha; }
-  // float glow() const { return _glow; }
   bool selected() const { return _selected; }
-  //
-  // void set_glow(float glow) { _glow = glow; }
-  // void set_highlight_sky(bool state) { _highlight_sky = state; }
-  // void set_river_shallow_alpha(float alpha) { _river_shallow_alpha = alpha; }
-  // void set_river_deep_alpha(float alpha) { _river_deep_alpha = alpha; }
-  // void set_ocean_shallow_alpha(float alpha) { _ocean_shallow_alpha = alpha; }
-  // void set_ocean_deep_alpha(float alpha) { _ocean_deep_alpha = alpha; }
 
   void save_to_dbc();
 
 private:
-  // bool _highlight_sky;
-  // float _river_shallow_alpha;
-  // float _river_deep_alpha;
-  // float _ocean_shallow_alpha;
-  // float _ocean_deep_alpha;
-
-  // float _glow;
   bool _selected;
 
   Noggit::NoggitRenderContext _context;
