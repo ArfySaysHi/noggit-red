@@ -6,6 +6,7 @@
 #include <noggit/World.inl>
 
 #include <cassert>
+#include <stdexcept>
 
 using namespace Noggit::Ui::Tools::ChunkManipulator;
 
@@ -39,7 +40,7 @@ void ChunkClipboard::selectRange(glm::vec3 const &cursor_pos, float radius,
     break;
   }
   default:
-    assert(false);
+    throw std::invalid_argument("Unknown mode passed to selectRange");
   }
 
   emit selectionChanged(_selected_chunks);
@@ -67,7 +68,7 @@ void ChunkClipboard::selectChunk(glm::vec3 const &pos,
     break;
   }
   default:
-    assert(false);
+    throw std::invalid_argument("Unknown mode passed to selectChunk");
   }
 
   emit selectionChanged(_selected_chunks);
@@ -92,7 +93,7 @@ void ChunkClipboard::selectChunk(TileIndex const &tile_index, unsigned x,
     break;
   }
   default:
-    assert(false);
+    throw std::invalid_argument("Unknown mode passed to selectChunk");
   }
 
   emit selectionChanged(_selected_chunks);

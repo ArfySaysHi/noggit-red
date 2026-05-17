@@ -8,8 +8,7 @@
 #include <QDirIterator>
 #include <QFileInfo>
 #include <algorithm>
-#include <cctype>
-#include <fstream>
+#include <qglobal.h>
 #include <vector>
 
 namespace Noggit::Ui::Component {
@@ -43,7 +42,7 @@ public:
       QTextStream stream(&file_1);
       stream << "a" << Qt::endl;
     } else {
-      assert(false);
+      qWarning() << "Could not open file:" << file_1_path;
       return {};
     }
     file_1.close();
@@ -53,7 +52,7 @@ public:
       QTextStream stream(&file_2);
       stream << "b" << Qt::endl;
     } else {
-      assert(false);
+      qWarning() << "Could not open file:" << file_2_path;
       return {};
     }
     file_2.close();
@@ -67,7 +66,7 @@ public:
         is_case_sensitive_fs = true;
       }
     } else {
-      assert(false);
+      qWarning() << "Could not read file:" << file_1_path;
       return {};
     }
     file_test.close();

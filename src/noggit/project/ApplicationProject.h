@@ -15,15 +15,13 @@
 #include <blizzard-archive-library/include/Exception.hpp>
 #include <blizzard-database-library/include/BlizzardDatabase.h>
 #include <cassert>
-#include <chrono>
 #include <filesystem>
-#include <fstream>
 #include <glm/vec3.hpp>
 #include <map>
 #include <memory>
 #include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/ui/windows/downloadFileDialog/DownloadFileDialog.h>
-#include <thread>
+#include <stdexcept>
 #include <vector>
 
 #include "ApplicationProjectReader.h"
@@ -49,7 +47,7 @@ struct ClientVersionFactory {
     if (projectVersion == "Shadowlands")
       return ProjectVersion::SL;
 
-    assert(false);
+    throw std::invalid_argument("Unknown project version: " + projectVersion);
   }
 
   static std::string MapToStringVersion(ProjectVersion const &projectVersion) {
@@ -58,7 +56,8 @@ struct ClientVersionFactory {
     if (projectVersion == ProjectVersion::SL)
       return std::string("Shadowlands");
 
-    assert(false);
+    throw std::invalid_argument(
+        "Unknown project version when attempting to map to a string");
   }
 };
 

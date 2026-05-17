@@ -8,6 +8,7 @@
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/FontNoggit.hpp>
+#include <stdexcept>
 
 using namespace Noggit::Ui::Tools;
 
@@ -206,7 +207,8 @@ QJsonObject BrushStackItem::toJSON() {
   }
   }
 
-  assert(false);
+  throw std::invalid_argument(
+      &"Invalid _tool_widget index: "[_tool_widget.index()]);
 }
 
 void BrushStackItem::fromJSON(QJsonObject const &json) {
@@ -500,6 +502,9 @@ bool BrushStackItem::isMaskEnabled() {
         ->getImageMaskSelector()
         ->isEnabled();
   }
+
+  throw std::invalid_argument(
+      &"Invalid _tool_widget index in isMaskEnabled: "[_tool_widget.index()]);
 }
 
 void BrushStackItem::updateMask() {
