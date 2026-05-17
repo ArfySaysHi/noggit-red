@@ -58,11 +58,11 @@ void WorldTileUpdateQueue::waitForAllUpdate() {
 }
 
 void WorldTileUpdateQueue::queueUpdate(SceneObject *instance,
-                                        ModelUpdate type) {
+                                       ModelUpdate type) {
   {
     std::lock_guard<std::mutex> const lock(_mutex);
 
-    _update_queue.emplace(new instance_update(instance, type));
+    _update_queue.emplace(std::make_unique<instance_update>(instance, type));
     _state_changed.notify_one();
   }
   // make sure deletion are done here
