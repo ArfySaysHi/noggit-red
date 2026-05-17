@@ -87,8 +87,10 @@ texture_swapper::texture_swapper(QWidget *parent, const glm::vec3 *camera_pos,
 
   connect(swap_global, &QPushButton::clicked, [this, camera_pos, map_view]() {
     if (_texture_to_swap) {
-      // TODO : action manager
+      ActionManager::instance()->beginAction(map_view,
+                                             ActionFlags::eCHUNKS_TEXTURE);
       _world->swapTextureGlobal(_texture_to_swap.value());
+      ActionManager::instance()->endAction();
     }
   });
 

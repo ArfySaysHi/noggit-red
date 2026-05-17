@@ -1,5 +1,5 @@
 CompileFlags:
   Remove:
     - -fmodules-ts
-    - -fmodule-mapper=CMakeFiles/noggit.dir/src/noggit/MapIndex.cpp.o.modmap
+    - -fmodule-mapper=*
     - -fdeps-format=p1689r5
