@@ -170,7 +170,7 @@ void LiquidRender::updateLayerData(LiquidTextureManager *tex_manager) {
         if (long diff =
                 static_cast<long>(_render_layers.size() - layer_counter);
             diff > 0) {
-          for (int i = 0; i < diff; ++i) {
+          for (size_t i = 0; i < diff; ++i) {
             auto &layer_params = _render_layers.back();
 
             gl.deleteBuffers(1, &layer_params.chunk_data_buf);

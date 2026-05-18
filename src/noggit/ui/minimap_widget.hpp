@@ -64,12 +64,11 @@ public:
 protected:
   virtual void paintEvent(QPaintEvent *paint_event) override;
   virtual void mouseDoubleClickEvent(QMouseEvent *) override;
-  virtual void mouseMoveEvent(QMouseEvent *) override;
   virtual void mousePressEvent(QMouseEvent *event) override;
   virtual void mouseReleaseEvent(QMouseEvent *event) override;
   virtual void wheelEvent(QWheelEvent *event) override;
 
-  QPoint locateTile(QMouseEvent *event);
+  std::optional<QPoint> locateTile(QMouseEvent *event);
 
 signals:
   void map_clicked(const glm::vec3 &);

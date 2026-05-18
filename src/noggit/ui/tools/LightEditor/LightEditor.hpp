@@ -11,11 +11,11 @@
 
 namespace Noggit::Ui::Tools {
 
-static std::map<int, std::string> sky_color_names_map = {
+inline const std::unordered_map<int, std::string> sky_color_names_map = {
     {0, "Direct"},
-    {1, "Ambiant"},
+    {1, "Ambient"},
     {2, "Sky Top"},
-    {3, "Sky Midle"},
+    {3, "Sky Middle"},
     {4, "Sky Band 1"},
     {5, "Sky Band 2"},
     {6, "Sky Smog"},
@@ -23,7 +23,7 @@ static std::map<int, std::string> sky_color_names_map = {
     {8, "Sun"},
     {9, "Cloud Sun"},
     {10, "Cloud Emissive"},
-    {11, "Cloud Layer 1 Ambian"},
+    {11, "Cloud Layer 1 Ambiant"},
     {12, "Cloud Layer 2 Ambiant"},
     {13, "Unknown/Unused"},
     {14, "Ocean Close"},
@@ -31,9 +31,9 @@ static std::map<int, std::string> sky_color_names_map = {
     {16, "River Close"},
     {17, "River Far"}};
 
-static std::map<int, std::string> light_names_map = {
+inline const std::unordered_map<int, std::string> light_names_map = {
     {1, "Global Light"},
-    {2, "DuskWood"},
+    {2, "Duskwood"},
     {3, "Swamp Of Sorrows"},
     {4, "WestFall n 2"},
     {5, "Deadwind Pass"},
@@ -41,8 +41,8 @@ static std::map<int, std::string> light_names_map = {
     {7, "Burning Steppes"},
     {8, "WestFall 2 razan"},
     {9, "StrangleThorn"},
-    {10, "Badlands  enter"},
-    {11, "WetLands"},
+    {10, "Badlands enter"},
+    {11, "Wetlands"},
     {12, "Arathi Highlands"},
     {13, "Alterac Mountains"},
     {14, "Swamp Of Sorrows 3"},
@@ -98,7 +98,7 @@ static std::map<int, std::string> light_names_map = {
     {64, "Blasted Lands2 ity"},
     {65, "Blasted Lands3"},
     {66, "Blasted Lands4"},
-    {67, "Blasterd LandsPortal"},
+    {67, "Blasted LandsPortal"},
     {68, "Swamp Of Sorrows Fix"},
     {69, "Blasted Lands Peak"},
     {70, "ProgramerIsleDeadWin"},
@@ -153,8 +153,8 @@ static std::map<int, std::string> light_names_map = {
     {198, "Duskwallow ds Demon"},
     {199, "Darkshore2"},
     {200, "Kalidar"},
-    {201, "Mullgore"},
-    {202, "MullgoreSouth"},
+    {201, "Mulgore"},
+    {202, "MulgoreSouth"},
     {203, "DurotarSouth"},
     {204, "DurotarNorth"},
     {205, "BarrensSouth01"},
@@ -186,7 +186,7 @@ static std::map<int, std::string> light_names_map = {
     {231, "DuskwallowBarrens"},
     {232, "FelwoodJadenar"},
     {233, "FelwoodJadenar2"},
-    {234, "MullgoreHarpy"},
+    {234, "MulgoreHarpy"},
     {235, "AshenvaleHellScream2"},
     {236, "ThousandNeedles05"},
     {237, "ThousandNeedles06"},
@@ -196,8 +196,8 @@ static std::map<int, std::string> light_names_map = {
     {241, "FeralasTwinColossus"},
     {242, "Tanaris Desert2"},
     {243, "Tanaris Desert3"},
-    {244, "Tanaries Desert4"},
-    {245, "Tanaries Desert5"},
+    {244, "Tanaris Desert4"},
+    {245, "Tanaris Desert5"},
     {246, "Desolace2"},
     {247, "Azshara1 ea2"},
     {248, "UnGoro 1 ea2"},
@@ -280,8 +280,8 @@ private:
   MapView *_map_view;
   World *_world;
   Sky *_curr_sky;
-  QPushButton *_color_value_Buttons[18]{0};
-  QLabel *_color_value_labels[18]{0};
+  QPushButton *_color_value_Buttons[18]{};
+  QLabel *_color_value_labels[18]{};
 
   std::vector<LightViewPreview *> LightsPreview;
   std::vector<LightViewEditor *> ActiveEditor;

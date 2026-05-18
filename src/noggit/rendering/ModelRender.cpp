@@ -349,7 +349,7 @@ void ModelRender::fixShaderIdBlendOverride() {
     } else {
       uint16_t runtime_shader_val[2] = {0, 0};
 
-      for (int i = 0; i < pass.texture_count; ++i) {
+      for (size_t i = 0; i < pass.texture_count; ++i) {
         uint16_t override_blend = _model->blend_override[pass.shader_id + i];
         uint16_t texture_unit_lookup =
             _model->_texture_unit_lookup[pass.texture_coord_combo_index + i];
@@ -529,7 +529,7 @@ void ModelRender::fixShaderIDLayer() {
 
     if (need_reducing) {
       previous_render_flag = -1;
-      for (int i = 0; i < passes.size(); ++i) {
+      for (size_t i = 0; i < passes.size(); ++i) {
         auto &pass = _render_passes[i];
         uint16_t renderflag_index = pass.renderflag_index;
 
@@ -967,7 +967,7 @@ void ModelRenderPass::initUVTypes(Model *m) {
     LogError << "model: texture_coord_combo_index out of range "
              << m->file_key().stringRepr() << std::endl;
 
-    for (int i = 0; i < texture_count; ++i) {
+    for (size_t i = 0; i < texture_count; ++i) {
       switch (i) {
       case 0:
         tu_lookups[i] = texture_unit_lookup::t1;
@@ -979,12 +979,9 @@ void ModelRenderPass::initUVTypes(Model *m) {
     }
 
     return;
-
-    // throw std::out_of_range("model: texture_coord_combo_index out of range "
-    // + m->filename);
   }
 
-  for (int i = 0; i < texture_count; ++i) {
+  for (size_t i = 0; i < texture_count; ++i) {
     switch (m->_texture_unit_lookup[texture_coord_combo_index + i]) {
     case (int16_t)(-1):
       tu_lookups[i] = texture_unit_lookup::environment;

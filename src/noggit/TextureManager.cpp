@@ -61,7 +61,7 @@ TextureManager::get_tex_array(int width, int height, int mip_level,
     int width_ = width;
     int height_ = height;
 
-    for (int i = 0; i < mip_level; ++i) {
+    for (size_t i = 0; i < mip_level; ++i) {
       gl.texImage3D(GL_TEXTURE_2D_ARRAY, i, GL_RGBA8, width_, height_, n_layers,
                     0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
@@ -106,7 +106,7 @@ TextureManager::get_tex_array(GLint compression, int width, int height,
     int width_ = width;
     int height_ = height;
 
-    for (int i = 0; i < mip_level; ++i) {
+    for (size_t i = 0; i < mip_level; ++i) {
       gl.compressedTexImage3D(
           GL_TEXTURE_2D_ARRAY, i, compression, width_, height_, n_layers, 0,
           static_cast<GLsizei>(comp_data[i].size() * n_layers), nullptr);
@@ -162,7 +162,7 @@ void blp_texture::uploadToArray(unsigned layer) {
 
   if (!_compression_format) {
 
-    for (int i = 0; i < _data.size(); ++i) {
+    for (size_t i = 0; i < _data.size(); ++i) {
       gl.texSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, layer, width, height, 1,
                        GL_RGBA, GL_UNSIGNED_BYTE, _data[i].data());
 
@@ -173,7 +173,7 @@ void blp_texture::uploadToArray(unsigned layer) {
     _data.clear();
 
   } else {
-    for (int i = 0; i < _compressed_data.size(); ++i) {
+    for (size_t i = 0; i < _compressed_data.size(); ++i) {
       gl.compressedTexSubImage3D(
           GL_TEXTURE_2D_ARRAY, i, 0, 0, layer, width, height, 1,
           _compression_format.value(),
@@ -212,7 +212,7 @@ void blp_texture::upload() {
     _texture_array = params.arrays[index_x];
     _array_index = index_y;
 
-    for (int i = 0; i < _data.size(); ++i) {
+    for (size_t i = 0; i < _data.size(); ++i) {
       gl.texSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, index_y, width, height, 1,
                        GL_RGBA, GL_UNSIGNED_BYTE, _data[i].data());
 
@@ -236,7 +236,7 @@ void blp_texture::upload() {
     _texture_array = params.arrays[index_x];
     _array_index = index_y;
 
-    for (int i = 0; i < _compressed_data.size(); ++i) {
+    for (size_t i = 0; i < _compressed_data.size(); ++i) {
       gl.compressedTexSubImage3D(
           GL_TEXTURE_2D_ARRAY, i, 0, 0, index_y, width, height, 1,
           _compression_format.value(),

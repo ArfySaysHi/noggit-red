@@ -13,6 +13,7 @@
 #include <noggit/Camera.hpp>
 #include <noggit/Sky.h>
 #include <noggit/World.h>
+#include <optional>
 
 namespace Noggit {
 namespace Ui {
@@ -77,7 +78,7 @@ void minimap_widget::wheelEvent(QWheelEvent *event) {
       setFixedSize(new_size, new_size);
     }
 
-    event->ignore();
+    event->accept();
   }
 }
 
@@ -143,7 +144,8 @@ void minimap_widget::paintEvent(QPaintEvent *paint_event) {
                                    tile_size - 2, tile_size - 2));
           }
 
-          if (_use_selection && _selected_tiles->at(64 * i + j)) {
+          if (_use_selection && _selected_tiles &&
+              _selected_tiles->at(64 * i + j)) {
             painter.setPen(QColor::fromRgbF(1.0f, 0.0f, 0.0f, 1.f));
             painter.drawRect(QRect(tile_size * i + 1, tile_size * j + 1,
                                    tile_size - 2, tile_size - 2));
@@ -153,10 +155,7 @@ void minimap_widget::paintEvent(QPaintEvent *paint_event) {
     }
 
     if (draw_skies() && _world->renderer()->skies()) {
-      foreach (Sky sky, _world->renderer()->skies()->skies) {
-        //! \todo Get actual color from sky.
-        //! \todo Get actual radius.
-        //! \todo Inner and outer radius?
+      for (const Sky &sky : _world->renderer()->skies()->skies) {
         painter.setPen(Qt::blue);
 
         painter.drawEllipse(
@@ -194,10 +193,7 @@ void minimap_widget::paintEvent(QPaintEvent *paint_event) {
 
       auto extents = _world->mWmoEntry.extents;
 
-      // WMOInstance inst(_world->mWmoFilename, &_world->mWmoEntry,
-      // _world->_context);
-
-      float pos = tile_size * 64 / 2; // TODO : convert wmo pos
+      float pos = tile_size * 64.0 / 2.0; // TODO : convert wmo pos
 
       float min_point_x =
           pos + (extents[0][0] / TILESIZE * tile_size); // extents[min][x]
@@ -205,7 +201,6 @@ void minimap_widget::paintEvent(QPaintEvent *paint_event) {
           pos + (extents[0][1] / TILESIZE * tile_size); // extents[min][y]
       float max_point_x = pos + (extents[1][0] / TILESIZE * tile_size);
       float max_point_y = pos + (extents[1][1] / TILESIZE * tile_size);
-      // tile_size = 14 | max size = 896
 
       float width = max_point_x - min_point_x;
       float height = max_point_y - min_point_y;
@@ -222,13 +217,14 @@ void minimap_widget::paintEvent(QPaintEvent *paint_event) {
   }
 }
 
-QPoint minimap_widget::locateTile(QMouseEvent *event) {
+std::optional<QPoint> minimap_widget::locateTile(QMouseEvent *event) {
   const int smaller_side((qMin(rect().width(), rect().height()) / 64) * 64);
   const int tile_size(smaller_side / 64);
-  //! \note event->pos() / tile_size seems to be using floating point
-  //! arithmetic, therefore getting wrong results.
-  const QPoint tile(event->pos().x() / float(tile_size),
-                    event->pos().y() / float(tile_size));
+  const QPoint tile(event->pos().x() / tile_size, event->pos().y() / tile_size);
+
+  if (tile.x() < 0 || tile.x() >= 64 || tile.y() < 0 || tile.y() >= 64) {
+    return std::nullopt;
+  }
 
   return tile;
 }
@@ -239,9 +235,9 @@ void minimap_widget::mouseDoubleClickEvent(QMouseEvent *event) {
     return;
   }
 
-  QPoint tile = locateTile(event);
+  std::optional<QPoint> tile = locateTile(event);
 
-  if (!world()->mapIndex.hasTile(TileIndex(tile.x(), tile.y())) &&
+  if (!world()->mapIndex.hasTile(TileIndex(tile->x(), tile->y())) &&
       !_world->mapIndex.hasAGlobalWMO()) {
     event->ignore();
     return;
@@ -249,8 +245,8 @@ void minimap_widget::mouseDoubleClickEvent(QMouseEvent *event) {
 
   event->accept();
 
-  emit map_clicked(::glm::vec3(tile.x() * TILESIZE + TILESIZE / 2, 0.0f,
-                               tile.y() * TILESIZE + TILESIZE / 2));
+  emit map_clicked(::glm::vec3(tile->x() * TILESIZE + TILESIZE / 2, 0.0f,
+                               tile->y() * TILESIZE + TILESIZE / 2));
 }
 
 void minimap_widget::mousePressEvent(QMouseEvent *event) {
@@ -263,14 +259,27 @@ void minimap_widget::mousePressEvent(QMouseEvent *event) {
     _is_selecting = false;
     emit reset_selection();
 
+    event->accept();
     return;
   }
 
-  QPoint tile = locateTile(event);
-  emit tile_clicked(tile);
-  _is_selecting = true;
+  if (event->button() != Qt::LeftButton) {
+    event->ignore();
+    return;
+  }
 
-  update();
+  if (auto tile = locateTile(event)) {
+    emit tile_clicked(*tile);
+
+    _is_selecting = true;
+
+    update();
+
+    event->accept();
+    return;
+  }
+
+  event->ignore();
 }
 
 void minimap_widget::mouseReleaseEvent(QMouseEvent *event) {
@@ -282,28 +291,6 @@ void minimap_widget::mouseReleaseEvent(QMouseEvent *event) {
 
   _is_selecting = false;
   update();
-}
-
-void minimap_widget::mouseMoveEvent(QMouseEvent *event) {
-  if (!_world) {
-    event->ignore();
-    return;
-  }
-
-  QPoint tile = locateTile(event);
-
-  std::string str("ADT: " + std::to_string(tile.x()) + "_" +
-                  std::to_string(tile.y()));
-
-  QToolTip::showText(
-      mapToGlobal(QPoint(event->pos().x(), event->pos().y() + 5)),
-      QString::fromStdString(str));
-
-  if (_is_selecting) {
-    emit tile_clicked(tile);
-  }
-
-  // update();
 }
 } // namespace Ui
 } // namespace Noggit

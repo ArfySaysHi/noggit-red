@@ -300,7 +300,7 @@ void Noggit::Action::finish() {
   if (_flags & ActionFlags::eCHUNKS_TERRAIN) {
     _chunk_terrain_post.resize(_chunk_terrain_pre.size());
 
-    for (int i = 0; i < _chunk_terrain_pre.size(); ++i) {
+    for (size_t i = 0; i < _chunk_terrain_pre.size(); ++i) {
       auto &post = _chunk_terrain_post.at(i);
       auto &pre = _chunk_terrain_pre.at(i);
       post.first = pre.first;
@@ -311,7 +311,7 @@ void Noggit::Action::finish() {
   if (_flags & ActionFlags::eCHUNKS_TEXTURE) {
     _chunk_texture_post.reserve(_chunk_texture_pre.size());
 
-    for (int i = 0; i < _chunk_texture_pre.size(); ++i) {
+    for (size_t i = 0; i < _chunk_texture_pre.size(); ++i) {
       auto &pre = _chunk_texture_pre.at(i);
 
       TextureChangeCache cache;
@@ -323,7 +323,7 @@ void Noggit::Action::finish() {
       std::memcpy(&cache.layers_info, texture_set->getMCLYEntries(),
                   sizeof(ENTRY_MCLY) * 4);
 
-      for (int j = 0; j < cache.n_textures; ++j) {
+      for (size_t j = 0; j < cache.n_textures; ++j) {
         cache.textures.push_back(texture_set->filename(j));
       }
 
@@ -334,7 +334,7 @@ void Noggit::Action::finish() {
   if (_flags & ActionFlags::eCHUNKS_VERTEX_COLOR) {
     _chunk_vertex_color_post.resize(_chunk_vertex_color_pre.size());
 
-    for (int i = 0; i < _chunk_vertex_color_pre.size(); ++i) {
+    for (size_t i = 0; i < _chunk_vertex_color_pre.size(); ++i) {
       auto &post = _chunk_vertex_color_post.at(i);
       auto &pre = _chunk_vertex_color_pre.at(i);
       post.first = pre.first;
@@ -345,7 +345,7 @@ void Noggit::Action::finish() {
   if (_flags & ActionFlags::eOBJECTS_TRANSFORMED) {
     _transformed_objects_post.resize(_transformed_objects_pre.size());
 
-    for (int i = 0; i < _transformed_objects_pre.size(); ++i) {
+    for (size_t i = 0; i < _transformed_objects_pre.size(); ++i) {
       auto &post = _transformed_objects_post.at(i);
       auto &pre = _transformed_objects_pre.at(i);
       post.first = pre.first;
@@ -370,7 +370,7 @@ void Noggit::Action::finish() {
   if (_flags & ActionFlags::eCHUNKS_HOLES) {
     _chunk_holes_post.resize(_chunk_holes_pre.size());
 
-    for (int i = 0; i < _chunk_holes_pre.size(); ++i) {
+    for (size_t i = 0; i < _chunk_holes_pre.size(); ++i) {
       auto &post = _chunk_holes_post.at(i);
       auto &pre = _chunk_holes_pre.at(i);
       post.first = pre.first;
@@ -380,7 +380,7 @@ void Noggit::Action::finish() {
   if (_flags & ActionFlags::eCHUNKS_AREAID) {
     _chunk_area_id_post.resize(_chunk_area_id_pre.size());
 
-    for (int i = 0; i < _chunk_area_id_pre.size(); ++i) {
+    for (size_t i = 0; i < _chunk_area_id_pre.size(); ++i) {
       auto &post = _chunk_area_id_post.at(i);
       auto &pre = _chunk_area_id_pre.at(i);
       post.first = pre.first;
@@ -390,7 +390,7 @@ void Noggit::Action::finish() {
   if (_flags & ActionFlags::eCHUNKS_FLAGS) {
     _chunk_flags_post.resize(_chunk_flags_pre.size());
 
-    for (int i = 0; i < _chunk_flags_pre.size(); ++i) {
+    for (size_t i = 0; i < _chunk_flags_pre.size(); ++i) {
       auto &post = _chunk_flags_post.at(i);
       auto &pre = _chunk_flags_pre.at(i);
       post.first = pre.first;
@@ -400,7 +400,7 @@ void Noggit::Action::finish() {
   if (_flags & ActionFlags::eCHUNKS_WATER) {
     _chunk_liquid_post.resize(_chunk_liquid_pre.size());
 
-    for (int i = 0; i < _chunk_liquid_pre.size(); ++i) {
+    for (size_t i = 0; i < _chunk_liquid_pre.size(); ++i) {
       auto &post = _chunk_liquid_post.at(i);
       auto &pre = _chunk_liquid_pre.at(i);
       post.first = pre.first;
@@ -413,7 +413,7 @@ void Noggit::Action::finish() {
   if (_flags & ActionFlags::eCHUNK_SHADOWS) {
     _chunk_shadow_map_post.resize(_chunk_shadow_map_pre.size());
 
-    for (int i = 0; i < _chunk_shadow_map_pre.size(); ++i) {
+    for (size_t i = 0; i < _chunk_shadow_map_pre.size(); ++i) {
       auto &post = _chunk_shadow_map_post.at(i);
       auto &pre = _chunk_shadow_map_pre.at(i);
       post.first = pre.first;

@@ -152,3 +152,5 @@ void ActionManager::redo() {
   _undo_index--;
   emit currentActionChanged(_undo_index);
 }
+
+Noggit::ActionManager::~ActionManager() = default;

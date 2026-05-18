@@ -5,7 +5,6 @@
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/qtreewidget.h>
-#include <map>
 #include <noggit/DBC.h>
 #include <noggit/MapView.h>
 #include <noggit/World.h>
@@ -17,7 +16,8 @@
 using namespace Noggit::Ui::Tools;
 
 LightEditor::LightEditor(MapView *map_view, QWidget *parent)
-    : QWidget(parent), _map_view(map_view), _world(map_view->getWorld()) {
+    : QWidget(parent), _map_view(map_view), _world(map_view->getWorld()),
+      _curr_sky(nullptr) {
 
   setMinimumWidth(250);
   setMaximumWidth(250);
@@ -142,8 +142,9 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
 
   global_values_layout->addWidget(new QLabel("Inner Radius:", this), 4, 0);
   auto inner_radius_spin = new QDoubleSpinBox(this);
-  inner_radius_spin->setRange(0,
-                              100000); // max seen in dbc is 3871 (139363 ・36 )
+  inner_radius_spin->setRange(
+      0,
+      100000); // max seen in dbc is 3871 (139363 ・36 )
   inner_radius_spin->setValue(0);
   inner_radius_spin->setSingleStep(50);
   inner_radius_spin->setEnabled(false);
@@ -151,8 +152,9 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
 
   global_values_layout->addWidget(new QLabel("Outer Radius:", this), 5, 0);
   auto outer_radius_spin = new QDoubleSpinBox(this);
-  outer_radius_spin->setRange(0,
-                              100000); // max seen in dbc is 3871 (139363 ・36 )
+  outer_radius_spin->setRange(
+      0,
+      100000); // max seen in dbc is 3871 (139363 ・36 )
   outer_radius_spin->setValue(0);
   outer_radius_spin->setSingleStep(50);
   outer_radius_spin->setEnabled(false);
@@ -291,7 +293,7 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
   // QSizePolicy::Maximum);
   auto color_values_layout = new QGridLayout(color_values_group);
 
-  for (int i = 0; i < NUM_SkyColorNames; ++i) {
+  for (size_t i = 0; i < NUM_SkyColorNames; ++i) {
     std::string color_name = sky_color_names_map.at(i);
 
     LightViewPreview *LightPrev =
@@ -305,17 +307,16 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
         return;
 
       LightViewEditor *Editor = new LightViewEditor(
-          _map_view, _curr_sky->skyParams[param_combobox->currentIndex()],
+          _map_view, _curr_sky->skyParams[param_combobox->currentIndex()].get(),
           SkyColorNames(i), this);
       ActiveEditor.push_back(Editor);
       Editor->show();
 
       connect(Editor, &LightViewEditor::Delete,
               ([=, this](LightViewEditor *self) {
-                for (int i = 0; i < ActiveEditor.size(); ++i)
+                for (size_t i = 0; i < ActiveEditor.size(); ++i)
                   if (ActiveEditor[i] == self)
-                    ActiveEditor.erase(ActiveEditor.begin() + i,
-                                       ActiveEditor.begin() + i);
+                    ActiveEditor.erase(ActiveEditor.begin() + i);
               }));
 
       connect(Editor, &LightViewEditor::UpdatePixmap,
@@ -337,16 +338,16 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
           });
 
   connect(GetCurrentSkyButton, &QPushButton::clicked, ([=, this]() {
-            // _curr_sky =
-            // _map_view->getWorld()->renderer()->skies()->findSkyWeights(map_view->getCamera()->position);
+            if (!_curr_sky)
+              return;
             auto new_sky = _map_view->getWorld()
                                ->renderer()
                                ->skies()
                                ->findClosestSkyByWeight();
-            if (_curr_sky == nullptr)
+            if (new_sky == nullptr)
               return; // todo error
-            else
-              _curr_sky = new_sky;
+
+            _curr_sky = new_sky;
 
             light_editing_widget->setEnabled(true);
             lightning_tabs->setCurrentWidget(light_editing_widget);
@@ -379,8 +380,9 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
             param_combobox->setCurrentIndex(0);
             // light param specific data (only 0 currently)
             auto default_param =
-                _curr_sky->skyParams[param_combobox->currentIndex()];
-            glow_slider->setSliderPosition(default_param->glow() * 100);
+                _curr_sky->skyParams[param_combobox->currentIndex()].get();
+            glow_slider->setSliderPosition(
+                static_cast<int>(default_param->glow() * 100.0f));
             glow_slider->setEnabled(true);
             highlight_sky_checkbox->setCheckState(
                 Qt::CheckState(default_param->highlight_sky()));
@@ -392,22 +394,20 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
                                              ->file_key()
                                              .filepath()));
             // alpha values
-            shallow_water_alpha_slider->setSliderPosition(
-                default_param->river_shallow_alpha() *
-                100); // TODO bug : when reselecting the same light, sliders
-                      // with digits values reset to 0.
+            shallow_water_alpha_slider->setSliderPosition(static_cast<int>(
+                default_param->river_shallow_alpha() * 100.0f));
             shallow_water_alpha_slider->setEnabled(true);
             deep_water_alpha_slider->setSliderPosition(
-                default_param->river_deep_alpha() * 100);
+                static_cast<int>(default_param->river_deep_alpha() * 100.0f));
             deep_water_alpha_slider->setEnabled(true);
-            shallow_ocean_alpha_slider->setSliderPosition(
-                default_param->ocean_shallow_alpha() * 100);
+            shallow_ocean_alpha_slider->setSliderPosition(static_cast<int>(
+                default_param->ocean_shallow_alpha() * 100.0f));
             shallow_ocean_alpha_slider->setEnabled(true);
             deep_ocean_alpha_slider->setSliderPosition(
-                default_param->ocean_deep_alpha() * 100);
+                static_cast<int>(default_param->ocean_deep_alpha() * 100.0f));
             deep_ocean_alpha_slider->setEnabled(true);
             // color values
-            for (int i = 0; i < NUM_SkyColorNames; ++i) {
+            for (size_t i = 0; i < NUM_SkyColorNames; ++i) {
 
               LightsPreview[i]->SetPreview(default_param->colorRows[i]);
 
@@ -430,7 +430,7 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
                       ->data(0, 0)
                       .toInt(); // TODO : doesn't work since moving to role 0
 
-              for (int i = 0;
+              for (size_t i = 0;
                    i < _map_view->getWorld()->renderer()->skies()->skies.size();
                    i++) {
                 auto &sky =
@@ -454,6 +454,8 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
   connect(
       param_combobox, qOverload<int>(&QComboBox::currentIndexChanged),
       [this](int index) {
+        if (!_curr_sky)
+          return;
         // update rendering to selected param
         _curr_sky->curr_sky_param = index;
         _world->renderer()->skies()->update_sky_colors(
@@ -469,11 +471,12 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
               nb_user++;
           }
         }
-        _nb_param_users->setText("This param is used " + nb_user);
+        _nb_param_users->setText(&"This param is used "[nb_user]);
 
-        auto sky_param = _curr_sky->skyParams[index];
+        auto sky_param = _curr_sky->skyParams[index].get();
 
-        glow_slider->setSliderPosition(sky_param->glow() * 100);
+        glow_slider->setSliderPosition(
+            static_cast<int>(sky_param->glow() * 100.0f));
         highlight_sky_checkbox->setCheckState(
             Qt::CheckState(sky_param->highlight_sky()));
         if (_curr_sky->skybox.has_value())
@@ -481,15 +484,15 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
               sky_param->skybox.value().model.get()->file_key().filepath()));
         // alpha values
         shallow_water_alpha_slider->setSliderPosition(
-            sky_param->river_shallow_alpha() * 100);
+            static_cast<int>(sky_param->river_shallow_alpha() * 100.0f));
         deep_water_alpha_slider->setSliderPosition(
-            sky_param->river_deep_alpha() * 100);
+            static_cast<int>(sky_param->river_deep_alpha() * 100.0f));
         shallow_ocean_alpha_slider->setSliderPosition(
-            sky_param->ocean_shallow_alpha() * 100);
+            static_cast<int>(sky_param->ocean_shallow_alpha() * 100.0f));
         deep_ocean_alpha_slider->setSliderPosition(
-            sky_param->ocean_deep_alpha() * 100);
+            static_cast<int>(sky_param->ocean_deep_alpha() * 100.0f));
         // color values
-        for (int i = 0; i < NUM_SkyColorNames; ++i) {
+        for (size_t i = 0; i < NUM_SkyColorNames; ++i) {
           LightsPreview[i]->SetPreview(sky_param->colorRows[i]);
           //_color_value_Buttons[i]->setText(QString::fromStdString(std::format("{}
           /// 16 values", sky_param->colorRows[i].size())));
@@ -501,6 +504,8 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
 
   connect(pos_x_spin, qOverload<double>(&QDoubleSpinBox::valueChanged),
           [&](double v) {
+            if (!_curr_sky)
+              return;
             _curr_sky->pos.x = v; // pos_x_spin->value();
             _world->renderer()->skies()->update_sky_colors(
                 _map_view->getCamera()->position,
@@ -510,6 +515,8 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
 
   connect(pos_y_spin, qOverload<double>(&QDoubleSpinBox::valueChanged),
           [&](double v) {
+            if (!_curr_sky)
+              return;
             _curr_sky->pos.z = v; // pos_y_spin->value();
             _world->renderer()->skies()->update_sky_colors(
                 _map_view->getCamera()->position,
@@ -519,6 +526,8 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
 
   connect(pos_z_spin, qOverload<double>(&QDoubleSpinBox::valueChanged),
           [&](double v) {
+            if (!_curr_sky)
+              return;
             _curr_sky->pos.y = v; //  pos_z_spin->value();
             _world->renderer()->skies()->update_sky_colors(
                 _map_view->getCamera()->position,
@@ -528,6 +537,8 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
 
   connect(inner_radius_spin, qOverload<double>(&QDoubleSpinBox::valueChanged),
           [&](double v) {
+            if (!_curr_sky)
+              return;
             _curr_sky->r1 = v; //  inner_radius_spin->value();
             _world->renderer()->skies()->update_sky_colors(
                 _map_view->getCamera()->position,
@@ -537,6 +548,8 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
 
   connect(outer_radius_spin, qOverload<double>(&QDoubleSpinBox::valueChanged),
           [&](double v) {
+            if (!_curr_sky)
+              return;
             _curr_sky->r2 = v; //  outer_radius_spin->value();
             _world->renderer()->skies()->update_sky_colors(
                 _map_view->getCamera()->position,
@@ -545,15 +558,19 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
           });
 
   connect(glow_slider, &QSlider::valueChanged, [&](int v) {
+    if (!_curr_sky)
+      return;
     _curr_sky->skyParams[param_combobox->currentIndex()]->set_glow(
         v /
-        100); // glow_slider->value() / 100; // crashes, glow_slider is null.
+        100.0f); // glow_slider->value() / 100; // crashes, glow_slider is null.
     _world->renderer()->skies()->update_sky_colors(
         _map_view->getCamera()->position,
         static_cast<int>(_world->time) % 2880); // find how to update sky
   });
 
   connect(highlight_sky_checkbox, &QCheckBox::stateChanged, [&](int state) {
+    if (!_curr_sky)
+      return;
     _curr_sky->skyParams[param_combobox->currentIndex()]->set_highlight_sky(
         state);
     _world->renderer()->skies()->update_sky_colors(
@@ -562,32 +579,40 @@ LightEditor::LightEditor(MapView *map_view, QWidget *parent)
   });
 
   connect(shallow_water_alpha_slider, &QSlider::valueChanged, [&](int v) {
+    if (!_curr_sky)
+      return;
     _curr_sky->skyParams[param_combobox->currentIndex()]
-        ->set_river_shallow_alpha(v / 100);
+        ->set_river_shallow_alpha(v / 100.0f);
     _world->renderer()->skies()->update_sky_colors(
         _map_view->getCamera()->position,
         static_cast<int>(_world->time) % 2880); // find how to update sky
   });
 
   connect(deep_water_alpha_slider, &QSlider::valueChanged, [&](int v) {
+    if (!_curr_sky)
+      return;
     _curr_sky->skyParams[param_combobox->currentIndex()]->set_river_deep_alpha(
-        v / 100);
+        v / 100.0f);
     _world->renderer()->skies()->update_sky_colors(
         _map_view->getCamera()->position,
         static_cast<int>(_world->time) % 2880); // find how to update sky
   });
 
   connect(shallow_ocean_alpha_slider, &QSlider::valueChanged, [&](int v) {
+    if (!_curr_sky)
+      return;
     _curr_sky->skyParams[param_combobox->currentIndex()]
-        ->set_ocean_shallow_alpha(v / 100);
+        ->set_ocean_shallow_alpha(v / 100.0f);
     _world->renderer()->skies()->update_sky_colors(
         _map_view->getCamera()->position,
         static_cast<int>(_world->time) % 2880); // find how to update sky
   });
 
   connect(deep_ocean_alpha_slider, &QSlider::valueChanged, [&](int v) {
+    if (!_curr_sky)
+      return;
     _curr_sky->skyParams[param_combobox->currentIndex()]->set_ocean_deep_alpha(
-        v / 100);
+        v / 100.0f);
     _world->renderer()->skies()->update_sky_colors(
         _map_view->getCamera()->position,
         static_cast<int>(_world->time) % 2880); // find how to update sky
@@ -598,7 +623,7 @@ void LightEditor::UpdateWorldTime() {
   if (ActiveEditor.size() == 0)
     return;
 
-  for (int i = 0; i < ActiveEditor.size(); ++i)
+  for (size_t i = 0; i < ActiveEditor.size(); ++i)
     ActiveEditor[i]->UpdateWorldTime();
 }
 

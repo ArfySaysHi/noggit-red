@@ -4,7 +4,6 @@
 #include "LiquidTextureManager.hpp"
 #include "noggit/DBC.h"
 #include "noggit/application/NoggitApplication.hpp"
-#include "opengl/context.inl"
 #include <noggit/Log.h>
 
 using namespace Noggit::Rendering;
@@ -16,7 +15,7 @@ void LiquidTextureManager::upload() {
   if (_uploaded)
     return;
 
-  for (int i = 0; i < gLiquidTypeDB.getRecordCount(); ++i) {
+  for (size_t i = 0; i < gLiquidTypeDB.getRecordCount(); ++i) {
     const DBCFile::Record record = gLiquidTypeDB.getRecord(i);
     unsigned liquid_type_id = record.getInt(LiquidTypeDB::ID);
     int type = record.getInt(LiquidTypeDB::Type);

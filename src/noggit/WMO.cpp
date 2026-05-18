@@ -194,16 +194,6 @@ void WMO::finishLoading() {
 
   f.seekRelative(size);
 
-  /*
-  std::vector<glm::vec3> portal_vertices;
-
-  for (size_t i (0); i < size / 12; ++i) {
-    f.read (ff, 12);
-    portal_vertices.push_back(glm::vec3(ff[0], ff[2], -ff[1]));
-  }
-
-   */
-
   // - MOPT ----------------------------------------------
 
   f.read(&fourcc, 4);
@@ -386,7 +376,7 @@ WMO::doodads_per_group(uint16_t doodadset) const {
   auto const &dset = doodadsets[doodadset];
   uint32_t start = dset.start, end = start + dset.size;
 
-  for (int i = 0; i < groups.size(); ++i) {
+  for (size_t i = 0; i < groups.size(); ++i) {
     for (uint16_t ref : groups[i].doodad_ref()) {
       if (ref >= start && ref < end) {
         doodads[i].push_back(modelis[ref]);
@@ -847,7 +837,7 @@ void WMOGroup::load() {
       std::vector<CImVector> mocv_2(size / sizeof(CImVector));
       f.read(mocv_2.data(), size);
 
-      for (int i = 0; i < mocv_2.size(); ++i) {
+      for (size_t i = 0; i < mocv_2.size(); ++i) {
         float alpha = static_cast<float>(mocv_2[i].a) / 255.f;
 
         // the second mocv is used for texture blending only
@@ -941,7 +931,7 @@ void WMOGroup::fix_vertex_color_alpha() {
     wmo_ambient_color.w = 0.f;
   }
 
-  for (int i = 0; i < _vertex_colors.size(); ++i) {
+  for (size_t i = 0; i < _vertex_colors.size(); ++i) {
     auto &color = _vertex_colors[i];
     float r = color.x;
     float g = color.y;
