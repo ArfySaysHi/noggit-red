@@ -90,7 +90,7 @@ add_subdirectory("${EXTERNAL_SOURCE_DIR}/NodeEditor")
 add_subdirectory("${EXTERNAL_SOURCE_DIR}/libnoise")
 if(TARGET noise-static)
 target_include_directories(noise-static
-    PUBLIC 
+  SYSTEM PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/external/libnoise/src
 )
 endif()
@@ -101,6 +101,42 @@ if(WIN32)
 add_subdirectory("${EXTERNAL_SOURCE_DIR}/framelesshelper")
 endif()
 
+# Suppress warnings from all external targets
+set(_external_targets
+    ColorWidgets-qt5
+    qtadvanceddocking
+    nodes
+    imgui
+    qt_imgui_widgets
+    qt_imgui_quick
+    noise-static
+    noiseutils-static
+    FastNoise
+    lodepng
+    blizzard-archive-library
+    blizzard-database-library
+)
+
+function(external_target_no_warnings target)
+    if(MSVC)
+        target_compile_options(${target} PRIVATE /W0)
+    else()
+        target_compile_options(${target} PRIVATE -w)
+    endif()
+
+    get_target_property(_incs ${target} INTERFACE_INCLUDE_DIRECTORIES)
+    if(_incs)
+        target_include_directories(${target}
+            SYSTEM INTERFACE ${_incs}
+        )
+    endif()
+endfunction()
+
+foreach(_target ${_external_targets})
+    if(TARGET ${_target})
+        external_target_no_warnings(${_target})
+    endif()
+endforeach()
 
 # Source Collection
 collect_files(math_sources src/math FALSE "*.cpp" "")

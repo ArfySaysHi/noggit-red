@@ -37,32 +37,11 @@ void WMORender::draw(OpenGL::Scoped::use_program &wmo_shader,
       continue;
     }
 
-    /*
-    if (!group.is_visible(transform_matrix, frustum, cull_distance, camera,
-    display))
-    {
-      continue;
-    }
-
-     */
-
     group.renderer()->draw(wmo_shader, frustum, cull_distance, camera, draw_fog,
                            world_has_skies);
-
-    /*
-    group.drawLiquid ( transform_matrix_transposed
-                     , render
-                     , draw_fog
-                     , animtime
-                     );
-
-                     */
   }
 
   if (boundingbox) {
-    // OpenGL::Scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
-    // gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     for (auto &group : _wmo->groups) {
       Noggit::Rendering::Primitives::WireBox::getInstance(_wmo->_context)
           .draw(model_view, projection, transform_matrix,

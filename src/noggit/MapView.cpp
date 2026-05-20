@@ -4066,8 +4066,8 @@ void MapView::ShowContextMenu(QPoint pos) {
     QAction action_11("Duplicate Object(s)", this);
     menu->addAction(&action_11);
     action_11.setEnabled(has_copied_objects);
-    action_11.setShortcut(
-        QKeySequence(Qt::CTRL + Qt::Key_B)); // (Qt::CTRL | Qt::Key_P)
+    action_11.setShortcut(QKeySequence(static_cast<int>(Qt::CTRL) +
+                                       Qt::Key_B)); // (Qt::CTRL | Qt::Key_P)
     QObject::connect(&action_11, &QAction::triggered, [=, this]() {
       if (terrainMode == editing_mode::object && !NOGGIT_CUR_ACTION) {
         NOGGIT_ACTION_MGR->beginAction(this,
@@ -4091,7 +4091,7 @@ void MapView::ShowContextMenu(QPoint pos) {
     QObject::connect(&action_1, &QAction::triggered, [=, this]() {
       auto last_entry = _world->get_last_selected_model();
       if (last_entry) {
-        if (!last_entry.value().index() == eEntry_Object)
+        if (!(last_entry.value().index() == eEntry_Object))
           return;
 
         auto obj = std::get<selected_object_type>(last_entry.value());
@@ -4154,7 +4154,7 @@ void MapView::ShowContextMenu(QPoint pos) {
     QObject::connect(&action_palette_add, &QAction::triggered, [=, this]() {
       auto last_entry = _world->get_last_selected_model();
       if (last_entry) {
-        if (!last_entry.value().index() == eEntry_Object)
+        if (!(last_entry.value().index() == eEntry_Object))
           return;
 
         getObjectPalette()->setVisible(true);

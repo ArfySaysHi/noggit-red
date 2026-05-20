@@ -10,6 +10,7 @@
 #include <noggit/ModelManager.h>
 #include <noggit/TextureManager.h>
 #include <noggit/ToolEnums.hpp>
+#include <noggit/WMOLighting.h>
 #include <noggit/WmoLiquid.hpp>
 #include <noggit/rendering/Primitives.hpp>
 #include <noggit/rendering/WMOGroupRender.hpp>
@@ -227,21 +228,6 @@ private:
   Noggit::Rendering::WMOGroupRender _renderer;
 };
 
-struct WMOLight {
-  uint32_t flags, color;
-  glm::vec3 pos;
-  float intensity;
-  float unk[5];
-  float r;
-
-  glm::vec4 fcolor;
-
-  void init(BlizzardArchive::ClientFile *f);
-  void setup(GLint light);
-
-  static void setupOnce(GLint light, glm::vec3 dir, glm::vec3 light_color);
-};
-
 struct WMOPV {
   glm::vec3 a, b, c, d;
 };
@@ -255,20 +241,6 @@ struct WMODoodadSet {
   int32_t start;
   int32_t size;
   int32_t unused;
-};
-
-struct WMOFog {
-  unsigned int flags;
-  glm::vec3 pos;
-  float r1, r2, fogend, fogstart;
-  unsigned int color1;
-  float f2;
-  float f3;
-  unsigned int color2;
-  // read to here (0x30 bytes)
-  glm::vec4 color;
-  void init(BlizzardArchive::ClientFile *f);
-  void setup();
 };
 
 union mohd_flags {

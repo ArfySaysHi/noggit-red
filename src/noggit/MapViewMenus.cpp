@@ -19,6 +19,7 @@
 #include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/tools/ViewToolbar/Ui/ViewToolbar.hpp>
 #include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
+#include <qkeysequence.h>
 
 void MapView::setupFileMenu() {
   auto file_menu(_main_window->_menuBar->addMenu("Editor"));
@@ -69,16 +70,18 @@ void MapView::setupFileMenu() {
                 ([this] { _force_uid_check = true; }));
   file_menu->addSeparator();
 
-  ADD_ACTION(file_menu, "Add bookmark", Qt::CTRL + Qt::Key_F5, [this] {
-    auto bookmark = Noggit::Project::NoggitProjectBookmarkMap();
-    bookmark.position = _camera.position;
-    bookmark.camera_pitch = _camera.pitch()._;
-    bookmark.camera_yaw = _camera.yaw()._;
-    bookmark.map_id = _world->getMapID();
-    bookmark.name = gAreaDB.getAreaName(_world->getAreaID(_camera.position));
+  ADD_ACTION(file_menu, "Add bookmark",
+             QKeySequence(static_cast<int>(Qt::CTRL) + Qt::Key_F5), [this] {
+               auto bookmark = Noggit::Project::NoggitProjectBookmarkMap();
+               bookmark.position = _camera.position;
+               bookmark.camera_pitch = _camera.pitch()._;
+               bookmark.camera_yaw = _camera.yaw()._;
+               bookmark.map_id = _world->getMapID();
+               bookmark.name =
+                   gAreaDB.getAreaName(_world->getAreaID(_camera.position));
 
-    _project->createBookmark(bookmark);
-  });
+               _project->createBookmark(bookmark);
+             });
 
   ADD_ACTION(
       file_menu, "Write coordinates to port.txt and copy to clipboard",
@@ -695,15 +698,17 @@ void MapView::setupViewMenu() {
   ADD_TOGGLE(view_menu, "Draw fog", Qt::Key_F12, _draw_fog);
 
   ADD_TOGGLE_POST(
-      view_menu, "Hole lines", Qt::SHIFT + Qt::Key_F1, _draw_hole_lines,
+      view_menu, "Hole lines",
+      QKeySequence(static_cast<int>(Qt::SHIFT) + Qt::Key_F1), _draw_hole_lines,
       ([=, this] {
         _world->renderer()->getTerrainParamsUniformBlock()->draw_hole_lines =
             _draw_hole_lines.get();
         _world->renderer()->markTerrainParamsUniformBlockDirty();
       }));
 
-  ADD_TOGGLE_POST(view_menu, "Climb", Qt::SHIFT + Qt::Key_F2, _draw_climb,
-                  ([=, this] {
+  ADD_TOGGLE_POST(view_menu, "Climb",
+                  QKeySequence(static_cast<int>(Qt::SHIFT) + Qt::Key_F2),
+                  _draw_climb, ([=, this] {
                     _world->renderer()
                         ->getTerrainParamsUniformBlock()
                         ->draw_impassible_climb = _draw_climb.get();
@@ -711,16 +716,18 @@ void MapView::setupViewMenu() {
                   }));
 
   ADD_TOGGLE_POST(
-      view_menu, "Vertex Color", Qt::SHIFT + Qt::Key_F3, _draw_vertex_color,
-      ([=, this] {
+      view_menu, "Vertex Color",
+      QKeySequence(static_cast<int>(Qt::SHIFT) + Qt::Key_F3),
+      _draw_vertex_color, ([=, this] {
         _world->renderer()->getTerrainParamsUniformBlock()->draw_vertex_color =
             _draw_vertex_color.get();
         _world->renderer()->markTerrainParamsUniformBlockDirty();
       }));
 
   ADD_TOGGLE_POST(
-      view_menu, "Baked Shadows", Qt::SHIFT + Qt::Key_F4, _draw_baked_shadows,
-      ([=, this] {
+      view_menu, "Baked Shadows",
+      QKeySequence(static_cast<int>(Qt::SHIFT) + Qt::Key_F4),
+      _draw_baked_shadows, ([=, this] {
         _world->renderer()->getTerrainParamsUniformBlock()->draw_shadows =
             _draw_baked_shadows.get();
         _world->renderer()->markTerrainParamsUniformBlockDirty();
