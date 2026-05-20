@@ -12,13 +12,13 @@
 #include <noggit/ToolEnums.hpp>
 #include <noggit/WMOLighting.h>
 #include <noggit/WmoLiquid.hpp>
+#include <noggit/data/WMOData.hpp>
 #include <noggit/rendering/Primitives.hpp>
 #include <noggit/rendering/WMOGroupRender.hpp>
 #include <noggit/rendering/WMORender.hpp>
 #include <optional>
 
 #include <cstdint>
-#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -34,122 +34,6 @@ namespace Noggit::Rendering {
 class WMOGroupRender;
 class WMORender;
 } // namespace Noggit::Rendering
-
-struct wmo_batch {
-  int8_t unused[12];
-
-  uint32_t index_start;
-  uint16_t index_count;
-  uint16_t vertex_start;
-  uint16_t vertex_end;
-
-  uint8_t flags;
-  uint8_t texture;
-};
-
-union wmo_mopy_flags {
-  int8_t value;
-  struct {
-    int8_t flag_0x01 : 1;      // 0x1
-    int8_t no_cam_collide : 1; // 0x2
-    int8_t detail : 1;         // 0x4
-    int8_t collision : 1;      // 0x8
-    int8_t hint : 1;
-    int8_t render : 1;
-    int8_t flag_0x40 : 1;   // 0x40
-    int8_t collide_hit : 1; // 0x80
-  };
-};
-static_assert(sizeof(wmo_mopy_flags) == sizeof(std::int8_t),
-              "bitfields shall be implemented packed");
-
-struct wmo_triangle_material_info {
-  wmo_mopy_flags flags;
-  uint8_t texture;
-
-  bool isTransFace() {
-    return flags.flag_0x01 && (flags.detail || flags.render);
-  }
-  bool isColor() { return !flags.collision; }
-  bool isRenderFace() { return flags.render && !flags.detail; }
-  bool isCollidable() { return flags.collision || isRenderFace(); }
-
-  bool isCollision() { return texture == 0xff; }
-};
-
-enum wmo_mobn_flags {
-  Flag_XAxis = 0x0,
-  Flag_YAxis = 0x1,
-  Flag_ZAxis = 0x2,
-  Flag_AxisMask = 0x3,
-  Flag_Leaf = 0x4,
-  Flag_NoChild = 0xFFFF,
-};
-
-struct wmo_bsp_node {
-  uint16_t flags;
-  int16_t negChild; // index of bsp child node (right in this array)
-  int16_t posChild;
-  uint16_t nFaces;    // num of triangle faces in MOBR
-  uint32_t faceStart; // index of the first triangle index(in MOBR)
-  float planeDist;
-};
-
-union wmo_group_flags {
-  uint32_t value;
-  struct {
-    uint32_t has_bsp_tree : 1;     // 0x1
-    uint32_t has_light_map : 1;    // 0x2
-    uint32_t has_vertex_color : 1; // 0x4
-    uint32_t exterior : 1;         // 0x8
-    uint32_t flag_0x10 : 1;
-    uint32_t flag_0x20 : 1;
-    uint32_t exterior_lit : 1; // 0x40
-    uint32_t unreacheable : 1; // 0x80
-    uint32_t flag_0x100 : 1;
-    uint32_t has_light : 1; // 0x200
-    uint32_t flag_0x400 : 1;
-    uint32_t has_doodads : 1; // 0x800
-    uint32_t has_water : 1;   // 0x1000
-    uint32_t indoor : 1;      // 0x2000
-    uint32_t flag_0x4000 : 1;
-    uint32_t flag_0x8000 : 1;
-    uint32_t always_draw : 1;   // 0x10000
-    uint32_t has_mori_morb : 1; // 0x20000, cata+ only (?)
-    uint32_t skybox : 1;        // 0x40000
-    uint32_t ocean : 1;         // 0x80000
-    uint32_t flag_0x100000 : 1;
-    uint32_t mount_allowed : 1; // 0x200000
-    uint32_t flag_0x400000 : 1;
-    uint32_t flag_0x800000 : 1;
-    uint32_t use_mocv2_for_texture_blending : 1; // 0x1000000
-    uint32_t has_two_motv : 1;                   // 0x2000000
-    uint32_t antiportal : 1;                     // 0x4000000
-    uint32_t unk : 1; // 0x8000000 requires intBatchCount == 0, extBatchCount ==
-                      // 0, UNREACHABLE.
-    uint32_t unused : 4;
-  };
-};
-static_assert(sizeof(wmo_group_flags) == sizeof(std::uint32_t),
-              "bitfields shall be implemented packed");
-
-struct wmo_group_header {
-  uint32_t group_name;             // offset into MOGN
-  uint32_t descriptive_group_name; // offset into MOGN
-  wmo_group_flags flags;
-  float box1[3];
-  float box2[3];
-  uint16_t portal_start;
-  uint16_t portal_count;
-  uint16_t transparency_batches_count;
-  uint16_t interior_batch_count;
-  uint16_t exterior_batch_count;
-  uint16_t padding_or_batch_type_d; // probably padding, but might be data?
-  uint8_t fogs[4];
-  uint32_t group_liquid; // used for MLIQ
-  uint32_t id;
-  int32_t unk2, unk3;
-};
 
 class WMOGroup {
   friend class Noggit::Rendering::WMOGroupRender;
@@ -205,15 +89,15 @@ private:
   void fix_vertex_color_alpha();
 
   WMO *wmo;
-  wmo_group_header header;
+  WMOData::GroupHeader header;
   float rad;
   int32_t num;
   int32_t fog;
   std::vector<uint16_t> _doodad_ref;
   std::unique_ptr<wmo_liquid> lq;
 
-  std::vector<wmo_triangle_material_info> _material_infos;
-  std::vector<wmo_batch> _batches;
+  std::vector<WMOData::TriangleMaterialInfo> _material_infos;
+  std::vector<WMOData::Batch> _batches;
 
   std::vector<::glm::vec3> _vertices;
   std::vector<::glm::vec3> _normals;
@@ -222,39 +106,11 @@ private:
   std::vector<glm::vec4> _vertex_colors;
   std::vector<uint16_t> _indices;
 
-  std::optional<std::vector<wmo_bsp_node>> _bsp_tree_nodes;
+  std::optional<std::vector<WMOData::BspNode>> _bsp_tree_nodes;
   std::optional<std::vector<uint16_t>> _bsp_indices;
 
   Noggit::Rendering::WMOGroupRender _renderer;
 };
-
-struct WMOPV {
-  glm::vec3 a, b, c, d;
-};
-
-struct WMOPR {
-  int16_t portal, group, dir, reserved;
-};
-
-struct WMODoodadSet {
-  char name[0x14];
-  int32_t start;
-  int32_t size;
-  int32_t unused;
-};
-
-union mohd_flags {
-  std::uint16_t flags;
-  struct {
-    std::uint16_t do_not_attenuate_vertices_based_on_distance_to_portal : 1;
-    std::uint16_t use_unified_render_path : 1;
-    std::uint16_t use_liquid_type_dbc_id : 1;
-    std::uint16_t do_not_fix_vertex_color_alpha : 1;
-    std::uint16_t unused : 12;
-  };
-};
-static_assert(sizeof(mohd_flags) == sizeof(std::uint16_t),
-              "bitfields shall be implemented packed");
 
 class WMO : public AsyncObject {
   friend class Noggit::Rendering::WMORender;
@@ -288,11 +144,11 @@ public:
 
   uint32_t WmoId;
 
-  mohd_flags flags;
+  WMOData::MohdFlags flags;
 
   std::vector<WMOFog> fogs;
 
-  std::vector<WMODoodadSet> doodadsets;
+  std::vector<WMOData::DoodadSet> doodadsets;
 
   std::optional<scoped_model_reference> skybox;
 

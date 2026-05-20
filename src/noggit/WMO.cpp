@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License
 // (version 3).
 
+#include "noggit/data/WMOData.hpp"
 #include <math/frustum.hpp>
 #include <noggit/AsyncLoader.h>
 #include <noggit/Log.h>            // LogDebug
@@ -254,7 +255,7 @@ void WMO::finishLoading() {
 
   doodadsets.reserve(nDoodadSets);
   for (size_t i(0); i < nDoodadSets; ++i) {
-    WMODoodadSet dds;
+    WMOData::DoodadSet dds;
     f.read(&dds, 32);
     doodadsets.push_back(dds);
   }
@@ -473,7 +474,7 @@ void WMOGroup::load() {
 
   assert(fourcc == 'MOGP');
 
-  f.read(&header, sizeof(wmo_group_header));
+  f.read(&header, sizeof(WMOData::GroupHeader));
 
   unsigned fog_index = header.fogs[0];
 
@@ -590,7 +591,7 @@ void WMOGroup::load() {
 
   assert(fourcc == 'MOBA');
 
-  _batches.resize(size / sizeof(wmo_batch));
+  _batches.resize(size / sizeof(WMOData::Batch));
   f.read(_batches.data(), size);
 
   _renderer.initRenderBatches();
