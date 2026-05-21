@@ -17,7 +17,7 @@ void WMOGroupRender::upload() {
   for (auto &batch : _wmo_group->_batches) {
     WMOMaterial const &mat(_wmo_group->wmo->materials.at(batch.texture));
 
-    auto &tex1 = _wmo_group->wmo->textures.at(mat.texture1);
+    auto &tex1 = _wmo_group->wmo->textures.at(mat.texture1_index);
 
     tex1->wait_until_loaded();
     tex1->upload();
@@ -30,7 +30,7 @@ void WMOGroupRender::upload() {
     bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3;
 
     if (use_tex2) {
-      auto &tex2 = _wmo_group->wmo->textures.at(mat.texture2);
+      auto &tex2 = _wmo_group->wmo->textures.at(mat.texture2_index);
       tex2->wait_until_loaded();
       tex2->upload();
 

@@ -16,7 +16,6 @@
 #include <opengl/scoped.hpp>
 
 #include <algorithm>
-#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
@@ -79,50 +78,46 @@ void WMO::finishLoading() {
 
   // - MOTX ----------------------------------------------
 
-  f.read(&fourcc, 4);
-  f.read(&size, 4);
-
-  assert(fourcc == 'MOTX');
-
-  std::vector<char> texbuf(size);
-  f.read(texbuf.data(), texbuf.size());
+  std::vector<char> texbuf = parser.parseMOTX(f);
 
   // - MOMT ----------------------------------------------
 
-  f.read(&fourcc, 4);
-  f.read(&size, 4);
+  std::vector<WMOData::Material> rawMaterials = parser.parseMOMT(f);
 
-  assert(fourcc == 'MOMT');
-
-  std::size_t const num_materials(size / 0x40);
-  materials.resize(num_materials);
-
-  // note: used to map to size_t, but our other values don't support that.
-  // std::map<std::uint32_t, std::size_t> texture_offset_to_inmem_index;
   std::map<std::uint32_t, std::uint32_t> texture_offset_to_inmem_index;
+  auto load_texture = [&](std::uint32_t ofs) {
+    const char *texture_path = (ofs < texbuf.size() && texbuf[ofs] != 0)
+                                   ? &texbuf[ofs]
+                                   : "textures/shanecube.blp";
 
-  auto load_texture([&](std::uint32_t ofs) {
-    char const *texture(texbuf[ofs] ? &texbuf[ofs] : "textures/shanecube.blp");
-
-    auto const mapping(texture_offset_to_inmem_index.emplace(
-        ofs, static_cast<std::uint32_t>(textures.size())));
-
-    if (mapping.second) {
-      textures.emplace_back(texture, _context);
+    auto mapping = texture_offset_to_inmem_index.find(ofs);
+    if (mapping != texture_offset_to_inmem_index.end()) {
+      return mapping->second;
     }
-    return mapping.first->second;
-  });
 
-  for (size_t i(0); i < num_materials; ++i) {
-    f.read(&materials[i], sizeof(WMOMaterial));
+    textures.emplace_back(texture_path, _context);
+    uint32_t new_index = static_cast<uint32_t>(textures.size() - 1);
 
-    uint32_t shader = materials[i].shader;
-    bool use_second_texture = (shader == 6 || shader == 5 || shader == 3);
+    texture_offset_to_inmem_index[ofs] = new_index;
+    return new_index;
+  };
 
-    materials[i].texture1 = load_texture(materials[i].texture_offset_1);
+  materials.reserve(rawMaterials.size());
+  for (const auto &raw_mat : rawMaterials) {
+    WMOMaterial mat;
+    *static_cast<WMOData::Material *>(&mat) = raw_mat;
+
+    mat.texture1_index = load_texture(raw_mat.texture_offset_1);
+
+    bool use_second_texture =
+        (raw_mat.shader == 6 || raw_mat.shader == 5 || raw_mat.shader == 3);
     if (use_second_texture) {
-      materials[i].texture2 = load_texture(materials[i].texture_offset_2);
+      mat.texture2_index = load_texture(raw_mat.texture_offset_2);
+    } else {
+      mat.texture2_index = 0;
     }
+
+    materials.push_back(std::move(mat));
   }
 
   // - MOGN ----------------------------------------------

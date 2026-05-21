@@ -33,6 +33,11 @@ class WMOGroupRender;
 class WMORender;
 } // namespace Noggit::Rendering
 
+struct WMOMaterial : public WMOData::Material {
+  uint32_t texture1_index = 0;
+  uint32_t texture2_index = 0;
+};
+
 class WMO : public AsyncObject {
   friend class Noggit::Rendering::WMORender;
 

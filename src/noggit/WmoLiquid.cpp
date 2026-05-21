@@ -219,30 +219,3 @@ void wmo_liquid::upload(OpenGL::Scoped::use_program &water_shader) {
 
   _uploaded = true;
 }
-
-/*
-void wmo_liquid::draw ( glm::mat4x4 const& transform
-                      , liquid_render& render
-                      , int animtime
-                      )
-{
-  OpenGL::Scoped::use_program water_shader(render.shader_program());
-
-  if (!_uploaded)
-  {
-    upload(water_shader);
-  }
-
-  OpenGL::Scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
-
-  water_shader.uniform ("transform", transform);
-
-  OpenGL::Scoped::vao_binder const _ (_vao);
-
-  render.force_texture_update();
-  render.prepare_draw (water_shader, _liquid_id, animtime);
-
-  gl.drawElements (GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr);
-}
-
- */
