@@ -96,6 +96,7 @@ public:
 
 private:
   bool _hidden = false;
+  WMOData::Header _header;
 
   Noggit::Rendering::WMORender _renderer;
 };

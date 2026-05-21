@@ -11,6 +11,7 @@
 #include <noggit/WMOLighting.h>
 #include <noggit/World.h>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/parsing/WMOParser.hpp>
 #include <noggit/rendering/Primitives.hpp>
 #include <opengl/scoped.hpp>
 
@@ -54,35 +55,27 @@ void WMO::finishLoading() {
 
   // - MOHD ----------------------------------------------
 
-  f.read(&fourcc, 4);
-  f.seekRelative(4);
+  WMOParser parser;
+  WMOData::Header rawHeader = parser.parseHeader(f);
 
-  assert(fourcc == 'MOHD');
+  extents[0] = glm::vec3(_header.extents[0][0], _header.extents[0][1],
+                         _header.extents[0][2]);
+  extents[1] = glm::vec3(_header.extents[1][0], _header.extents[1][1],
+                         _header.extents[1][2]);
 
-  CArgb ambient_color;
-  unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets;
-  // header
-  f.read(&nTextures, 4);
-  f.read(&nGroups, 4);
-  f.read(&nP, 4);
-  f.read(&nLights, 4);
-  f.read(&nModels, 4);
-  f.read(&nDoodads, 4);
-  f.read(&nDoodadSets, 4);
-  f.read(&ambient_color, 4);
-  f.read(&WmoId, 4);
-  f.read(ff, 12);
-  extents[0] = ::glm::vec3(ff[0], ff[1], ff[2]);
-  f.read(ff, 12);
-  extents[1] = ::glm::vec3(ff[0], ff[1], ff[2]);
-  f.read(&flags, 2);
+  WmoId = _header.wmoId;
+  flags = _header.flags;
 
-  f.seekRelative(2);
+  CArgb ambient_color = *reinterpret_cast<CArgb *>(&_header.ambient_color);
+  ambient_light_color = glm::vec4(static_cast<float>(ambient_color.r) / 255.f,
+                                  static_cast<float>(ambient_color.g) / 255.f,
+                                  static_cast<float>(ambient_color.b) / 255.f,
+                                  static_cast<float>(ambient_color.a) / 255.f);
 
-  ambient_light_color.x = static_cast<float>(ambient_color.r) / 255.f;
-  ambient_light_color.y = static_cast<float>(ambient_color.g) / 255.f;
-  ambient_light_color.z = static_cast<float>(ambient_color.b) / 255.f;
-  ambient_light_color.w = static_cast<float>(ambient_color.a) / 255.f;
+  uint32_t nTextures = _header.nTextures;
+  uint32_t nGroups = _header.nGroups;
+  uint32_t nLights = _header.nLights;
+  uint32_t nDoodadSets = _header.nDoodadSets;
 
   // - MOTX ----------------------------------------------
 

@@ -4,6 +4,7 @@
 #include <cstdint>
 
 namespace WMOData {
+
 union GroupFlags {
   uint32_t value;
   struct {
@@ -140,5 +141,20 @@ union MohdFlags {
 };
 static_assert(sizeof(MohdFlags) == sizeof(std::uint16_t),
               "bitfields shall be implemented packed");
+
+struct Header {
+  uint32_t nTextures;
+  uint32_t nGroups;
+  uint32_t nPortals;
+  uint32_t nLights;
+  uint32_t nModels;
+  uint32_t nDoodads;
+  uint32_t nDoodadSets;
+  uint32_t ambient_color;
+  uint32_t wmoId;
+  float extents[2][3];
+  MohdFlags flags;
+  uint16_t padding;
+};
 
 } // namespace WMOData
