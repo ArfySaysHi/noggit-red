@@ -91,15 +91,6 @@ static_assert(sizeof(MopyFlags) == sizeof(std::int8_t),
 struct TriangleMaterialInfo {
   MopyFlags flags;
   uint8_t texture;
-
-  bool isTransFace() {
-    return flags.flag_0x01 && (flags.detail || flags.render);
-  }
-  bool isColor() { return !flags.collision; }
-  bool isRenderFace() { return flags.render && !flags.detail; }
-  bool isCollidable() { return flags.collision || isRenderFace(); }
-
-  bool isCollision() { return texture == 0xff; }
 };
 
 enum MobnFlags {

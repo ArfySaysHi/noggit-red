@@ -6,12 +6,13 @@
 #include <noggit/ContextObject.hpp>
 #include <noggit/SceneObject.hpp>
 #include <noggit/WMO.h>
+#include <noggit/WMOManager.hpp>
 
 struct ENTRY_MODF;
 
 class WMOInstance : public SceneObject {
 public:
-  scoped_wmo_reference wmo;
+  ScopedWMOReference wmo;
   std::map<int, std::pair<glm::vec3, glm::vec3>> group_extents;
   uint16_t mFlags;
   uint16_t mUnknown;
