@@ -33,7 +33,7 @@ private:
 
   uint16_t _doodadset;
 
-  std::map<uint32_t, std::vector<wmo_doodad_instance>> _doodads_per_group;
+  std::map<uint32_t, std::vector<WMODoodadInstance>> _doodads_per_group;
   bool _need_doodadset_update = true;
   bool _update_group_extents = false;
 
@@ -105,11 +105,11 @@ public:
     return wmo.get();
   };
 
-  std::vector<wmo_doodad_instance *>
+  std::vector<WMODoodadInstance *>
   get_visible_doodads(math::frustum const &frustum, float const &cull_distance,
                       glm::vec3 const &camera, bool draw_hidden_models,
                       display_mode display);
 
-  std::map<uint32_t, std::vector<wmo_doodad_instance>> *
+  std::map<uint32_t, std::vector<WMODoodadInstance>> *
   get_doodads(bool draw_hidden_models);
 };

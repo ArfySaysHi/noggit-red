@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "noggit/data/WMOData.hpp"
 #include <ClientFile.hpp>
 #include <cstdint>
 #include <math/ray.hpp>
@@ -28,7 +29,7 @@ public:
     return static_cast<float>((1 << 16) - 1) / 1024.f;
   };
 
-  scoped_model_reference model;
+  ScopedModelReference model;
 
   glm::vec3 light_color = {1.f, 1.f, 1.f};
 
@@ -119,16 +120,16 @@ protected:
   std::uint32_t _gpu_transform_uid;
 };
 
-class wmo_doodad_instance : public ModelInstance {
+class WMODoodadInstance : public ModelInstance {
 public:
   glm::quat doodad_orientation;
   glm::vec3 world_pos;
 
-  explicit wmo_doodad_instance(
-      BlizzardArchive::Listfile::FileKey const &file_key,
-      BlizzardArchive::ClientFile *f, Noggit::NoggitRenderContext context);
+  explicit WMODoodadInstance(BlizzardArchive::Listfile::FileKey const &file_key,
+                             WMOData::DoodadInstanceData data,
+                             Noggit::NoggitRenderContext context);
 
-  wmo_doodad_instance(wmo_doodad_instance const &other)
+  WMODoodadInstance(WMODoodadInstance const &other)
       : ModelInstance(other.model->file_key(), other._context),
         doodad_orientation(other.doodad_orientation),
         world_pos(other.world_pos),
@@ -136,15 +137,15 @@ public:
 
         };
 
-  wmo_doodad_instance &operator=(wmo_doodad_instance const &other) = delete;
+  WMODoodadInstance &operator=(WMODoodadInstance const &other) = delete;
 
-  wmo_doodad_instance(wmo_doodad_instance &&other) noexcept
+  WMODoodadInstance(WMODoodadInstance &&other) noexcept
       : ModelInstance(reinterpret_cast<ModelInstance &&>(other)),
         doodad_orientation(other.doodad_orientation),
         world_pos(other.world_pos),
         _need_matrix_update(other._need_matrix_update) {}
 
-  wmo_doodad_instance &operator=(wmo_doodad_instance &&other) {
+  WMODoodadInstance &operator=(WMODoodadInstance &&other) {
     ModelInstance::operator=(reinterpret_cast<ModelInstance &&>(other));
     std::swap(doodad_orientation, other.doodad_orientation);
     std::swap(world_pos, other.world_pos);

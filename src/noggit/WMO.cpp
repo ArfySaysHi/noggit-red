@@ -17,7 +17,6 @@
 
 #include <algorithm>
 #include <map>
-#include <string>
 #include <vector>
 
 WMO::WMO(BlizzardArchive::Listfile::FileKey const &file_key,
@@ -39,23 +38,13 @@ void WMO::finishLoading() {
 
   float ff[3];
 
-  char const *ddnames = nullptr;
   char const *groupnames = nullptr;
 
-  // - MVER ----------------------------------------------
-
-  uint32_t version;
-
-  f.read(&fourcc, 4);
-  f.seekRelative(4);
-  f.read(&version, 4);
-
-  assert(fourcc == 'MVER' && version == 17);
-
-  // - MOHD ----------------------------------------------
-
   WMOParser parser;
-  WMOData::Header rawHeader = parser.parseHeader(f);
+
+  uint32_t version = parser.parseMVER(f);
+  WMOData::Header rawHeader = parser.parseMOHD(f);
+  _header = rawHeader;
 
   extents[0] = glm::vec3(_header.extents[0][0], _header.extents[0][1],
                          _header.extents[0][2]);
@@ -76,11 +65,7 @@ void WMO::finishLoading() {
   uint32_t nLights = _header.nLights;
   uint32_t nDoodadSets = _header.nDoodadSets;
 
-  // - MOTX ----------------------------------------------
-
   std::vector<char> texbuf = parser.parseMOTX(f);
-
-  // - MOMT ----------------------------------------------
 
   std::vector<WMOData::Material> rawMaterials = parser.parseMOMT(f);
 
@@ -120,169 +105,55 @@ void WMO::finishLoading() {
     materials.push_back(std::move(mat));
   }
 
-  // - MOGN ----------------------------------------------
+  groupnames = parser.parseMOGN(f);
 
-  f.read(&fourcc, 4);
-  f.read(&size, 4);
+  std::vector<WMOData::GroupHeader> rawGroupHeaders =
+      parser.parseMOGI(f, _header.nGroups);
 
-  assert(fourcc == 'MOGN');
-
-  groupnames = reinterpret_cast<char const *>(f.getPointer());
-
-  f.seekRelative(size);
-
-  // - MOGI ----------------------------------------------
-
-  f.read(&fourcc, 4);
-  f.read(&size, 4);
-
-  assert(fourcc == 'MOGI');
-
-  groups.reserve(nGroups);
-  for (int i(0); i < nGroups; ++i) {
-    groups.emplace_back(this, &f, i, groupnames);
+  groups.reserve(rawGroupHeaders.size());
+  for (const auto &raw : rawGroupHeaders) {
+    groups.emplace_back(this, raw, groupnames);
   }
 
-  // - MOSB ----------------------------------------------
+  skybox = parser.parseMOSB(f, _context);
+  parser.parseMOPV(f);
+  parser.parseMOPT(f);
+  parser.parseMOPR(f);
+  parser.parseMOVV(f);
+  parser.parseMOVB(f);
 
-  f.read(&fourcc, 4);
-  f.read(&size, 4);
+  std::vector<WMOData::Light> rawLights = parser.parseMOLT(f, nLights);
 
-  assert(fourcc == 'MOSB');
-
-  if (size > 4) {
-    std::string path = BlizzardArchive::ClientData::normalizeFilenameInternal(
-        std::string(reinterpret_cast<char const *>(f.getPointer())));
-    auto from = std::string("mdx");
-    auto to = std::string("m2");
-    size_t start_pos = 0;
-    while ((start_pos = path.find(from, start_pos)) != std::string::npos) {
-      path.replace(start_pos, from.length(), to);
-      start_pos +=
-          to.length(); // Handles case where 'to' is a substring of 'from'
-    }
-
-    if (path.length()) {
-      if (Noggit::Application::NoggitApplication::instance()
-              ->clientData()
-              ->exists(path)) {
-        skybox = scoped_model_reference(path, _context);
-      }
-    }
-  }
-
-  f.seekRelative(size);
-
-  // - MOPV ----------------------------------------------
-
-  f.read(&fourcc, 4);
-  f.read(&size, 4);
-
-  assert(fourcc == 'MOPV');
-
-  f.seekRelative(size);
-
-  // - MOPT ----------------------------------------------
-
-  f.read(&fourcc, 4);
-  f.read(&size, 4);
-
-  assert(fourcc == 'MOPT');
-
-  f.seekRelative(size);
-
-  // - MOPR ----------------------------------------------
-
-  f.read(&fourcc, 4);
-  f.read(&size, 4);
-
-  assert(fourcc == 'MOPR');
-
-  f.seekRelative(size);
-
-  // - MOVV ----------------------------------------------
-
-  f.read(&fourcc, 4);
-  f.read(&size, 4);
-
-  assert(fourcc == 'MOVV');
-
-  f.seekRelative(size);
-
-  // - MOVB ----------------------------------------------
-
-  f.read(&fourcc, 4);
-  f.read(&size, 4);
-
-  assert(fourcc == 'MOVB');
-
-  f.seekRelative(size);
-
-  // - MOLT ----------------------------------------------
-
-  f.read(&fourcc, 4);
-  f.seekRelative(4);
-
-  assert(fourcc == 'MOLT');
-
-  lights.reserve(nLights);
-  for (size_t i(0); i < nLights; ++i) {
+  lights.reserve(rawLights.size());
+  for (const auto &raw : rawLights) {
     WMOLight l;
-    l.init(&f);
+    l.init(raw);
     lights.push_back(l);
   }
 
-  // - MODS ----------------------------------------------
+  doodadsets = parser.parseMODS(f, nDoodadSets);
+  char const *ddnames = parser.parseMODN(f);
 
-  f.read(&fourcc, 4);
-  f.seekRelative(4);
+  std::vector<WMOData::DoodadInstanceData> rawDoodadInstances =
+      parser.parseMODD(f);
 
-  assert(fourcc == 'MODS');
+  modelis.reserve(rawDoodadInstances.size());
+  model_nearest_light_vector.reserve(rawDoodadInstances.size());
 
-  doodadsets.reserve(nDoodadSets);
-  for (size_t i(0); i < nDoodadSets; ++i) {
-    WMOData::DoodadSet dds;
-    f.read(&dds, 32);
-    doodadsets.push_back(dds);
+  if (ddnames == nullptr && !rawDoodadInstances.empty()) {
+    LogError << "MODN chunk missing or empty, but " << rawDoodadInstances.size()
+             << " doodads found. Cannot resolve names.";
   }
 
-  // - MODN ----------------------------------------------
+  for (const auto &data : rawDoodadInstances) {
+    if (ddnames == nullptr) {
+      LogError << "Cannot load doodads: MODN names buffer is null";
+      break;
+    }
 
-  f.read(&fourcc, 4);
-  f.read(&size, 4);
-
-  assert(fourcc == 'MODN');
-
-  if (size) {
-    ddnames = reinterpret_cast<char const *>(f.getPointer());
-    f.seekRelative(size);
-  }
-
-  // - MODD ----------------------------------------------
-
-  f.read(&fourcc, 4);
-  f.read(&size, 4);
-
-  assert(fourcc == 'MODD');
-
-  modelis.reserve(size / 0x28);
-  for (size_t i(0); i < size / 0x28; ++i) {
-    struct {
-      uint32_t name_offset : 24;
-      uint32_t flag_AcceptProjTex : 1;
-      uint32_t flag_0x2 : 1;
-      uint32_t flag_0x4 : 1;
-      uint32_t flag_0x8 : 1;
-      uint32_t flags_unused : 4;
-    } x;
-
-    size_t after_entry(f.getPos() + 0x28);
-    f.read(&x, sizeof(x));
-
-    modelis.emplace_back(ddnames + x.name_offset, &f, _context);
+    const char *name = ddnames + data.name_offset;
+    modelis.emplace_back(name, data, _context);
     model_nearest_light_vector.emplace_back();
-
-    f.seek(after_entry);
   }
 
   // - MFOG ----------------------------------------------
@@ -351,9 +222,9 @@ std::vector<float> WMO::intersect(math::ray const &ray,
   return results;
 }
 
-std::map<uint32_t, std::vector<wmo_doodad_instance>>
+std::map<uint32_t, std::vector<WMODoodadInstance>>
 WMO::doodads_per_group(uint16_t doodadset) const {
-  std::map<uint32_t, std::vector<wmo_doodad_instance>> doodads;
+  std::map<uint32_t, std::vector<WMODoodadInstance>> doodads;
 
   if (doodadset >= doodadsets.size()) {
     LogError << "Invalid doodadset for instance of wmo "

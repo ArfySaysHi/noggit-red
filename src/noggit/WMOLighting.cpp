@@ -3,33 +3,18 @@
 #include <GL/gl.h>
 #include <noggit/WMO.h>
 
-void WMOLight::init(BlizzardArchive::ClientFile *f) {
-  char type[4];
-  f->read(&type, 4);
-  f->read(&color, 4);
-  f->read(&pos, 12);
-  f->read(&intensity, 4);
-  f->read(unk, 4 * 5);
-  f->read(&r, 4);
+void WMOLight::init(const WMOData::Light &raw) {
+  this->pos = raw.pos;
+  this->pos = glm::vec3(this->pos.x, this->pos.z, -this->pos.y);
 
-  pos = glm::vec3(pos.x, pos.z, -pos.y);
-
-  // rgb? bgr? hm
   float fa = ((color & 0xff000000) >> 24) / 255.0f;
   float fr = ((color & 0x00ff0000) >> 16) / 255.0f;
   float fg = ((color & 0x0000ff00) >> 8) / 255.0f;
   float fb = ((color & 0x000000ff)) / 255.0f;
 
-  fcolor = glm::vec4(fr, fg, fb, fa);
-  fcolor *= intensity;
-  fcolor.w = 1.0f;
-
-  /*
-  // light logging
-  gLog("Light %08x @ (%4.2f,%4.2f,%4.2f)\t %4.2f, %4.2f, %4.2f, %4.2f, %4.2f,
-  %4.2f, %4.2f\t(%d,%d,%d,%d)\n", color, pos.x, pos.y, pos.z, intensity, unk[0],
-  unk[1], unk[2], unk[3], unk[4], r, type[0], type[1], type[2], type[3]);
-  */
+  this->fcolor = glm::vec4(fr, fg, fb, fa);
+  this->fcolor *= intensity;
+  this->fcolor.w = 1.0f;
 }
 
 void WMOLight::setup(GLint) {

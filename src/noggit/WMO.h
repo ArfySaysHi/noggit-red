@@ -54,7 +54,7 @@ public:
   void waitForChildrenLoaded() override;
 
   [[nodiscard]]
-  std::map<uint32_t, std::vector<wmo_doodad_instance>>
+  std::map<uint32_t, std::vector<WMODoodadInstance>>
   doodads_per_group(uint16_t doodadset) const;
 
   std::vector<WMOGroup> groups;
@@ -62,7 +62,7 @@ public:
   glm::vec3 extents[2];
   std::vector<scoped_blp_texture_reference> textures;
   std::vector<std::string> models;
-  std::vector<wmo_doodad_instance> modelis;
+  std::vector<WMODoodadInstance> modelis;
   std::vector<glm::vec3> model_nearest_light_vector;
 
   std::vector<WMOLight> lights;
@@ -76,7 +76,7 @@ public:
 
   std::vector<WMOData::DoodadSet> doodadsets;
 
-  std::optional<scoped_model_reference> skybox;
+  std::optional<ScopedModelReference> skybox;
 
   Noggit::NoggitRenderContext _context;
 

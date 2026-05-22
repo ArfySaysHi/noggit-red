@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License
 // (version 3).
 
+#include "noggit/data/WMOData.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <math/bounding_box.hpp>
@@ -238,19 +239,14 @@ void ModelInstance::updateDetails(Noggit::Ui::detail_infos *detail_widget) {
   detail_widget->setText(select_info.str());
 }
 
-wmo_doodad_instance::wmo_doodad_instance(
+WMODoodadInstance::WMODoodadInstance(
     BlizzardArchive::Listfile::FileKey const &file_key,
-    BlizzardArchive::ClientFile *f, Noggit::NoggitRenderContext context)
+    WMOData::DoodadInstanceData data, Noggit::NoggitRenderContext context)
     : ModelInstance(file_key, context) {
-  float ff[4];
-
-  f->read(ff, 12);
-  pos = glm::vec3(ff[0], ff[2], -ff[1]);
-
-  f->read(ff, 16);
-  doodad_orientation = glm::quat(-ff[0], -ff[2], ff[1], ff[3]);
-
-  f->read(&scale, 4);
+  pos = glm::vec3(data.position[0], data.position[1], data.position[2]);
+  doodad_orientation = glm::quat(data.orientation[0], data.orientation[1],
+                                 data.orientation[2], data.orientation[3]);
+  scale = data.scale;
 
   union {
     uint32_t packed;
@@ -258,14 +254,13 @@ wmo_doodad_instance::wmo_doodad_instance(
       uint8_t b, g, r, a;
     } bgra;
   } color;
-
-  f->read(&color.packed, 4);
+  color.packed = data.color_packed;
 
   light_color = glm::vec3(color.bgra.r / 255.f, color.bgra.g / 255.f,
                           color.bgra.b / 255.f);
 }
 
-void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance *wmo) {
+void WMODoodadInstance::update_transform_matrix_wmo(WMOInstance *wmo) {
   if (!model->finishedLoading()) {
     return;
   }

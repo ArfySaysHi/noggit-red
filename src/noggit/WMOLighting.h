@@ -1,5 +1,6 @@
 #pragma once
 
+#include "noggit/data/WMOData.hpp"
 #include <ClientFile.hpp>
 
 #include <GL/gl.h>
@@ -14,7 +15,7 @@ struct WMOLight {
   float r;
   glm::vec4 fcolor;
 
-  void init(BlizzardArchive::ClientFile *f);
+  void init(const WMOData::Light &raw);
   void setup(GLint light);
   static void setupOnce(GLint light, glm::vec3 dir, glm::vec3 light_color);
 };

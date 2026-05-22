@@ -4230,7 +4230,7 @@ void MapView::ShowContextMenu(QPoint pos) {
           // Just swapping model
           // Issue : doesn't work with actions
           // _world->updateTilesEntry(entry, ModelUpdate::remove);
-          // source_m2->model = scoped_model_reference(replace_path, _context);
+          // source_m2->model = ScopedModelReference(replace_path, _context);
           // source_m2->recalcExtents();
           // _world->updateTilesEntry(entry, ModelUpdate::add);
 

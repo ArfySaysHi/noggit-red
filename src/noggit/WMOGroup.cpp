@@ -1,3 +1,4 @@
+#include "noggit/data/WMOData.hpp"
 #include <noggit/WMO.h>
 #include <noggit/WMOGroup.hpp>
 #include <noggit/application/NoggitApplication.hpp>
@@ -5,22 +6,14 @@
 #include <iomanip>
 #include <sstream>
 
-WMOGroup::WMOGroup(WMO *_wmo, BlizzardArchive::ClientFile *f, int _num,
+WMOGroup::WMOGroup(WMO *_wmo, const WMOData::GroupHeader &header,
                    char const *names)
-    : wmo(_wmo), num(_num), _renderer(this) {
-  // extract group info from f
-  std::uint32_t flags; // not used, the flags are in the group header
-  f->read(&flags, 4);
-  float ff[3];
-  f->read(ff, 12);
-  VertexBoxMax = glm::vec3(ff[0], ff[1], ff[2]);
-  f->read(ff, 12);
-  VertexBoxMin = glm::vec3(ff[0], ff[1], ff[2]);
-  int nameOfs;
-  f->read(&nameOfs, 4);
+    : wmo(_wmo), _renderer(this) {
+  VertexBoxMin = glm::vec3(header.box1[0], header.box1[1], header.box1[2]);
+  VertexBoxMax = glm::vec3(header.box2[0], header.box2[1], header.box2[2]);
 
-  //! \todo  get proper name from group header and/or dbc?
-  if (nameOfs > 0) {
+  int nameOfs = header.group_name;
+  if (nameOfs > 0 && names != nullptr) {
     name = std::string(names + nameOfs);
   } else
     name = "(no name)";

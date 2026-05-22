@@ -269,10 +269,10 @@ void WMOInstance::update_doodads() {
   }
 }
 
-std::vector<wmo_doodad_instance *> WMOInstance::get_visible_doodads(
+std::vector<WMODoodadInstance *> WMOInstance::get_visible_doodads(
     math::frustum const &frustum, float const &cull_distance,
     glm::vec3 const &camera, bool draw_hidden_models, display_mode display) {
-  std::vector<wmo_doodad_instance *> doodads;
+  std::vector<WMODoodadInstance *> doodads;
 
   if (!wmo->finishedLoading() || wmo->loading_failed()) {
     return doodads;
@@ -300,7 +300,7 @@ std::vector<wmo_doodad_instance *> WMOInstance::get_visible_doodads(
   return doodads;
 }
 
-std::map<uint32_t, std::vector<wmo_doodad_instance>> *
+std::map<uint32_t, std::vector<WMODoodadInstance>> *
 WMOInstance::get_doodads(bool draw_hidden_models) {
 
   if (!wmo->finishedLoading() || wmo->loading_failed()) {

@@ -1,20 +1,32 @@
 #pragma once
 
 #include "ClientFile.hpp"
+#include "noggit/ContextObject.hpp"
+#include <noggit/ModelManager.h>
 #include <noggit/data/WMOData.hpp>
-#include <string>
-
-struct ParsedMaterials {
-  std::vector<WMOData::Material> materials;
-  std::vector<std::string> texture_names;
-};
 
 class WMOParser {
 public:
-  WMOData::Header parseHeader(BlizzardArchive::ClientFile &file);
+  uint32_t parseMVER(BlizzardArchive::ClientFile &f);
   std::vector<char> parseMOTX(BlizzardArchive::ClientFile &f);
-  std::vector<WMOData::Material> parseMOMT(BlizzardArchive::ClientFile &f);
-
-private:
   WMOData::Header parseMOHD(BlizzardArchive::ClientFile &f);
+  std::vector<WMOData::Material> parseMOMT(BlizzardArchive::ClientFile &f);
+  char const *parseMOGN(BlizzardArchive::ClientFile &f);
+  std::vector<WMOData::GroupHeader> parseMOGI(BlizzardArchive::ClientFile &f,
+                                              uint32_t nGroups);
+  std::optional<ScopedModelReference>
+  parseMOSB(BlizzardArchive::ClientFile &f,
+            Noggit::NoggitRenderContext &_context);
+  void parseMOPV(BlizzardArchive::ClientFile &f);
+  void parseMOPT(BlizzardArchive::ClientFile &f);
+  void parseMOPR(BlizzardArchive::ClientFile &f);
+  void parseMOVV(BlizzardArchive::ClientFile &f);
+  void parseMOVB(BlizzardArchive::ClientFile &f);
+  std::vector<WMOData::Light> parseMOLT(BlizzardArchive::ClientFile &f,
+                                        uint32_t nLights);
+  std::vector<WMOData::DoodadSet> parseMODS(BlizzardArchive::ClientFile &f,
+                                            uint32_t nDoodadSets);
+  char const *parseMODN(BlizzardArchive::ClientFile &f);
+  std::vector<WMOData::DoodadInstanceData>
+  parseMODD(BlizzardArchive::ClientFile &f);
 };

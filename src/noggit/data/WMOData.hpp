@@ -165,27 +165,63 @@ struct Material {
       uint32_t unlit : 1;
       uint32_t unfogged : 1;
       uint32_t unculled : 1;
-      uint32_t ext_light : 1; // darkened used for the intern face of windows
+      uint32_t ext_light : 1;
       uint32_t sidn : 1;
-      uint32_t window : 1; // lighting related(flag checked in
-                           // CMapObj::UpdateSceneMaterials)
+      uint32_t window : 1;
       uint32_t clamp_s : 1;
       uint32_t clamp_t : 1;
       uint32_t unused : 24;
     };
-  } flags;
-  uint32_t shader;
-  uint32_t blend_mode;       // Blending: 0 for opaque, 1 for transparent
-  uint32_t texture_offset_1; // Start position for the first texture filename in
-                             // the MOTX data block
-  CImVector sidn_color;      // emissive color
-  uint32_t texture_offset_2; // Start position for the second texture filename
-                             // in the MOTX data block
-  CArgb diffuse_color;
-  uint32_t ground_type;
-  uint32_t texture_offset_3;
-  uint32_t color_2;
-  uint32_t flag_2;
+  } flags; // 0x00 (4 bytes)
+
+  uint32_t shader;           // 0x04 (4 bytes)
+  uint32_t blend_mode;       // 0x08 (4 bytes)
+  uint32_t texture_offset_1; // 0x0C (4 bytes)
+
+  CImVector sidn_color; // 0x10 (4 bytes) - Emissive color
+
+  CImVector frame_sidn_color; // 0x14 (4 bytes) - Runtime value (must be in
+                              // struct to align file read)
+
+  uint32_t texture_offset_2; // 0x18 (4 bytes)
+  CArgb diffuse_color;       // 0x1C (4 bytes)
+  uint32_t ground_type;      // 0x20 (4 bytes)
+  uint32_t texture_offset_3; // 0x24 (4 bytes)
+  uint32_t color_2;          // 0x28 (4 bytes)
+  uint32_t flag_2;           // 0x2C (4 bytes)
+
+  uint32_t runtime_data[4];
+};
+static_assert(sizeof(WMOData::Material) == 0x40,
+              "Material struct size mismatch");
+
+struct Light {
+  char type[4];
+  uint32_t color;
+  glm::vec3 pos;
+  float intensity;
+  float unkn[5];
+  float r;
 };
 
+struct DoodadInstanceData {
+  union {
+    uint32_t value;
+    struct {
+      uint32_t name_offset : 24;       // Offset into MODN string table
+      uint32_t flag_AcceptProjTex : 1; // 0x01
+      uint32_t flag_0x2 : 1;           // 0x02 (Interior lighting vs Exterior)
+      uint32_t flag_0x4 : 1;
+      uint32_t flag_0x8 : 1;
+      uint32_t unused : 4; // Padding
+    };
+  };
+
+  float scale;          // Scale factor
+  float orientation[4]; // x, y, z, w
+  float position[3];
+  uint32_t color_packed; // B, G, R, A
+};
+static_assert(sizeof(DoodadInstanceData) == 40,
+              "DoodadInstanceData must be 40 bytes");
 } // namespace WMOData
