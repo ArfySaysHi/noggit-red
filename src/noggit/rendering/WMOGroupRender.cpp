@@ -153,47 +153,50 @@ void WMOGroupRender::upload() {
   _buffers.upload();
   gl.genTextures(1, &_render_batch_tex);
 
-  gl.bufferData<GL_ARRAY_BUFFER>(_vertices_buffer,
-                                 _wmo_group->_vertices.size() *
-                                     sizeof(*_wmo_group->_vertices.data()),
-                                 _wmo_group->_vertices.data(), GL_STATIC_DRAW);
+  {
+    OpenGL::Scoped::vao_binder const _(_vao);
 
-  gl.bufferData<GL_ARRAY_BUFFER>(_normals_buffer,
-                                 _wmo_group->_normals.size() *
-                                     sizeof(*_wmo_group->_normals.data()),
-                                 _wmo_group->_normals.data(), GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER>(
+        _vertices_buffer,
+        _wmo_group->_vertices.size() * sizeof(*_wmo_group->_vertices.data()),
+        _wmo_group->_vertices.data(), GL_STATIC_DRAW);
 
-  gl.bufferData<GL_ARRAY_BUFFER>(_texcoords_buffer,
-                                 _wmo_group->_texcoords.size() *
-                                     sizeof(*_wmo_group->_texcoords.data()),
-                                 _wmo_group->_texcoords.data(), GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER>(_normals_buffer,
+                                   _wmo_group->_normals.size() *
+                                       sizeof(*_wmo_group->_normals.data()),
+                                   _wmo_group->_normals.data(), GL_STATIC_DRAW);
 
-  gl.bufferData<GL_ARRAY_BUFFER>(_render_batch_mapping_buffer,
-                                 _render_batch_mapping.size() *
-                                     sizeof(unsigned),
-                                 _render_batch_mapping.data(), GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER>(
+        _texcoords_buffer,
+        _wmo_group->_texcoords.size() * sizeof(*_wmo_group->_texcoords.data()),
+        _wmo_group->_texcoords.data(), GL_STATIC_DRAW);
 
-  gl.bindBuffer(GL_TEXTURE_BUFFER, _render_batch_tex_buffer);
-  gl.bufferData(GL_TEXTURE_BUFFER,
-                _render_batches.size() * sizeof(WMORenderBatch),
-                _render_batches.data(), GL_STATIC_DRAW);
-  gl.bindTexture(GL_TEXTURE_BUFFER, _render_batch_tex);
-  gl.texBuffer(GL_TEXTURE_BUFFER, GL_RGBA32UI, _render_batch_tex_buffer);
+    gl.bufferData<GL_ARRAY_BUFFER>(
+        _render_batch_mapping_buffer,
+        _render_batch_mapping.size() * sizeof(unsigned),
+        _render_batch_mapping.data(), GL_STATIC_DRAW);
 
-  gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(
-      _indices_buffer, _wmo_group->_indices, GL_STATIC_DRAW);
+    gl.bindBuffer(GL_TEXTURE_BUFFER, _render_batch_tex_buffer);
+    gl.bufferData(GL_TEXTURE_BUFFER,
+                  _render_batches.size() * sizeof(WMORenderBatch),
+                  _render_batches.data(), GL_STATIC_DRAW);
+    gl.bindTexture(GL_TEXTURE_BUFFER, _render_batch_tex);
+    gl.texBuffer(GL_TEXTURE_BUFFER, GL_RGBA32UI, _render_batch_tex_buffer);
 
-  if (_wmo_group->header.flags.has_two_motv) {
-    gl.bufferData<GL_ARRAY_BUFFER, glm::vec2>(
-        _texcoords_buffer_2, _wmo_group->_texcoords_2, GL_STATIC_DRAW);
+    gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(
+        _indices_buffer, _wmo_group->_indices, GL_STATIC_DRAW);
+
+    if (_wmo_group->header.flags.has_two_motv) {
+      gl.bufferData<GL_ARRAY_BUFFER, glm::vec2>(
+          _texcoords_buffer_2, _wmo_group->_texcoords_2, GL_STATIC_DRAW);
+    }
+
+    gl.bufferData<GL_ARRAY_BUFFER>(
+        _vertex_colors_buffer,
+        _wmo_group->_vertex_colors.size() *
+            sizeof(*_wmo_group->_vertex_colors.data()),
+        _wmo_group->_vertex_colors.data(), GL_STATIC_DRAW);
   }
-
-  gl.bufferData<GL_ARRAY_BUFFER>(_vertex_colors_buffer,
-                                 _wmo_group->_vertex_colors.size() *
-                                     sizeof(*_wmo_group->_vertex_colors.data()),
-                                 _wmo_group->_vertex_colors.data(),
-                                 GL_STATIC_DRAW);
-
   // free unused data
   _wmo_group->_normals.clear();
   _wmo_group->_texcoords.clear();

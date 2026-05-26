@@ -13,7 +13,7 @@ class WMOGroup {
   friend class Noggit::Rendering::WMOGroupRender;
 
 public:
-  WMOGroup(WMO *wmo, const WMOData::GroupHeader &header, char const *names);
+  WMOGroup(WMO *wmo, const WMOData::GroupHeader &header, std::string name);
   WMOGroup(WMOGroup const &);
 
   void load();

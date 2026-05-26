@@ -8,7 +8,11 @@ using namespace Noggit::Rendering;
 
 WMORender::WMORender(WMO *wmo) : _wmo(wmo) {}
 
-void WMORender::upload() {}
+void WMORender::upload() {
+  for (auto &group : _wmo->groups) {
+    group.renderer()->upload();
+  }
+}
 
 void WMORender::unload() {
   for (auto &group : _wmo->groups) {

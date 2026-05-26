@@ -33,24 +33,15 @@ void WMO::finishLoading() {
     return;
   }
 
-  uint32_t fourcc;
-  uint32_t size;
-
-  float ff[3];
-
-  char const *groupnames = nullptr;
-
   WMOParser parser;
 
-  uint32_t version = parser.parseMVER(f);
-  WMOData::Header rawHeader = parser.parseMOHD(f);
-  _header = rawHeader;
+  parser.parseMVER(f);
+  _header = parser.parseMOHD(f);
 
   extents[0] = glm::vec3(_header.extents[0][0], _header.extents[0][1],
                          _header.extents[0][2]);
   extents[1] = glm::vec3(_header.extents[1][0], _header.extents[1][1],
                          _header.extents[1][2]);
-
   WmoId = _header.wmoId;
   flags = _header.flags;
 
@@ -60,116 +51,42 @@ void WMO::finishLoading() {
                                   static_cast<float>(ambient_color.b) / 255.f,
                                   static_cast<float>(ambient_color.a) / 255.f);
 
-  uint32_t nTextures = _header.nTextures;
-  uint32_t nGroups = _header.nGroups;
-  uint32_t nLights = _header.nLights;
-  uint32_t nDoodadSets = _header.nDoodadSets;
-
-  std::vector<char> texbuf = parser.parseMOTX(f);
-
-  std::vector<WMOData::Material> rawMaterials = parser.parseMOMT(f);
-
-  std::map<std::uint32_t, std::uint32_t> texture_offset_to_inmem_index;
-  auto load_texture = [&](std::uint32_t ofs) {
-    const char *texture_path = (ofs < texbuf.size() && texbuf[ofs] != 0)
-                                   ? &texbuf[ofs]
-                                   : "textures/shanecube.blp";
-
-    auto mapping = texture_offset_to_inmem_index.find(ofs);
-    if (mapping != texture_offset_to_inmem_index.end()) {
-      return mapping->second;
-    }
-
-    textures.emplace_back(texture_path, _context);
-    uint32_t new_index = static_cast<uint32_t>(textures.size() - 1);
-
-    texture_offset_to_inmem_index[ofs] = new_index;
-    return new_index;
-  };
-
-  materials.reserve(rawMaterials.size());
-  for (const auto &raw_mat : rawMaterials) {
-    WMOMaterial mat;
-    *static_cast<WMOData::Material *>(&mat) = raw_mat;
-
-    mat.texture1_index = load_texture(raw_mat.texture_offset_1);
-
-    bool use_second_texture =
-        (raw_mat.shader == 6 || raw_mat.shader == 5 || raw_mat.shader == 3);
-    if (use_second_texture) {
-      mat.texture2_index = load_texture(raw_mat.texture_offset_2);
-    } else {
-      mat.texture2_index = 0;
-    }
-
-    materials.push_back(std::move(mat));
-  }
-
-  groupnames = parser.parseMOGN(f);
-
-  std::vector<WMOData::GroupHeader> rawGroupHeaders =
-      parser.parseMOGI(f, _header.nGroups);
-
-  groups.reserve(rawGroupHeaders.size());
-  for (const auto &raw : rawGroupHeaders) {
-    groups.emplace_back(this, raw, groupnames);
-  }
-
-  skybox = parser.parseMOSB(f, _context);
+  auto texbuf = parser.parseMOTX(f);
+  auto rawMaterials = parser.parseMOMT(f);
+  auto groupNameTable = parser.parseMOGN(f);
+  auto rawGroupHeaders = parser.parseMOGI(f, _header.nGroups);
+  auto skyboxData = parser.parseMOSB(f);
   parser.parseMOPV(f);
   parser.parseMOPT(f);
   parser.parseMOPR(f);
   parser.parseMOVV(f);
   parser.parseMOVB(f);
+  auto rawLights = parser.parseMOLT(f, _header.nLights);
+  doodadsets = parser.parseMODS(f, _header.nDoodadSets);
+  auto modelNames = parser.parseMODN(f);
+  auto rawDoodads = parser.parseMODD(f);
+  auto rawFogs = parser.parseMFOG(f);
 
-  std::vector<WMOData::Light> rawLights = parser.parseMOLT(f, nLights);
+  buildMaterials(rawMaterials, texbuf);
+  buildLights(rawLights);
+  buildDoodads(rawDoodads, modelNames);
 
-  lights.reserve(rawLights.size());
-  for (const auto &raw : rawLights) {
-    WMOLight l;
-    l.init(raw);
-    lights.push_back(l);
+  groups.reserve(rawGroupHeaders.size());
+  for (const auto &raw : rawGroupHeaders)
+    groups.emplace_back(this, raw, groupNameTable.nameAt(raw.group_name));
+
+  if (skyboxData) {
+    auto *clientData =
+        Noggit::Application::NoggitApplication::instance()->clientData();
+    if (clientData->exists(skyboxData->path))
+      skybox = ScopedModelReference(skyboxData->path, _context);
   }
 
-  doodadsets = parser.parseMODS(f, nDoodadSets);
-  char const *ddnames = parser.parseMODN(f);
-
-  std::vector<WMOData::DoodadInstanceData> rawDoodadInstances =
-      parser.parseMODD(f);
-
-  modelis.reserve(rawDoodadInstances.size());
-  model_nearest_light_vector.reserve(rawDoodadInstances.size());
-
-  if (ddnames == nullptr && !rawDoodadInstances.empty()) {
-    LogError << "MODN chunk missing or empty, but " << rawDoodadInstances.size()
-             << " doodads found. Cannot resolve names.";
-  }
-
-  for (const auto &data : rawDoodadInstances) {
-    if (ddnames == nullptr) {
-      LogError << "Cannot load doodads: MODN names buffer is null";
-      break;
-    }
-
-    const char *name = ddnames + data.name_offset;
-    modelis.emplace_back(name, data, _context);
-    model_nearest_light_vector.emplace_back();
-  }
-
-  // - MFOG ----------------------------------------------
-
-  f.read(&fourcc, 4);
-  f.read(&size, 4);
-
-  assert(fourcc == 'MFOG');
-
-  int nfogs = size / 0x30;
-  fogs.reserve(nfogs);
-
-  for (size_t i(0); i < nfogs; ++i) {
+  fogs.reserve(rawFogs.size());
+  for (const auto &raw : rawFogs) {
     WMOFog fog;
-    fog.init(&f);
-    fogs.push_back(std::move(fog));
+    fog.init(raw);
+    fogs.push_back(fog);
   }
 
   for (auto &group : groups)
@@ -244,4 +161,64 @@ WMO::doodads_per_group(uint16_t doodadset) const {
   }
 
   return doodads;
+}
+
+void WMO::buildMaterials(const std::vector<WMOData::Material> &rawMaterials,
+                         const std::vector<char> &texbuf) {
+  std::map<std::uint32_t, std::uint32_t> texture_offset_to_inmem_index;
+  auto load_texture = [&](std::uint32_t ofs) {
+    const char *texture_path = (ofs < texbuf.size() && texbuf[ofs] != 0)
+                                   ? &texbuf[ofs]
+                                   : "textures/shanecube.blp";
+
+    auto mapping = texture_offset_to_inmem_index.find(ofs);
+    if (mapping != texture_offset_to_inmem_index.end()) {
+      return mapping->second;
+    }
+
+    textures.emplace_back(texture_path, _context);
+    uint32_t new_index = static_cast<uint32_t>(textures.size() - 1);
+
+    texture_offset_to_inmem_index[ofs] = new_index;
+    return new_index;
+  };
+
+  materials.reserve(rawMaterials.size());
+  for (const auto &raw_mat : rawMaterials) {
+    WMOMaterial mat;
+    *static_cast<WMOData::Material *>(&mat) = raw_mat;
+
+    mat.texture1_index = load_texture(raw_mat.texture_offset_1);
+
+    bool use_second_texture =
+        (raw_mat.shader == 6 || raw_mat.shader == 5 || raw_mat.shader == 3);
+    if (use_second_texture) {
+      mat.texture2_index = load_texture(raw_mat.texture_offset_2);
+    } else {
+      mat.texture2_index = 0;
+    }
+
+    materials.push_back(std::move(mat));
+  }
+}
+
+void WMO::buildLights(const std::vector<WMOData::Light> &rawLights) {
+  lights.reserve(rawLights.size());
+  for (const auto &raw : rawLights) {
+    WMOLight l;
+    l.init(raw);
+    lights.push_back(l);
+  }
+}
+
+void WMO::buildDoodads(
+    const std::vector<WMOData::DoodadInstanceData> &rawInstances,
+    WMOData::GroupNameTable &modelNames) {
+  modelis.reserve(rawInstances.size());
+  model_nearest_light_vector.reserve(rawInstances.size());
+
+  for (const auto &data : rawInstances) {
+    modelis.emplace_back(modelNames.nameAt(data.name_offset), data, _context);
+    model_nearest_light_vector.emplace_back();
+  }
 }

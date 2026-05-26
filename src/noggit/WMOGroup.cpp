@@ -7,16 +7,10 @@
 #include <sstream>
 
 WMOGroup::WMOGroup(WMO *_wmo, const WMOData::GroupHeader &header,
-                   char const *names)
-    : wmo(_wmo), _renderer(this) {
+                   std::string name)
+    : wmo(_wmo), name(std::move(name)), _renderer(this) {
   VertexBoxMin = glm::vec3(header.box1[0], header.box1[1], header.box1[2]);
   VertexBoxMax = glm::vec3(header.box2[0], header.box2[1], header.box2[2]);
-
-  int nameOfs = header.group_name;
-  if (nameOfs > 0 && names != nullptr) {
-    name = std::string(names + nameOfs);
-  } else
-    name = "(no name)";
 }
 
 glm::vec4 colorFromInt(unsigned int col) {

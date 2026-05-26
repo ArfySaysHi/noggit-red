@@ -224,4 +224,45 @@ struct DoodadInstanceData {
 };
 static_assert(sizeof(DoodadInstanceData) == 40,
               "DoodadInstanceData must be 40 bytes");
+
+struct SkyboxData {
+  std::string path;
+};
+
+struct GroupNameTable {
+  std::vector<char> buffer;
+  std::string nameAt(uint32_t offset) const {
+    if (offset >= buffer.size())
+      return "(no name)";
+    return std::string(&buffer[offset]);
+  }
+};
+
+union FogFlags {
+  uint32_t value;
+  struct {
+    uint32_t flag_infinite_radius : 1; // F_IEBLEND
+    uint32_t unused1 : 3;
+    uint32_t flag_0x10 : 1;
+    uint32_t unused2 : 27;
+  };
+};
+static_assert(sizeof(FogFlags) == 4, "FogFlags must be 4 bytes");
+
+struct FogEntry {
+  float end;
+  float start_scalar;
+  uint32_t color; // CImVector — BGRA
+};
+static_assert(sizeof(FogEntry) == 12, "FogEntry must be 12 bytes");
+
+struct Fog {
+  FogFlags flags;          // 0x00 — 4 bytes
+  float position[3];       // 0x04 — 12 bytes
+  float smaller_radius;    // 0x10 — 4 bytes
+  float larger_radius;     // 0x14 — 4 bytes
+  FogEntry fog;            // 0x18 — 12 bytes (FOG)
+  FogEntry underwater_fog; // 0x24 — 12 bytes (UWFOG)
+};
+static_assert(sizeof(WMOData::Fog) == 48, "WMOData::Fog must be 48 bytes");
 } // namespace WMOData

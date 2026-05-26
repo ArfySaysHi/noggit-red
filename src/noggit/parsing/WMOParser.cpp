@@ -1,5 +1,3 @@
-#include "noggit/ContextObject.hpp"
-#include "noggit/Log.h"
 #include <ClientFile.hpp>
 #include <noggit/application/NoggitApplication.hpp>
 #include <noggit/data/WMOData.hpp>
@@ -41,8 +39,7 @@ static std::string GetStringFromBuffer(const std::vector<char> &buffer,
 
 // Returns null-terminated texture names
 std::vector<char> WMOParser::parseMOTX(BlizzardArchive::ClientFile &f) {
-  uint32_t fourcc;
-  uint32_t size;
+  uint32_t fourcc, size;
   f.read(&fourcc, 4);
   f.read(&size, 4);
 
@@ -56,8 +53,7 @@ std::vector<char> WMOParser::parseMOTX(BlizzardArchive::ClientFile &f) {
 
 std::vector<WMOData::Material>
 WMOParser::parseMOMT(BlizzardArchive::ClientFile &f) {
-  uint32_t fourcc;
-  uint32_t size;
+  uint32_t fourcc, size;
   f.read(&fourcc, 4);
   f.read(&size, 4);
 
@@ -73,25 +69,23 @@ WMOParser::parseMOMT(BlizzardArchive::ClientFile &f) {
   return materials;
 }
 
-char const *WMOParser::parseMOGN(BlizzardArchive::ClientFile &f) {
-  uint32_t fourcc;
-  uint32_t size;
+WMOData::GroupNameTable WMOParser::parseMOGN(BlizzardArchive::ClientFile &f) {
+  uint32_t fourcc, size;
   f.read(&fourcc, 4);
   f.read(&size, 4);
 
   assert(fourcc == 'MOGN');
 
-  char const *groupnames = reinterpret_cast<char const *>(f.getPointer());
+  WMOData::GroupNameTable table;
+  table.buffer.resize(size);
+  f.read(table.buffer.data(), size);
 
-  f.seekRelative(size);
-
-  return groupnames;
+  return table;
 }
 
 std::vector<WMOData::GroupHeader>
 WMOParser::parseMOGI(BlizzardArchive::ClientFile &f, uint32_t nGroups) {
-  uint32_t fourcc;
-  uint32_t size;
+  uint32_t fourcc, size;
   f.read(&fourcc, 4);
   f.read(&size, 4);
 
@@ -105,45 +99,34 @@ WMOParser::parseMOGI(BlizzardArchive::ClientFile &f, uint32_t nGroups) {
   return headers;
 }
 
-std::optional<ScopedModelReference>
-WMOParser::parseMOSB(BlizzardArchive::ClientFile &f,
-                     Noggit::NoggitRenderContext &_context) {
-  uint32_t fourcc;
-  uint32_t size;
+std::optional<WMOData::SkyboxData>
+WMOParser::parseMOSB(BlizzardArchive::ClientFile &f) {
+  uint32_t fourcc, size;
   f.read(&fourcc, 4);
   f.read(&size, 4);
-
   assert(fourcc == 'MOSB');
 
   if (size > 4) {
     std::string path = BlizzardArchive::ClientData::normalizeFilenameInternal(
         std::string(reinterpret_cast<char const *>(f.getPointer())));
-    auto from = std::string("mdx");
-    auto to = std::string("m2");
-    size_t start_pos = 0;
-    while ((start_pos = path.find(from, start_pos)) != std::string::npos) {
-      path.replace(start_pos, from.length(), to);
-      start_pos +=
-          to.length(); // Handles case where 'to' is a substring of 'from'
-    }
 
-    if (path.length()) {
-      if (Noggit::Application::NoggitApplication::instance()
-              ->clientData()
-              ->exists(path)) {
-        return ScopedModelReference(path, _context);
-      }
-    }
+    static const std::string from = "mdx", to = "m2";
+    for (size_t pos = 0; (pos = path.find(from, pos)) != std::string::npos;
+         pos += to.size())
+      path.replace(pos, from.size(), to);
+
+    f.seekRelative(size);
+
+    if (!path.empty())
+      return WMOData::SkyboxData{std::move(path)};
   }
 
   f.seekRelative(size);
-
   return std::nullopt;
 }
 
 void WMOParser::parseMOPV(BlizzardArchive::ClientFile &f) {
-  uint32_t fourcc;
-  uint32_t size;
+  uint32_t fourcc, size;
   f.read(&fourcc, 4);
   f.read(&size, 4);
 
@@ -153,8 +136,7 @@ void WMOParser::parseMOPV(BlizzardArchive::ClientFile &f) {
 }
 
 void WMOParser::parseMOPT(BlizzardArchive::ClientFile &f) {
-  uint32_t fourcc;
-  uint32_t size;
+  uint32_t fourcc, size;
   f.read(&fourcc, 4);
   f.read(&size, 4);
 
@@ -164,9 +146,7 @@ void WMOParser::parseMOPT(BlizzardArchive::ClientFile &f) {
 }
 
 void WMOParser::parseMOPR(BlizzardArchive::ClientFile &f) {
-
-  uint32_t fourcc;
-  uint32_t size;
+  uint32_t fourcc, size;
   f.read(&fourcc, 4);
   f.read(&size, 4);
 
@@ -176,8 +156,7 @@ void WMOParser::parseMOPR(BlizzardArchive::ClientFile &f) {
 }
 
 void WMOParser::parseMOVV(BlizzardArchive::ClientFile &f) {
-  uint32_t fourcc;
-  uint32_t size;
+  uint32_t fourcc, size;
   f.read(&fourcc, 4);
   f.read(&size, 4);
 
@@ -187,8 +166,7 @@ void WMOParser::parseMOVV(BlizzardArchive::ClientFile &f) {
 }
 
 void WMOParser::parseMOVB(BlizzardArchive::ClientFile &f) {
-  uint32_t fourcc;
-  uint32_t size;
+  uint32_t fourcc, size;
   f.read(&fourcc, 4);
   f.read(&size, 4);
 
@@ -229,30 +207,23 @@ WMOParser::parseMODS(BlizzardArchive::ClientFile &f, uint32_t nDoodadSets) {
   return doodadSets;
 }
 
-const char *WMOParser::parseMODN(BlizzardArchive::ClientFile &f) {
-  uint32_t fourcc;
-  uint32_t size;
+WMOData::GroupNameTable WMOParser::parseMODN(BlizzardArchive::ClientFile &f) {
+  uint32_t fourcc, size;
   f.read(&fourcc, 4);
   f.read(&size, 4);
 
-  if (fourcc != 'MODN') {
-    LogError << "Expected MODN chunk, got something else";
-    return nullptr;
-  }
+  assert(fourcc == 'MODN');
 
-  const char *ddnames = nullptr;
-  if (size > 0) {
-    ddnames = reinterpret_cast<char const *>(f.getPointer());
-    f.seekRelative(size);
-  }
+  WMOData::GroupNameTable table;
+  table.buffer.resize(size);
+  f.read(table.buffer.data(), size);
 
-  return ddnames;
+  return table;
 }
 
 std::vector<WMOData::DoodadInstanceData>
 WMOParser::parseMODD(BlizzardArchive::ClientFile &f) {
-  uint32_t fourcc;
-  uint32_t size;
+  uint32_t fourcc, size;
   f.read(&fourcc, 4);
   f.read(&size, 4);
 
@@ -266,4 +237,20 @@ WMOParser::parseMODD(BlizzardArchive::ClientFile &f) {
   }
 
   return instances;
+}
+
+std::vector<WMOData::Fog> WMOParser::parseMFOG(BlizzardArchive::ClientFile &f) {
+  uint32_t fourcc, size;
+  f.read(&fourcc, 4);
+  f.read(&size, 4);
+  assert(fourcc == 'MFOG');
+
+  size_t count = size / 48;
+  std::vector<WMOData::Fog> fogs(count);
+
+  if (count > 0) {
+    f.read(fogs.data(), size);
+  }
+
+  return fogs;
 }

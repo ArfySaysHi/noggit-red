@@ -6,7 +6,6 @@
 #include <opengl/context.inl>
 #include <opengl/texture.hpp>
 #include <optional>
-#include <stdexcept>
 
 namespace OpenGL {
 namespace Scoped {

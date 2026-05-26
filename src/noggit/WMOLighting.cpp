@@ -31,16 +31,23 @@ void WMOLight::setupOnce(GLint, glm::vec3, glm::vec3) {
   // gl.enable(light);
 }
 
-void WMOFog::init(BlizzardArchive::ClientFile *f) {
-  f->read(this, 0x30);
-  color = glm::vec4(((color1 & 0x00FF0000) >> 16) / 255.0f,
-                    ((color1 & 0x0000FF00) >> 8) / 255.0f,
-                    (color1 & 0x000000FF) / 255.0f,
-                    ((color1 & 0xFF000000) >> 24) / 255.0f);
-  float temp;
-  temp = pos.y;
+void WMOFog::init(const WMOData::Fog &fog) {
+  pos = glm::vec3(fog.position[0], fog.position[1], fog.position[2]);
+  r1 = fog.smaller_radius;
+  r2 = fog.larger_radius;
+  fogend = fog.fog.end;
+  fogstart = fog.fog.start_scalar;
+
+  color = glm::vec4(((fog.fog.color & 0x00FF0000) >> 16) / 255.0f,
+                    ((fog.fog.color & 0x0000FF00) >> 8) / 255.0f,
+                    (fog.fog.color & 0x000000FF) / 255.0f,
+                    ((fog.fog.color & 0xFF000000) >> 24) / 255.0f);
+
+  // coord swap from WoW to engine
+  float temp = pos.y;
   pos.y = pos.z;
   pos.z = -temp;
+
   fogstart = fogstart * fogend * 1.5f;
   fogend *= 1.5;
 }

@@ -30,6 +30,6 @@ struct WMOFog {
   unsigned int color2;
   glm::vec4 color;
 
-  void init(BlizzardArchive::ClientFile *f);
+  void init(const WMOData::Fog &fog);
   void setup();
 };

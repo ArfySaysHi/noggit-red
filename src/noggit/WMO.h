@@ -104,4 +104,10 @@ private:
   WMOData::Header _header;
 
   Noggit::Rendering::WMORender _renderer;
+  void buildMaterials(const std::vector<WMOData::Material> &rawMaterials,
+                      const std::vector<char> &texbuf);
+  void buildLights(const std::vector<WMOData::Light> &rawLights);
+  void
+  buildDoodads(const std::vector<WMOData::DoodadInstanceData> &rawInstances,
+               WMOData::GroupNameTable &modelNames);
 };
