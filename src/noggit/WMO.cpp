@@ -28,10 +28,13 @@ void WMO::finishLoading() {
       _file_key.filepath(),
       Noggit::Application::NoggitApplication::instance()->clientData());
   if (f.isEof()) {
-    LogError << "Error loading WMO \"" << _file_key.stringRepr() << "\"."
-             << std::endl;
+    LogError << "Error loading WMO \"" << _file_key.stringRepr()
+             << "\". isEof on open." << std::endl;
+    finished = true;
+    _state_changed.notify_all();
     return;
   }
+  LogDebug << "WMO file opened ok: " << _file_key.stringRepr();
 
   WMOParser parser;
 
@@ -72,8 +75,10 @@ void WMO::finishLoading() {
   buildDoodads(rawDoodads, modelNames);
 
   groups.reserve(rawGroupHeaders.size());
-  for (const auto &raw : rawGroupHeaders)
-    groups.emplace_back(this, raw, groupNameTable.nameAt(raw.group_name));
+  for (size_t i = 0; i < rawGroupHeaders.size(); ++i)
+    groups.emplace_back(this, rawGroupHeaders[i],
+                        groupNameTable.nameAt(rawGroupHeaders[i].group_name),
+                        static_cast<int>(i));
 
   if (skyboxData) {
     auto *clientData =
@@ -88,9 +93,14 @@ void WMO::finishLoading() {
     fog.init(raw);
     fogs.push_back(fog);
   }
+  LogDebug << "Fogs ok, loading " << groups.size() << " groups";
 
-  for (auto &group : groups)
-    group.load();
+  for (size_t i = 0; i < groups.size(); ++i) {
+    LogDebug << "Loading group " << i;
+    groups[i].load();
+    LogDebug << "Group " << i << " done";
+  }
+  LogDebug << "All groups loaded";
 
   finished = true;
   _state_changed.notify_all();

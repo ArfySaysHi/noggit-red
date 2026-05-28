@@ -7,8 +7,8 @@
 #include <sstream>
 
 WMOGroup::WMOGroup(WMO *_wmo, const WMOData::GroupHeader &header,
-                   std::string name)
-    : wmo(_wmo), name(std::move(name)), _renderer(this) {
+                   std::string name, int groupIndex)
+    : wmo(_wmo), name(std::move(name)), num(groupIndex), _renderer(this) {
   VertexBoxMin = glm::vec3(header.box1[0], header.box1[1], header.box1[2]);
   VertexBoxMax = glm::vec3(header.box2[0], header.box2[1], header.box2[2]);
 }
@@ -40,12 +40,20 @@ WMOGroup::WMOGroup(WMOGroup const &other)
 }
 
 void WMOGroup::load() {
-  // open group file
+  LogDebug << "WMOGroup::load() num=" << num
+           << " wmo=" << wmo->file_key().filepath();
   std::stringstream curNum;
   curNum << "_" << std::setw(3) << std::setfill('0') << num;
-
   std::string fname = wmo->file_key().filepath();
+
+  auto wmo_pos = fname.find(".wmo");
+  if (wmo_pos == std::string::npos) {
+    LogError << "WMOGroup::load(): could not find .wmo in " << fname;
+    return;
+  }
+
   fname.insert(fname.find(".wmo"), curNum.str());
+  LogDebug << "WMOGroup::load() opening: " << fname;
 
   BlizzardArchive::ClientFile f(
       fname, Noggit::Application::NoggitApplication::instance()->clientData());

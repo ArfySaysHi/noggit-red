@@ -216,6 +216,10 @@ void WMOGroupRender::unload() {
 
   _uploaded = false;
   _vao_is_setup = false;
+  _draw_calls.clear();
+
+  // Re-populate _render_batches and _render_batch_mapping
+  initRenderBatches();
 }
 
 void WMOGroupRender::setupVao(OpenGL::Scoped::use_program &wmo_shader) {

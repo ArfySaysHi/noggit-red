@@ -4,17 +4,17 @@
 #include <noggit/WMO.h>
 
 void WMOLight::init(const WMOData::Light &raw) {
-  this->pos = raw.pos;
-  this->pos = glm::vec3(this->pos.x, this->pos.z, -this->pos.y);
+  pos = glm::vec3(raw.pos.x, raw.pos.z, -raw.pos.y);
 
-  float fa = ((color & 0xff000000) >> 24) / 255.0f;
-  float fr = ((color & 0x00ff0000) >> 16) / 255.0f;
-  float fg = ((color & 0x0000ff00) >> 8) / 255.0f;
-  float fb = ((color & 0x000000ff)) / 255.0f;
+  uint32_t c = raw.color;
+  float fa = ((c & 0xff000000) >> 24) / 255.0f;
+  float fr = ((c & 0x00ff0000) >> 16) / 255.0f;
+  float fg = ((c & 0x0000ff00) >> 8) / 255.0f;
+  float fb = ((c & 0x000000ff)) / 255.0f;
 
-  this->fcolor = glm::vec4(fr, fg, fb, fa);
-  this->fcolor *= intensity;
-  this->fcolor.w = 1.0f;
+  fcolor = glm::vec4(fr, fg, fb, fa);
+  fcolor *= raw.intensity;
+  fcolor.w = 1.0f;
 }
 
 void WMOLight::setup(GLint) {
@@ -32,6 +32,10 @@ void WMOLight::setupOnce(GLint, glm::vec3, glm::vec3) {
 }
 
 void WMOFog::init(const WMOData::Fog &fog) {
+  LogDebug << "Fog init: smaller_radius=" << fog.smaller_radius
+           << " larger_radius=" << fog.larger_radius << " end=" << fog.fog.end
+           << " start_scalar=" << fog.fog.start_scalar;
+
   pos = glm::vec3(fog.position[0], fog.position[1], fog.position[2]);
   r1 = fog.smaller_radius;
   r2 = fog.larger_radius;
@@ -48,8 +52,13 @@ void WMOFog::init(const WMOData::Fog &fog) {
   pos.y = pos.z;
   pos.z = -temp;
 
-  fogstart = fogstart * fogend * 1.5f;
-  fogend *= 1.5;
+  fogend *= 1.5f;
+
+  if (fogend > 0.0f) {
+    fogstart = fogstart * fogend;
+  } else {
+    fogend = 0.0f;
+  }
 }
 
 void WMOFog::setup() {}
