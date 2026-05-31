@@ -36,45 +36,56 @@ void WMORender::draw(
     return;
   }
 
+  // Check if this WMO has any indoor groups at all
+  bool has_indoor_groups =
+      std::any_of(_wmo->groups.begin(), _wmo->groups.end(),
+                  [](WMOGroup const &g) { return g.is_indoor(); });
+
+  // If interior_only is requested but there are no indoor groups,
+  // fall back to rendering all groups (pure exterior WMO)
+  bool effective_interior_only = interior_only && has_indoor_groups;
+
   wmo_shader.uniform("ambient_color", glm::vec3(_wmo->ambient_light_color));
 
   for (int i = 0; i < (int)_wmo->groups.size(); ++i) {
     auto &group = _wmo->groups[i];
 
-    if (interior_only && !group.is_indoor())
+    // Restore original condition with corrected fallback
+    if (effective_interior_only && !group.is_indoor())
       continue;
 
     auto it = group_extents.find(i);
     if (it == group_extents.end())
-      continue; // extents not yet computed for this group
+      continue;
 
     glm::vec3 const &group_min = it->second.first;
     glm::vec3 const &group_max = it->second.second;
 
-    bool camera_inside = glm::all(glm::greaterThanEqual(camera, group_min)) &&
-                         glm::all(glm::lessThanEqual(camera, group_max));
-
-    if (!camera_inside && !frustum.intersects(group_min, group_max))
+    glm::vec3 clamped = glm::clamp(camera, group_min, group_max);
+    float dist = glm::distance(clamped, camera);
+    if (dist >= cull_distance)
       continue;
-
-    if (!camera_inside) {
-      glm::vec3 clamped = glm::clamp(camera, group_min, group_max);
-      float dist = glm::distance(clamped, camera);
-      if (dist >= cull_distance)
-        continue;
-    }
 
     group.renderer()->draw(wmo_shader, frustum, cull_distance, camera, draw_fog,
                            world_has_skies);
   }
 
   if (boundingbox) {
-    for (auto &group : _wmo->groups) {
+    for (int i = 0; i < (int)_wmo->groups.size(); ++i) {
+      auto it = group_extents.find(i);
+      if (it == group_extents.end())
+        continue;
+
       Noggit::Rendering::Primitives::WireBox::getInstance(_wmo->_context)
-          .draw(model_view, projection, transform_matrix,
-                {1.0f, 1.0f, 1.0f, 1.0f}, group.BoundingBoxMin,
-                group.BoundingBoxMax);
+          .draw(model_view, projection, glm::mat4x4(1.0f),
+                {1.0f, 1.0f, 1.0f, 1.0f}, it->second.first, it->second.second);
     }
+    //    for (auto &group : _wmo->groups) {
+    //    Noggit::Rendering::Primitives::WireBox::getInstance(_wmo->_context)
+    //      .draw(model_view, projection, transform_matrix,
+    //          {1.0f, 1.0f, 1.0f, 1.0f}, group.BoundingBoxMin,
+    //        group.BoundingBoxMax);
+    //}
 
     Noggit::Rendering::Primitives::WireBox::getInstance(_wmo->_context)
         .draw(model_view, projection, transform_matrix,

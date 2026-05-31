@@ -85,10 +85,13 @@ void WMOInstance::draw(OpenGL::Scoped::use_program &wmo_shader,
       float max_extent = glm::max(size.x, glm::max(size.y, size.z));
 
       if (max_extent > TILESIZE) {
-        // WMO is larger than one tile — skip tile visibility, use extents only
+        float const near_plane_margin = 2.0f;
+        glm::vec3 expanded_min = extents[0] - glm::vec3(near_plane_margin);
+        glm::vec3 expanded_max = extents[1] + glm::vec3(near_plane_margin);
+
         bool camera_inside =
-            glm::all(glm::greaterThanEqual(camera, extents[0])) &&
-            glm::all(glm::lessThanEqual(camera, extents[1]));
+            glm::all(glm::greaterThanEqual(camera, expanded_min)) &&
+            glm::all(glm::lessThanEqual(camera, expanded_max));
 
         if (!camera_inside && !frustum.intersects(extents[0], extents[1])) {
           return;
