@@ -61,6 +61,10 @@ void WMOInstance::draw(OpenGL::Scoped::use_program &wmo_shader,
     return;
   }
 
+  if (group_extents.empty()) {
+    recalcExtents();
+  }
+
   const uint id = this->uid;
   bool const is_selected =
       selection.size() > 0 &&
@@ -75,32 +79,44 @@ void WMOInstance::draw(OpenGL::Scoped::use_program &wmo_shader,
                    }) != selection.end();
 
   {
-    unsigned region_visible = 0;
-
     if (!no_cull) {
-      for (auto &tile : getTiles()) {
-        if (tile->renderer()->objectsFrustumCullTest() &&
-            !tile->renderer()->isOccluded()) {
-          region_visible = tile->renderer()->objectsFrustumCullTest();
+      // Fall back to direct frustum test against the full extents
+      glm::vec3 size = extents[1] - extents[0];
+      float max_extent = glm::max(size.x, glm::max(size.y, size.z));
 
-          if (tile->renderer()->objectsFrustumCullTest() > 1)
-            break;
+      if (max_extent > TILESIZE) {
+        // WMO is larger than one tile — skip tile visibility, use extents only
+        bool camera_inside =
+            glm::all(glm::greaterThanEqual(camera, extents[0])) &&
+            glm::all(glm::lessThanEqual(camera, extents[1]));
+
+        if (!camera_inside && !frustum.intersects(extents[0], extents[1])) {
+          return;
+        }
+      } else {
+        // Original tile-based path for small WMOs
+        unsigned region_visible = 0;
+        for (auto &tile : getTiles()) {
+          if (tile->renderer()->objectsFrustumCullTest() &&
+              !tile->renderer()->isOccluded()) {
+            region_visible = tile->renderer()->objectsFrustumCullTest();
+            if (region_visible > 1)
+              break;
+          }
+        }
+        if (!region_visible || (region_visible <= 1 &&
+                                !frustum.intersects(extents[1], extents[0]))) {
+          return;
         }
       }
-    }
-
-    if (!no_cull &&
-        (!region_visible || (region_visible <= 1 &&
-                             !frustum.intersects(extents[1], extents[0])))) {
-      return;
     }
 
     wmo_shader.uniform("transform", _transform_mat);
 
     wmo->renderer()->draw(wmo_shader, model_view, projection, _transform_mat,
                           is_selected && !_grouped, frustum, cull_distance,
-                          camera, draw_doodads, draw_fog, animtime,
-                          world_has_skies, display, !draw_exterior);
+                          camera, group_extents, draw_doodads, draw_fog,
+                          animtime, world_has_skies, display, !draw_exterior);
   }
 
   if (force_box || is_selected) {
@@ -212,23 +228,17 @@ void WMOInstance::recalcExtents() {
 
   for (int i = 0; i < (int)wmo->groups.size(); ++i) {
     auto const &group = wmo->groups[i];
-
     auto &&group_points =
         math::aabb(group.BoundingBoxMin, group.BoundingBoxMax).all_corners();
-    auto adjustedGroupPoints = std::vector<glm::vec3>();
-
+    std::vector<glm::vec3> adjustedGroupPoints;
     for (auto const &point : group_points) {
       adjustedGroupPoints.push_back(_transform_mat * glm::vec4(point, 1.f));
     }
-
     points.insert(points.end(), adjustedGroupPoints.begin(),
                   adjustedGroupPoints.end());
 
-    if (group.has_skybox() || _update_group_extents) {
-      math::aabb const group_aabb(adjustedGroupPoints);
-
-      group_extents[i] = {group_aabb.min, group_aabb.max};
-    }
+    math::aabb const group_aabb(adjustedGroupPoints);
+    group_extents[i] = {group_aabb.min, group_aabb.max};
   }
   _update_group_extents = false;
 

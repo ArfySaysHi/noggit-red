@@ -481,42 +481,72 @@ void WMOGroup::load_mocv(BlizzardArchive::ClientFile &f, uint32_t size) {
   f.seekRelative(size);
 }
 
+bool WMOGroup::intersect(math::ray const &ray,
+                         std::vector<float> *results) const {
+  if (!ray.intersect_bounds(BoundingBoxMin, BoundingBoxMax)) {
+    return false;
+  }
+
+  bool hit = false;
+
+  for (std::size_t i = 0; i + 2 < _indices.size(); i += 3) {
+    glm::vec3 const &v0 = _vertices[_indices[i + 0]];
+    glm::vec3 const &v1 = _vertices[_indices[i + 1]];
+    glm::vec3 const &v2 = _vertices[_indices[i + 2]];
+
+    if (auto t = ray.intersect_triangle(v0, v1, v2)) {
+      results->push_back(*t);
+      hit = true;
+    }
+  }
+
+  return hit;
+}
+
 bool WMOGroup::is_visible(glm::mat4x4 const &transform,
                           math::frustum const &frustum,
                           float const &cull_distance, glm::vec3 const &camera,
                           display_mode display) const {
-  glm::vec3 pos = transform * glm::vec4(center, 0);
 
-  if (!frustum.intersects(pos + BoundingBoxMin, pos + BoundingBoxMax)) {
+  glm::vec3 corners[8] = {
+      {BoundingBoxMin.x, BoundingBoxMin.y, BoundingBoxMin.z},
+      {BoundingBoxMax.x, BoundingBoxMin.y, BoundingBoxMin.z},
+      {BoundingBoxMin.x, BoundingBoxMax.y, BoundingBoxMin.z},
+      {BoundingBoxMax.x, BoundingBoxMax.y, BoundingBoxMin.z},
+      {BoundingBoxMin.x, BoundingBoxMin.y, BoundingBoxMax.z},
+      {BoundingBoxMax.x, BoundingBoxMin.y, BoundingBoxMax.z},
+      {BoundingBoxMin.x, BoundingBoxMax.y, BoundingBoxMax.z},
+      {BoundingBoxMax.x, BoundingBoxMax.y, BoundingBoxMax.z},
+  };
+
+  glm::vec3 world_min(std::numeric_limits<float>::max());
+  glm::vec3 world_max(std::numeric_limits<float>::lowest());
+
+  for (auto const &corner : corners) {
+    glm::vec3 w = glm::vec3(transform * glm::vec4(corner, 1.0f));
+    world_min = glm::min(world_min, w);
+    world_max = glm::max(world_max, w);
+  }
+
+  bool camera_inside = glm::all(glm::greaterThanEqual(camera, world_min)) &&
+                       glm::all(glm::lessThanEqual(camera, world_max));
+
+  if (!camera_inside && !frustum.intersects(world_min, world_max)) {
     return false;
   }
 
-  float dist = display == display_mode::in_3D
-                   ? glm::distance(pos, camera) - rad
-                   : std::abs(pos.y - camera.y) - rad;
-
-  return (dist < cull_distance);
-}
-
-void WMOGroup::intersect(math::ray const &ray,
-                         std::vector<float> *results) const {
-  if (!ray.intersect_bounds(VertexBoxMin, VertexBoxMax)) {
-    return;
-  }
-
-  //! \todo Also allow clicking on doodads and liquids.
-  for (auto &&batch : _batches) {
-    for (size_t i(batch.index_start); i < batch.index_start + batch.index_count;
-         i += 3) {
-      // TODO : only intersect visible triangles
-      // TODO : option to only check collision
-      if (auto &&distance = ray.intersect_triangle(
-              _vertices[_indices[i + 0]], _vertices[_indices[i + 1]],
-              _vertices[_indices[i + 2]])) {
-        results->emplace_back(*distance);
-      }
+  // Use distance to the nearest point on the AABB
+  if (!camera_inside) {
+    glm::vec3 clamped = glm::clamp(camera, world_min, world_max);
+    float dist = display == display_mode::in_3D
+                     ? glm::distance(clamped, camera)
+                     : std::abs(clamped.y - camera.y);
+    if (dist >= cull_distance) {
+      return false;
     }
   }
+
+  return true;
 }
 
 /*

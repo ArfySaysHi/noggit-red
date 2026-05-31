@@ -21,7 +21,7 @@ public:
 
   void setupFog(bool draw_fog, std::function<void(bool)> setup_fog);
 
-  void intersect(math::ray const &, std::vector<float> *results) const;
+  bool intersect(math::ray const &ray, std::vector<float> *results) const;
 
   // todo: portal culling
   [[nodiscard]]
