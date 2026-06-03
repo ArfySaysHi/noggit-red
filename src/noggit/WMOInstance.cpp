@@ -61,6 +61,10 @@ void WMOInstance::draw(OpenGL::Scoped::use_program &wmo_shader,
     return;
   }
 
+  if (!wmo->renderer()->isUploaded()) {
+    wmo->renderer()->upload();
+  }
+
   if (group_extents.empty()) {
     recalcExtents();
   }
@@ -230,9 +234,9 @@ void WMOInstance::recalcExtents() {
   points.insert(points.end(), adjustedPoints.begin(), adjustedPoints.end());
 
   for (int i = 0; i < (int)wmo->groups.size(); ++i) {
-    auto const &group = wmo->groups[i];
+    auto const &group = wmo->groups[i].get();
     auto &&group_points =
-        math::aabb(group.BoundingBoxMin, group.BoundingBoxMax).all_corners();
+        math::aabb(group->BoundingBoxMin, group->BoundingBoxMax).all_corners();
     std::vector<glm::vec3> adjustedGroupPoints;
     for (auto const &point : group_points) {
       adjustedGroupPoints.push_back(_transform_mat * glm::vec4(point, 1.f));
@@ -297,8 +301,8 @@ std::vector<WMODoodadInstance *> WMOInstance::get_visible_doodads(
 
   if (!wmo->is_hidden() || draw_hidden_models) {
     for (int i = 0; i < wmo->groups.size(); ++i) {
-      if (wmo->groups[i].is_visible(_transform_mat, frustum, cull_distance,
-                                    camera, display)) {
+      if (wmo->groups[i]->is_visible(_transform_mat, frustum, cull_distance,
+                                     camera, display)) {
         for (auto &doodad : _doodads_per_group[i]) {
           if (doodad.need_matrix_update()) {
             doodad.update_transform_matrix_wmo(this);

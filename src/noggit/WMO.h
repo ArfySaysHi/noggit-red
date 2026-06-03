@@ -4,6 +4,7 @@
 #include <math/ray.hpp>
 
 #include <ClientFile.hpp>
+#include <memory>
 #include <noggit/AsyncObjectMultimap.hpp>
 #include <noggit/ContextObject.hpp>
 #include <noggit/ModelInstance.h> // ModelInstance
@@ -33,11 +34,6 @@ class WMOGroupRender;
 class WMORender;
 } // namespace Noggit::Rendering
 
-struct WMOMaterial : public WMOData::Material {
-  uint32_t texture1_index = 0;
-  uint32_t texture2_index = 0;
-};
-
 class WMO : public AsyncObject {
   friend class Noggit::Rendering::WMORender;
 
@@ -57,7 +53,7 @@ public:
   std::map<uint32_t, std::vector<WMODoodadInstance>>
   doodads_per_group(uint16_t doodadset) const;
 
-  std::vector<WMOGroup> groups;
+  std::vector<std::unique_ptr<WMOGroup>> groups;
   std::vector<WMOMaterial> materials;
   glm::vec3 extents[2];
   std::vector<scoped_blp_texture_reference> textures;

@@ -265,4 +265,16 @@ struct Fog {
   FogEntry underwater_fog; // 0x24 — 12 bytes (UWFOG)
 };
 static_assert(sizeof(WMOData::Fog) == 48, "WMOData::Fog must be 48 bytes");
+
+struct GroupGeometry {
+  std::vector<glm::vec3> vertices;
+  std::vector<glm::vec3> normals;
+  std::vector<glm::vec2> texcoords;
+  std::vector<glm::vec2> texcoords_2;
+  std::vector<glm::vec4> vertex_colors;
+  std::vector<uint16_t> indices;
+  std::vector<Batch> batches;
+  std::optional<std::vector<BspNode>> bsp_tree_nodes;
+  std::optional<std::vector<uint16_t>> bsp_indices;
+};
 } // namespace WMOData

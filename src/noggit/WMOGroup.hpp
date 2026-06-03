@@ -10,12 +10,10 @@
 class WMO;
 
 class WMOGroup {
-  friend class Noggit::Rendering::WMOGroupRender;
-
 public:
   WMOGroup(WMO *wmo, const WMOData::GroupHeader &header, std::string name,
            int groupIndex);
-  WMOGroup(WMOGroup const &);
+  // WMOGroup(WMOGroup const &);
 
   void load();
 
@@ -52,15 +50,23 @@ public:
     return header.flags.indoor;
   }
 
+  WMOData::GroupGeometry const &geometry() const { return _geometry; }
+
   [[nodiscard]]
   Noggit::Rendering::WMOGroupRender *renderer() {
     return &_renderer;
-  };
+  }
+
+  [[nodiscard]]
+  Noggit::Rendering::WMOGroupRender const *renderer() const {
+    return &_renderer;
+  }
+
   ::glm::vec3 center;
 
 private:
   void load_mocv(BlizzardArchive::ClientFile &f, uint32_t size);
-  void fix_vertex_color_alpha();
+  void fix_vertex_color_alpha(WMOData::GroupGeometry &geometry);
 
   WMO *wmo;
   WMOData::GroupHeader header;
@@ -71,17 +77,7 @@ private:
   std::unique_ptr<wmo_liquid> lq;
 
   std::vector<WMOData::TriangleMaterialInfo> _material_infos;
-  std::vector<WMOData::Batch> _batches;
 
-  std::vector<::glm::vec3> _vertices;
-  std::vector<::glm::vec3> _normals;
-  std::vector<glm::vec2> _texcoords;
-  std::vector<glm::vec2> _texcoords_2;
-  std::vector<glm::vec4> _vertex_colors;
-  std::vector<uint16_t> _indices;
-
-  std::optional<std::vector<WMOData::BspNode>> _bsp_tree_nodes;
-  std::optional<std::vector<uint16_t>> _bsp_indices;
-
+  WMOData::GroupGeometry _geometry;
   Noggit::Rendering::WMOGroupRender _renderer;
 };

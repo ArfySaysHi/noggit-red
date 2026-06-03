@@ -8,7 +8,7 @@
 
 WMOGroup::WMOGroup(WMO *_wmo, const WMOData::GroupHeader &header,
                    std::string name, int groupIndex)
-    : wmo(_wmo), name(std::move(name)), num(groupIndex), _renderer(this) {
+    : wmo(_wmo), name(std::move(name)), num(groupIndex), _renderer() {
   VertexBoxMin = glm::vec3(header.box1[0], header.box1[1], header.box1[2]);
   VertexBoxMax = glm::vec3(header.box2[0], header.box2[1], header.box2[2]);
 }
@@ -22,22 +22,18 @@ glm::vec4 colorFromInt(unsigned int col) {
   return glm::vec4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
 }
 
-WMOGroup::WMOGroup(WMOGroup const &other)
-    : BoundingBoxMin(other.BoundingBoxMin),
-      BoundingBoxMax(other.BoundingBoxMax), VertexBoxMin(other.VertexBoxMin),
-      VertexBoxMax(other.VertexBoxMax),
-      use_outdoor_lights(other.use_outdoor_lights), name(other.name),
-      wmo(other.wmo), header(other.header), center(other.center),
-      rad(other.rad), num(other.num), fog(other.fog),
-      _doodad_ref(other._doodad_ref), _batches(other._batches),
-      _vertices(other._vertices), _normals(other._normals),
-      _texcoords(other._texcoords), _texcoords_2(other._texcoords_2),
-      _vertex_colors(other._vertex_colors), _indices(other._indices),
-      _renderer(this) {
-  if (other.lq) {
-    lq = std::make_unique<wmo_liquid>(*other.lq.get());
-  }
-}
+// WMOGroup::WMOGroup(WMOGroup const &other)
+//     : BoundingBoxMin(other.BoundingBoxMin),
+//       BoundingBoxMax(other.BoundingBoxMax), VertexBoxMin(other.VertexBoxMin),
+//       VertexBoxMax(other.VertexBoxMax),
+//       use_outdoor_lights(other.use_outdoor_lights), name(other.name),
+//     wmo(other.wmo), header(other.header), center(other.center),
+//   rad(other.rad), num(other.num), fog(other.fog),
+//_geometry(other._geometry), _doodad_ref(other._doodad_ref), _renderer() {
+//  if (other.lq) {
+//  lq = std::make_unique<wmo_liquid>(*other.lq.get());
+//}
+//}
 
 void WMOGroup::load() {
   LogDebug << "WMOGroup::load() num=" << num
@@ -116,9 +112,9 @@ void WMOGroup::load() {
 
   assert(fourcc == 'MOVI');
 
-  _indices.resize(size / sizeof(uint16_t));
+  _geometry.indices.resize(size / sizeof(uint16_t));
 
-  f.read(_indices.data(), size);
+  f.read(_geometry.indices.data(), size);
 
   // - MOVT ----------------------------------------------
 
@@ -140,12 +136,13 @@ void WMOGroup::load() {
 
   rad = 0;
 
-  _vertices.resize(size / sizeof(::glm::vec3));
+  _geometry.vertices.resize(size / sizeof(::glm::vec3));
 
-  for (size_t i = 0; i < _vertices.size(); ++i) {
-    _vertices[i] = glm::vec3(vertices[i].x, vertices[i].z, -vertices[i].y);
+  for (size_t i = 0; i < _geometry.vertices.size(); ++i) {
+    _geometry.vertices[i] =
+        glm::vec3(vertices[i].x, vertices[i].z, -vertices[i].y);
 
-    ::glm::vec3 &v = _vertices[i];
+    ::glm::vec3 &v = _geometry.vertices[i];
 
     if (v.x < VertexBoxMin.x)
       VertexBoxMin.x = v.x;
@@ -162,8 +159,7 @@ void WMOGroup::load() {
   }
 
   center = (VertexBoxMax + VertexBoxMin) * 0.5f;
-  rad = (VertexBoxMax - center).length() + 300.0f;
-  ;
+  rad = glm::length(VertexBoxMax - center) + 300.0f;
 
   f.seekRelative(size);
 
@@ -174,11 +170,11 @@ void WMOGroup::load() {
 
   assert(fourcc == 'MONR');
 
-  _normals.resize(size / sizeof(::glm::vec3));
+  _geometry.normals.resize(size / sizeof(::glm::vec3));
 
-  f.read(_normals.data(), size);
+  f.read(_geometry.normals.data(), size);
 
-  for (auto &n : _normals) {
+  for (auto &n : _geometry.normals) {
     n = {n.x, n.z, -n.y};
   }
 
@@ -189,9 +185,9 @@ void WMOGroup::load() {
 
   assert(fourcc == 'MOTV');
 
-  _texcoords.resize(size / sizeof(glm::vec2));
+  _geometry.texcoords.resize(size / sizeof(glm::vec2));
 
-  f.read(_texcoords.data(), size);
+  f.read(_geometry.texcoords.data(), size);
 
   // - MOBA ----------------------------------------------
 
@@ -200,10 +196,10 @@ void WMOGroup::load() {
 
   assert(fourcc == 'MOBA');
 
-  _batches.resize(size / sizeof(WMOData::Batch));
-  f.read(_batches.data(), size);
+  _geometry.batches.resize(size / sizeof(WMOData::Batch));
+  f.read(_geometry.batches.data(), size);
 
-  _renderer.initRenderBatches();
+  _renderer.initRenderBatches(_geometry, header.flags, wmo->materials);
 
   // - MOLR ----------------------------------------------
   if (header.flags.has_light) {
@@ -388,8 +384,8 @@ void WMOGroup::load() {
                << "\". Trying to continue reading." << std::endl;
       f.seek(f.getPos() - 8);
     } else {
-      _texcoords_2.resize(size / sizeof(glm::vec2));
-      f.read(_texcoords_2.data(), size);
+      _geometry.texcoords_2.resize(size / sizeof(glm::vec2));
+      f.read(_geometry.texcoords_2.data(), size);
     }
   }
   // - MOCV ----------------------------------------------
@@ -410,10 +406,10 @@ void WMOGroup::load() {
 
         // the second mocv is used for texture blending only
         if (header.flags.has_vertex_color) {
-          _vertex_colors[i].w = alpha;
+          _geometry.vertex_colors[i].w = alpha;
         } else // no vertex coloring, only texture blending with the alpha
         {
-          _vertex_colors.emplace_back(0.f, 0.f, 0.f, alpha);
+          _geometry.vertex_colors.emplace_back(0.f, 0.f, 0.f, alpha);
         }
       }
     }
@@ -428,9 +424,6 @@ void WMOGroup::load() {
     for (auto doodad : _doodad_ref) {
       if (doodad >= wmo->modelis.size()) {
         continue;
-        LogError << "The WMO file currently loaded is potentially corrupt. "
-                    "Non-existing doodad referenced."
-                 << std::endl;
       }
 
       lenmin = 999999.0f * 999999.0f;
@@ -456,10 +449,10 @@ void WMOGroup::load() {
 
 void WMOGroup::load_mocv(BlizzardArchive::ClientFile &f, uint32_t size) {
   uint32_t const *colors = reinterpret_cast<uint32_t const *>(f.getPointer());
-  _vertex_colors.resize(size / sizeof(uint32_t));
+  _geometry.vertex_colors.resize(size / sizeof(uint32_t));
 
   for (size_t i(0); i < size / sizeof(uint32_t); ++i) {
-    _vertex_colors[i] = colorFromInt(colors[i]);
+    _geometry.vertex_colors[i] = colorFromInt(colors[i]);
   }
 
   if (wmo->flags.do_not_fix_vertex_color_alpha) {
@@ -467,14 +460,16 @@ void WMOGroup::load_mocv(BlizzardArchive::ClientFile &f, uint32_t size) {
 
     if (header.transparency_batches_count > 0) {
       interior_batchs_start =
-          _batches[header.transparency_batches_count - 1].vertex_end + 1;
+          _geometry.batches[header.transparency_batches_count - 1].vertex_end +
+          1;
     }
 
-    for (int n = interior_batchs_start; n < _vertex_colors.size(); ++n) {
-      _vertex_colors[n].w = header.flags.exterior ? 1.f : 0.f;
+    for (int n = interior_batchs_start; n < _geometry.vertex_colors.size();
+         ++n) {
+      _geometry.vertex_colors[n].w = header.flags.exterior ? 1.f : 0.f;
     }
   } else {
-    fix_vertex_color_alpha();
+    fix_vertex_color_alpha(_geometry);
   }
 
   // there's no read so this is required
@@ -489,10 +484,10 @@ bool WMOGroup::intersect(math::ray const &ray,
 
   bool hit = false;
 
-  for (std::size_t i = 0; i + 2 < _indices.size(); i += 3) {
-    glm::vec3 const &v0 = _vertices[_indices[i + 0]];
-    glm::vec3 const &v1 = _vertices[_indices[i + 1]];
-    glm::vec3 const &v2 = _vertices[_indices[i + 2]];
+  for (std::size_t i = 0; i + 2 < _geometry.indices.size(); i += 3) {
+    glm::vec3 const &v0 = _geometry.vertices[_geometry.indices[i + 0]];
+    glm::vec3 const &v1 = _geometry.vertices[_geometry.indices[i + 1]];
+    glm::vec3 const &v2 = _geometry.vertices[_geometry.indices[i + 2]];
 
     if (auto t = ray.intersect_triangle(v0, v1, v2)) {
       results->push_back(*t);

@@ -40,6 +40,8 @@ public:
                   std::map<int, std::pair<glm::vec3, glm::vec3>> const
                       &group_extents) const;
 
+  bool isUploaded() const;
+
 private:
   WMO *_wmo;
 };

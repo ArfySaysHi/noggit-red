@@ -1,10 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License
 // (version 3).
+#pragma once
 
-#ifndef NOGGIT_WMOGROUPRENDER_HPP
-#define NOGGIT_WMOGROUPRENDER_HPP
-
+#include "noggit/data/WMOData.hpp"
 #include <math/frustum.hpp>
+#include <noggit/WMOMaterial.hpp>
 #include <noggit/rendering/BaseRender.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
@@ -39,24 +39,32 @@ struct WMOCombinedDrawCall {
   bool backface_cull = false;
 };
 
-class WMOGroupRender : public BaseRender {
+class WMOGroupRender {
 public:
-  WMOGroupRender(WMOGroup *wmo_group);
+  WMOGroupRender();
 
-  void upload() override;
+  void upload(WMOData::GroupGeometry const &geometry,
+              std::vector<WMOMaterial> const &materials,
+              std::vector<scoped_blp_texture_reference> const &textures);
 
-  void unload() override;
+  void unload();
 
   void draw(OpenGL::Scoped::use_program &wmo_shader,
             math::frustum const &frustum, const float &cull_distance,
             const glm::vec3 &camera, bool draw_fog, bool world_has_skies);
 
-  void initRenderBatches();
+  void initRenderBatches(WMOData::GroupGeometry const &geometry,
+                         WMOData::GroupFlags const &flags,
+                         std::vector<WMOMaterial> const &materials);
+
+  bool isUploaded() const { return _uploaded; }
 
 private:
-  void setupVao(OpenGL::Scoped::use_program &wmo_shader);
+  bool _has_two_motv = false;
+  bool _has_vertex_color = false;
+  bool _use_mocv2_blending = false;
 
-  WMOGroup *_wmo_group;
+  void setupVao(OpenGL::Scoped::use_program &wmo_shader);
 
   std::vector<unsigned> _render_batch_mapping;
   std::vector<WMORenderBatch> _render_batches;
@@ -74,11 +82,9 @@ private:
   GLuint const &_render_batch_mapping_buffer = _buffers[6];
   GLuint const &_render_batch_tex_buffer = _buffers[7];
 
-  GLuint _render_batch_tex;
+  GLuint _render_batch_tex = 0;
 
   bool _uploaded = false;
   bool _vao_is_setup = false;
 };
 } // namespace Noggit::Rendering
-
-#endif // NOGGIT_WMOGROUPRENDER_HPP

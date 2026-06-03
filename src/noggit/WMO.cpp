@@ -76,9 +76,10 @@ void WMO::finishLoading() {
 
   groups.reserve(rawGroupHeaders.size());
   for (size_t i = 0; i < rawGroupHeaders.size(); ++i)
-    groups.emplace_back(this, rawGroupHeaders[i],
-                        groupNameTable.nameAt(rawGroupHeaders[i].group_name),
-                        static_cast<int>(i));
+    groups.push_back(std::make_unique<WMOGroup>(
+        this, rawGroupHeaders[i],
+        groupNameTable.nameAt(rawGroupHeaders[i].group_name),
+        static_cast<int>(i)));
 
   if (skyboxData) {
     auto *clientData =
@@ -97,7 +98,7 @@ void WMO::finishLoading() {
 
   for (size_t i = 0; i < groups.size(); ++i) {
     LogDebug << "Loading group " << i;
-    groups[i].load();
+    groups[i]->load();
     LogDebug << "Group " << i << " done";
   }
   LogDebug << "All groups loaded";
@@ -126,10 +127,10 @@ std::vector<float> WMO::intersect(math::ray const &ray,
   }
 
   for (auto &group : groups) {
-    if (!do_exterior && !group.is_indoor())
+    if (!do_exterior && !group->is_indoor())
       continue;
 
-    group.intersect(ray, &results);
+    group->intersect(ray, &results);
   }
 
   if (!do_exterior && results.size()) {
@@ -163,7 +164,7 @@ WMO::doodads_per_group(uint16_t doodadset) const {
   uint32_t start = dset.start, end = start + dset.size;
 
   for (size_t i = 0; i < groups.size(); ++i) {
-    for (uint16_t ref : groups[i].doodad_ref()) {
+    for (uint16_t ref : groups[i]->doodad_ref()) {
       if (ref >= start && ref < end) {
         doodads[i].push_back(modelis[ref]);
       }

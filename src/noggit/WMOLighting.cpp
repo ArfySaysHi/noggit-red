@@ -1,3 +1,4 @@
+#include "noggit/data/WMOData.hpp"
 #include <noggit/WMOLighting.h>
 
 #include <GL/gl.h>
@@ -63,12 +64,12 @@ void WMOFog::init(const WMOData::Fog &fog) {
 
 void WMOFog::setup() {}
 
-void WMOGroup::fix_vertex_color_alpha() {
+void WMOGroup::fix_vertex_color_alpha(WMOData::GroupGeometry &geometry) {
   int interior_batchs_start = 0;
 
   if (header.transparency_batches_count > 0) {
     interior_batchs_start =
-        _batches[header.transparency_batches_count - 1].vertex_end + 1;
+        geometry.batches[header.transparency_batches_count - 1].vertex_end + 1;
   }
 
   glm::vec4 wmo_ambient_color;
@@ -81,8 +82,8 @@ void WMOGroup::fix_vertex_color_alpha() {
     wmo_ambient_color.w = 0.f;
   }
 
-  for (size_t i = 0; i < _vertex_colors.size(); ++i) {
-    auto &color = _vertex_colors[i];
+  for (size_t i = 0; i < geometry.vertex_colors.size(); ++i) {
+    auto &color = geometry.vertex_colors[i];
     float r = color.x;
     float g = color.y;
     float b = color.z;

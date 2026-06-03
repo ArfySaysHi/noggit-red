@@ -11,13 +11,14 @@ WMORender::WMORender(WMO *wmo) : _wmo(wmo) {}
 
 void WMORender::upload() {
   for (auto &group : _wmo->groups) {
-    group.renderer()->upload();
+    group->renderer()->upload(group->geometry(), _wmo->materials,
+                              _wmo->textures);
   }
 }
 
 void WMORender::unload() {
   for (auto &group : _wmo->groups) {
-    group.renderer()->unload();
+    group->renderer()->unload();
   }
 }
 
@@ -37,9 +38,9 @@ void WMORender::draw(
   }
 
   // Check if this WMO has any indoor groups at all
-  bool has_indoor_groups =
-      std::any_of(_wmo->groups.begin(), _wmo->groups.end(),
-                  [](WMOGroup const &g) { return g.is_indoor(); });
+  bool has_indoor_groups = std::any_of(
+      _wmo->groups.begin(), _wmo->groups.end(),
+      [](std::unique_ptr<WMOGroup> const &g) { return g->is_indoor(); });
 
   // If interior_only is requested but there are no indoor groups,
   // fall back to rendering all groups (pure exterior WMO)
@@ -51,7 +52,7 @@ void WMORender::draw(
     auto &group = _wmo->groups[i];
 
     // Restore original condition with corrected fallback
-    if (effective_interior_only && !group.is_indoor())
+    if (effective_interior_only && !group->is_indoor())
       continue;
 
     auto it = group_extents.find(i);
@@ -66,8 +67,8 @@ void WMORender::draw(
     if (dist >= cull_distance)
       continue;
 
-    group.renderer()->draw(wmo_shader, frustum, cull_distance, camera, draw_fog,
-                           world_has_skies);
+    group->renderer()->draw(wmo_shader, frustum, cull_distance, camera,
+                            draw_fog, world_has_skies);
   }
 
   if (boundingbox) {
@@ -110,7 +111,7 @@ bool WMORender::drawSkybox(
   for (int i = 0; i < _wmo->groups.size(); ++i) {
     auto const &g = _wmo->groups[i];
 
-    if (!g.has_skybox()) {
+    if (!g->has_skybox()) {
       continue;
     }
 
@@ -147,4 +148,11 @@ bool WMORender::drawSkybox(
   }
 
   return false;
+}
+
+bool WMORender::isUploaded() const {
+  return std::all_of(_wmo->groups.begin(), _wmo->groups.end(),
+                     [](std::unique_ptr<WMOGroup> const &g) {
+                       return g->renderer()->isUploaded();
+                     });
 }

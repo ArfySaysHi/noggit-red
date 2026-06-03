@@ -1,23 +1,25 @@
 // This file is part of Noggit3, licensed under GNU General Public License
 // (version 3).
 
-#include "WMOGroupRender.hpp"
-#include <noggit/WMO.h>
+#include <noggit/WMOMaterial.hpp>
+#include <noggit/data/WMOData.hpp>
+#include <noggit/rendering/WMOGroupRender.hpp>
 
 using namespace Noggit::Rendering;
 
-WMOGroupRender::WMOGroupRender(WMOGroup *wmo_group) : _wmo_group(wmo_group) {}
+WMOGroupRender::WMOGroupRender() {}
 
-void WMOGroupRender::upload() {
-  // render batches
-
+void WMOGroupRender::upload(
+    WMOData::GroupGeometry const &geometry,
+    std::vector<WMOMaterial> const &materials,
+    std::vector<scoped_blp_texture_reference> const &textures) {
   bool texture_not_uploaded = false;
 
   std::size_t batch_counter = 0;
-  for (auto &batch : _wmo_group->_batches) {
-    WMOMaterial const &mat(_wmo_group->wmo->materials.at(batch.texture));
+  for (auto &batch : geometry.batches) {
+    WMOMaterial const &mat(materials.at(batch.texture));
 
-    auto &tex1 = _wmo_group->wmo->textures.at(mat.texture1_index);
+    auto &tex1 = textures.at(mat.texture1_index);
 
     tex1->wait_until_loaded();
     tex1->upload();
@@ -30,7 +32,7 @@ void WMOGroupRender::upload() {
     bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3;
 
     if (use_tex2) {
-      auto &tex2 = _wmo_group->wmo->textures.at(mat.texture2_index);
+      auto &tex2 = textures.at(mat.texture2_index);
       tex2->wait_until_loaded();
       tex2->upload();
 
@@ -55,8 +57,8 @@ void WMOGroupRender::upload() {
   std::vector<WMORenderBatch *> _used_batches;
 
   batch_counter = 0;
-  for (auto &batch : _wmo_group->_batches) {
-    WMOMaterial &mat = _wmo_group->wmo->materials.at(batch.texture);
+  for (auto &batch : geometry.batches) {
+    WMOMaterial const &mat = materials.at(batch.texture);
     bool backface_cull = !mat.flags.unculled;
     bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3;
 
@@ -156,20 +158,20 @@ void WMOGroupRender::upload() {
   {
     OpenGL::Scoped::vao_binder const _(_vao);
 
-    gl.bufferData<GL_ARRAY_BUFFER>(
-        _vertices_buffer,
-        _wmo_group->_vertices.size() * sizeof(*_wmo_group->_vertices.data()),
-        _wmo_group->_vertices.data(), GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER>(_vertices_buffer,
+                                   geometry.vertices.size() *
+                                       sizeof(*geometry.vertices.data()),
+                                   geometry.vertices.data(), GL_STATIC_DRAW);
 
     gl.bufferData<GL_ARRAY_BUFFER>(_normals_buffer,
-                                   _wmo_group->_normals.size() *
-                                       sizeof(*_wmo_group->_normals.data()),
-                                   _wmo_group->_normals.data(), GL_STATIC_DRAW);
+                                   geometry.normals.size() *
+                                       sizeof(*geometry.normals.data()),
+                                   geometry.normals.data(), GL_STATIC_DRAW);
 
-    gl.bufferData<GL_ARRAY_BUFFER>(
-        _texcoords_buffer,
-        _wmo_group->_texcoords.size() * sizeof(*_wmo_group->_texcoords.data()),
-        _wmo_group->_texcoords.data(), GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER>(_texcoords_buffer,
+                                   geometry.texcoords.size() *
+                                       sizeof(*geometry.texcoords.data()),
+                                   geometry.texcoords.data(), GL_STATIC_DRAW);
 
     gl.bufferData<GL_ARRAY_BUFFER>(
         _render_batch_mapping_buffer,
@@ -184,26 +186,18 @@ void WMOGroupRender::upload() {
     gl.texBuffer(GL_TEXTURE_BUFFER, GL_RGBA32UI, _render_batch_tex_buffer);
 
     gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(
-        _indices_buffer, _wmo_group->_indices, GL_STATIC_DRAW);
+        _indices_buffer, geometry.indices, GL_STATIC_DRAW);
 
-    if (_wmo_group->header.flags.has_two_motv) {
+    if (_has_two_motv) {
       gl.bufferData<GL_ARRAY_BUFFER, glm::vec2>(
-          _texcoords_buffer_2, _wmo_group->_texcoords_2, GL_STATIC_DRAW);
+          _texcoords_buffer_2, geometry.texcoords_2, GL_STATIC_DRAW);
     }
 
     gl.bufferData<GL_ARRAY_BUFFER>(
         _vertex_colors_buffer,
-        _wmo_group->_vertex_colors.size() *
-            sizeof(*_wmo_group->_vertex_colors.data()),
-        _wmo_group->_vertex_colors.data(), GL_STATIC_DRAW);
+        sizeof(*geometry.vertex_colors.data()) * geometry.vertex_colors.size(),
+        geometry.vertex_colors.data(), GL_STATIC_DRAW);
   }
-  // free unused data
-  _wmo_group->_normals.clear();
-  _wmo_group->_texcoords.clear();
-  _wmo_group->_texcoords_2.clear();
-  _wmo_group->_vertex_colors.clear();
-  _render_batches.clear();
-  _render_batch_mapping.clear();
 
   _uploaded = true;
 }
@@ -217,9 +211,6 @@ void WMOGroupRender::unload() {
   _uploaded = false;
   _vao_is_setup = false;
   _draw_calls.clear();
-
-  // Re-populate _render_batches and _render_batch_mapping
-  initRenderBatches();
 }
 
 void WMOGroupRender::setupVao(OpenGL::Scoped::use_program &wmo_shader) {
@@ -235,15 +226,14 @@ void WMOGroupRender::setupVao(OpenGL::Scoped::use_program &wmo_shader) {
     wmo_shader.attribi("batch_mapping", _render_batch_mapping_buffer, 1,
                        GL_UNSIGNED_INT, 0, 0);
 
-    if (_wmo_group->header.flags.has_two_motv) {
+    if (_has_two_motv) {
       wmo_shader.attrib("texcoord_2", _texcoords_buffer_2, 2, GL_FLOAT,
                         GL_FALSE, 0, 0);
     }
 
     // even if the 2 flags are set there's only one vertex color vector, the 2nd
     // chunk is used for alpha only
-    if (_wmo_group->header.flags.has_vertex_color ||
-        _wmo_group->header.flags.use_mocv2_for_texture_blending) {
+    if (_has_vertex_color || _use_mocv2_blending) {
       wmo_shader.attrib("vertex_color", _vertex_colors_buffer, 4, GL_FLOAT,
                         GL_FALSE, 0, 0);
     }
@@ -265,14 +255,6 @@ void WMOGroupRender::draw(OpenGL::Scoped::use_program &wmo_shader,
                           ,
                           bool // world_has_skies
 ) {
-  if (!_uploaded) [[unlikely]] {
-    upload();
-
-    if (!_uploaded) [[unlikely]] {
-      return;
-    }
-  }
-
   if (!_vao_is_setup) [[unlikely]] {
     setupVao(wmo_shader);
   }
@@ -310,39 +292,43 @@ void WMOGroupRender::draw(OpenGL::Scoped::use_program &wmo_shader,
   }
 }
 
-void WMOGroupRender::initRenderBatches() {
-  _render_batch_mapping.resize(_wmo_group->_vertices.size());
+void WMOGroupRender::initRenderBatches(
+    WMOData::GroupGeometry const &geometry, WMOData::GroupFlags const &flags,
+    std::vector<WMOMaterial> const &materials) {
+  _has_two_motv = flags.has_two_motv;
+  _has_vertex_color = flags.has_vertex_color;
+  _use_mocv2_blending = flags.use_mocv2_for_texture_blending;
+
+  _render_batch_mapping.resize(geometry.vertices.size());
   std::fill(_render_batch_mapping.begin(), _render_batch_mapping.end(), 0);
 
-  _render_batches.resize(_wmo_group->_batches.size());
+  _render_batches.resize(geometry.batches.size());
 
   std::size_t batch_counter = 0;
-  for (auto &batch : _wmo_group->_batches) {
+  for (auto &batch : geometry.batches) {
     for (std::size_t i = 0; i < (batch.vertex_end - batch.vertex_start + 1);
          ++i) {
       _render_batch_mapping[batch.vertex_start + i] =
           static_cast<unsigned>(batch_counter + 1);
     }
 
-    std::uint32_t flags = 0;
+    std::uint32_t flag_store = 0;
 
-    if (_wmo_group->header.flags.exterior_lit ||
-        _wmo_group->header.flags.exterior) {
-      flags |= WMORenderBatchFlags::eWMOBatch_ExteriorLit;
+    if (flags.exterior_lit || flags.exterior) {
+      flag_store |= WMORenderBatchFlags::eWMOBatch_ExteriorLit;
     }
-    if (_wmo_group->header.flags.has_vertex_color ||
-        _wmo_group->header.flags.use_mocv2_for_texture_blending) {
-      flags |= WMORenderBatchFlags::eWMOBatch_HasMOCV;
+    if (flags.has_vertex_color || flags.use_mocv2_for_texture_blending) {
+      flag_store |= WMORenderBatchFlags::eWMOBatch_HasMOCV;
     }
 
-    WMOMaterial const &mat(_wmo_group->wmo->materials.at(batch.texture));
+    WMOMaterial const &mat(materials.at(batch.texture));
 
     if (mat.flags.unlit) {
-      flags |= WMORenderBatchFlags::eWMOBatch_Unlit;
+      flag_store |= WMORenderBatchFlags::eWMOBatch_Unlit;
     }
 
     if (mat.flags.unfogged) {
-      flags |= WMORenderBatchFlags::eWMOBatch_Unfogged;
+      flag_store |= WMORenderBatchFlags::eWMOBatch_Unfogged;
     }
 
     std::uint32_t alpha_test;
@@ -365,7 +351,7 @@ void WMOGroupRender::initRenderBatches() {
     }
 
     _render_batches[batch_counter] =
-        WMORenderBatch{flags, mat.shader, 0, 0, 0, 0, alpha_test, 0};
+        WMORenderBatch{flag_store, mat.shader, 0, 0, 0, 0, alpha_test, 0};
 
     batch_counter++;
   }

@@ -15,7 +15,6 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMessageBox>
-#include <filesystem>
 #include <memory>
 #include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/application/Configuration/NoggitApplicationConfigurationReader.hpp>
@@ -23,8 +22,6 @@
 #include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
 #include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.hpp>
 #include <revision.h>
-#include <string>
-#include <string_view>
 #include <util/exception_to_string.hpp>
 #include <vector>
 

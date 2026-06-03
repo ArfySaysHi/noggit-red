@@ -928,7 +928,7 @@ bool World::isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds,
       for (int i = 0; i < (int)wmo_instance.wmo->groups.size(); ++i) {
         auto const &group = wmo_instance.wmo->groups[i];
 
-        if (group.is_indoor()) {
+        if (group->is_indoor()) {
           // must call getGroupExtent() to initialize wmo_instance.group_extents
           // TODO : clear group extents to free memory ?
           auto &group_extents = wmo_instance.getGroupExtents().at(i);
