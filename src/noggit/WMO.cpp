@@ -2,6 +2,7 @@
 // (version 3).
 
 #include "noggit/data/WMOData.hpp"
+#include "noggit/wmo/WMOBuilder.hpp"
 #include <math/frustum.hpp>
 #include <noggit/AsyncLoader.h>
 #include <noggit/Log.h>            // LogDebug
@@ -70,9 +71,7 @@ void WMO::finishLoading() {
   auto rawDoodads = parser.parseMODD(f);
   auto rawFogs = parser.parseMFOG(f);
 
-  buildMaterials(rawMaterials, texbuf);
-  buildLights(rawLights);
-  buildDoodads(rawDoodads, modelNames);
+  // TODO: Builder pattern for materials, lights and doodads
 
   groups.reserve(rawGroupHeaders.size());
   for (size_t i = 0; i < rawGroupHeaders.size(); ++i)
@@ -172,64 +171,4 @@ WMO::doodads_per_group(uint16_t doodadset) const {
   }
 
   return doodads;
-}
-
-void WMO::buildMaterials(const std::vector<WMOData::Material> &rawMaterials,
-                         const std::vector<char> &texbuf) {
-  std::map<std::uint32_t, std::uint32_t> texture_offset_to_inmem_index;
-  auto load_texture = [&](std::uint32_t ofs) {
-    const char *texture_path = (ofs < texbuf.size() && texbuf[ofs] != 0)
-                                   ? &texbuf[ofs]
-                                   : "textures/shanecube.blp";
-
-    auto mapping = texture_offset_to_inmem_index.find(ofs);
-    if (mapping != texture_offset_to_inmem_index.end()) {
-      return mapping->second;
-    }
-
-    textures.emplace_back(texture_path, _context);
-    uint32_t new_index = static_cast<uint32_t>(textures.size() - 1);
-
-    texture_offset_to_inmem_index[ofs] = new_index;
-    return new_index;
-  };
-
-  materials.reserve(rawMaterials.size());
-  for (const auto &raw_mat : rawMaterials) {
-    WMOMaterial mat;
-    *static_cast<WMOData::Material *>(&mat) = raw_mat;
-
-    mat.texture1_index = load_texture(raw_mat.texture_offset_1);
-
-    bool use_second_texture =
-        (raw_mat.shader == 6 || raw_mat.shader == 5 || raw_mat.shader == 3);
-    if (use_second_texture) {
-      mat.texture2_index = load_texture(raw_mat.texture_offset_2);
-    } else {
-      mat.texture2_index = 0;
-    }
-
-    materials.push_back(std::move(mat));
-  }
-}
-
-void WMO::buildLights(const std::vector<WMOData::Light> &rawLights) {
-  lights.reserve(rawLights.size());
-  for (const auto &raw : rawLights) {
-    WMOLight l;
-    l.init(raw);
-    lights.push_back(l);
-  }
-}
-
-void WMO::buildDoodads(
-    const std::vector<WMOData::DoodadInstanceData> &rawInstances,
-    WMOData::GroupNameTable &modelNames) {
-  modelis.reserve(rawInstances.size());
-  model_nearest_light_vector.reserve(rawInstances.size());
-
-  for (const auto &data : rawInstances) {
-    modelis.emplace_back(modelNames.nameAt(data.name_offset), data, _context);
-    model_nearest_light_vector.emplace_back();
-  }
 }
