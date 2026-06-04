@@ -11,13 +11,13 @@
 #include <noggit/ModelManager.h>
 #include <noggit/TextureManager.h>
 #include <noggit/ToolEnums.hpp>
-#include <noggit/WMOGroup.hpp>
-#include <noggit/WMOLighting.h>
-#include <noggit/WmoLiquid.hpp>
 #include <noggit/data/WMOData.hpp>
 #include <noggit/rendering/Primitives.hpp>
 #include <noggit/rendering/WMOGroupRender.hpp>
 #include <noggit/rendering/WMORender.hpp>
+#include <noggit/wmo/WMOGroup.hpp>
+#include <noggit/wmo/WMOLighting.hpp>
+#include <noggit/wmo/WMOLiquid.hpp>
 #include <optional>
 
 #include <cstdint>

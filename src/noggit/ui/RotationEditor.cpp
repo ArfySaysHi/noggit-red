@@ -9,9 +9,9 @@
 #include <noggit/Misc.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
-#include <noggit/WMOInstance.h>
 #include <noggit/World.h>
 #include <noggit/ui/ObjectEditor.h>
+#include <noggit/wmo/WMOInstance.hpp>
 #include <util/qt/overload.hpp>
 
 #include <QtWidgets/QFormLayout>

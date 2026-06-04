@@ -4,14 +4,14 @@
 #include <math/ray.hpp>
 #include <noggit/ContextObject.hpp>
 #include <noggit/SceneObject.hpp>
-#include <noggit/WMOManager.hpp>
 #include <noggit/wmo/WMO.hpp>
+#include <noggit/wmo/WMOManager.hpp>
 
 struct ENTRY_MODF;
 
 class WMOInstance : public SceneObject {
 public:
-  ScopedWMOReference wmo;
+  Noggit::WMO::ScopedWMOReference wmo;
   std::map<int, std::pair<glm::vec3, glm::vec3>> group_extents;
   uint16_t mFlags;
   uint16_t mUnknown;

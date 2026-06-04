@@ -1,13 +1,13 @@
+#include "noggit/wmo/WMOGroup.hpp"
 #include "noggit/data/WMOData.hpp"
-#include <noggit/wmo/WMO.hpp>
-#include <noggit/WMOGroup.hpp>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/wmo/WMO.hpp>
 
 #include <iomanip>
 #include <sstream>
 
-WMOGroup::WMOGroup(WMO *_wmo, const WMOData::GroupHeader &header,
-                   std::string name, int groupIndex)
+Noggit::WMO::WMOGroup::WMOGroup(WMO *_wmo, const WMOData::GroupHeader &header,
+                                std::string name, int groupIndex)
     : wmo(_wmo), name(std::move(name)), num(groupIndex), _renderer() {
   VertexBoxMin = glm::vec3(header.box1[0], header.box1[1], header.box1[2]);
   VertexBoxMax = glm::vec3(header.box2[0], header.box2[1], header.box2[2]);
@@ -22,20 +22,7 @@ glm::vec4 colorFromInt(unsigned int col) {
   return glm::vec4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
 }
 
-// WMOGroup::WMOGroup(WMOGroup const &other)
-//     : BoundingBoxMin(other.BoundingBoxMin),
-//       BoundingBoxMax(other.BoundingBoxMax), VertexBoxMin(other.VertexBoxMin),
-//       VertexBoxMax(other.VertexBoxMax),
-//       use_outdoor_lights(other.use_outdoor_lights), name(other.name),
-//     wmo(other.wmo), header(other.header), center(other.center),
-//   rad(other.rad), num(other.num), fog(other.fog),
-//_geometry(other._geometry), _doodad_ref(other._doodad_ref), _renderer() {
-//  if (other.lq) {
-//  lq = std::make_unique<wmo_liquid>(*other.lq.get());
-//}
-//}
-
-void WMOGroup::load() {
+void Noggit::WMO::WMOGroup::load() {
   LogDebug << "WMOGroup::load() num=" << num
            << " wmo=" << wmo->file_key().filepath();
   std::stringstream curNum;
@@ -447,7 +434,8 @@ void WMOGroup::load() {
   }
 }
 
-void WMOGroup::load_mocv(BlizzardArchive::ClientFile &f, uint32_t size) {
+void Noggit::WMO::WMOGroup::load_mocv(BlizzardArchive::ClientFile &f,
+                                      uint32_t size) {
   uint32_t const *colors = reinterpret_cast<uint32_t const *>(f.getPointer());
   _geometry.vertex_colors.resize(size / sizeof(uint32_t));
 
@@ -476,8 +464,8 @@ void WMOGroup::load_mocv(BlizzardArchive::ClientFile &f, uint32_t size) {
   f.seekRelative(size);
 }
 
-bool WMOGroup::intersect(math::ray const &ray,
-                         std::vector<float> *results) const {
+bool Noggit::WMO::WMOGroup::intersect(math::ray const &ray,
+                                      std::vector<float> *results) const {
   if (!ray.intersect_bounds(BoundingBoxMin, BoundingBoxMax)) {
     return false;
   }
@@ -498,10 +486,11 @@ bool WMOGroup::intersect(math::ray const &ray,
   return hit;
 }
 
-bool WMOGroup::is_visible(glm::mat4x4 const &transform,
-                          math::frustum const &frustum,
-                          float const &cull_distance, glm::vec3 const &camera,
-                          display_mode display) const {
+bool Noggit::WMO::WMOGroup::is_visible(glm::mat4x4 const &transform,
+                                       math::frustum const &frustum,
+                                       float const &cull_distance,
+                                       glm::vec3 const &camera,
+                                       display_mode display) const {
 
   glm::vec3 corners[8] = {
       {BoundingBoxMin.x, BoundingBoxMin.y, BoundingBoxMin.z},
@@ -544,28 +533,8 @@ bool WMOGroup::is_visible(glm::mat4x4 const &transform,
   return true;
 }
 
-/*
-void WMOGroup::drawLiquid ( glm::mat4x4 const& transform
-                          , liquid_render& render
-                          , bool // draw_fog
-                          , int animtime
-                          )
-{
-  // draw liquid
-  //! \todo  culling for liquid boundingbox or something
-  if (lq)
-  {
-    gl.enable(GL_BLEND);
-    gl.depthMask(GL_TRUE);
-
-    lq->draw ( transform, render, animtime);
-
-    gl.disable(GL_BLEND);
-  }
-}
-*/
-
-void WMOGroup::setupFog(bool draw_fog, std::function<void(bool)> setup_fog) {
+void Noggit::WMO::WMOGroup::setupFog(bool draw_fog,
+                                     std::function<void(bool)> setup_fog) {
   if (use_outdoor_lights || fog == -1) {
     setup_fog(draw_fog);
   } else {

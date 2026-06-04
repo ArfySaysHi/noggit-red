@@ -1,14 +1,14 @@
 #include <math/frustum.hpp>
 #include <noggit/AsyncLoader.h>
-#include <noggit/Log.h>            // LogDebug
-#include <noggit/ModelManager.h>   // ModelManager
-#include <noggit/TextureManager.h> // TextureManager, Texture
-#include <noggit/WMOLighting.h>
+#include <noggit/Log.h>
+#include <noggit/ModelManager.h>
+#include <noggit/TextureManager.h>
 #include <noggit/World.h>
 #include <noggit/application/NoggitApplication.hpp>
 #include <noggit/parsing/WMOParser.hpp>
 #include <noggit/rendering/Primitives.hpp>
 #include <noggit/wmo/WMO.hpp>
+#include <noggit/wmo/WMOLighting.hpp>
 #include <opengl/scoped.hpp>
 
 Noggit::WMO::WMO(BlizzardArchive::Listfile::FileKey const &file_key,

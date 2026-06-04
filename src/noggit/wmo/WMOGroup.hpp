@@ -1,19 +1,19 @@
 #pragma once
 
-#include "math/ray.hpp"
-#include "noggit/ToolEnums.hpp"
-#include "noggit/WmoLiquid.hpp"
-#include "noggit/data/WMOData.hpp"
 #include <ClientFile.hpp>
+#include <math/ray.hpp>
+#include <noggit/ToolEnums.hpp>
+#include <noggit/data/WMOData.hpp>
 #include <noggit/rendering/WMOGroupRender.hpp>
+#include <noggit/wmo/WMO.hpp>
+#include <noggit/wmo/WMOLiquid.hpp>
 
-class WMO;
+namespace Noggit::WMO {
 
 class WMOGroup {
 public:
-  WMOGroup(WMO *wmo, const WMOData::GroupHeader &header, std::string name,
-           int groupIndex);
-  // WMOGroup(WMOGroup const &);
+  WMOGroup(Noggit::WMO::WMO *wmo, const WMOData::GroupHeader &header,
+           std::string name, int groupIndex);
 
   void load();
 
@@ -68,7 +68,7 @@ private:
   void load_mocv(BlizzardArchive::ClientFile &f, uint32_t size);
   void fix_vertex_color_alpha(WMOData::GroupGeometry &geometry);
 
-  WMO *wmo;
+  Noggit::WMO::WMO *wmo;
   WMOData::GroupHeader header;
   float rad;
   int32_t num;
@@ -81,3 +81,5 @@ private:
   WMOData::GroupGeometry _geometry;
   Noggit::Rendering::WMOGroupRender _renderer;
 };
+
+} // namespace Noggit::WMO

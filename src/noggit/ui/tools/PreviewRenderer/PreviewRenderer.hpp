@@ -1,5 +1,4 @@
-#ifndef NOGGIT_PREVIEWRENDERER_HPP
-#define NOGGIT_PREVIEWRENDERER_HPP
+#pragma once
 
 #include "noggit/rendering/LiquidTextureManager.hpp"
 #include <noggit/BoolToggleProperty.hpp>
@@ -7,10 +6,10 @@
 #include <noggit/ContextObject.hpp>
 #include <noggit/Model.h>
 #include <noggit/ModelInstance.h>
-#include <noggit/WMO.h>
-#include <noggit/WMOInstance.h>
 #include <noggit/rendering/Primitives.hpp>
 #include <noggit/ui/tools/ViewportManager/ViewportManager.hpp>
+#include <noggit/wmo/WMO.hpp>
+#include <noggit/wmo/WMOInstance.hpp>
 
 #include <QOffscreenSurface>
 #include <QOpenGLContext>
@@ -118,5 +117,3 @@ private:
 };
 
 } // namespace Noggit::Ui::Tools
-
-#endif // NOGGIT_PREVIEWRENDERER_HPP

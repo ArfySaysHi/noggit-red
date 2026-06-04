@@ -4,7 +4,11 @@
 #include <noggit/AsyncObjectMultimap.hpp>
 #include <noggit/ContextObject.hpp>
 
+namespace Noggit::WMO {
 class WMO;
+}
+
+namespace Noggit::WMO {
 
 class WMOManager {
 public:
@@ -38,3 +42,5 @@ private:
   WMO *_wmo;
   Noggit::NoggitRenderContext _context;
 };
+
+} // namespace Noggit::WMO

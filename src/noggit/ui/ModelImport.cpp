@@ -6,8 +6,8 @@
 #include <noggit/MapView.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
-#include <noggit/WMOInstance.h>
 #include <noggit/ui/ObjectEditor.h>
+#include <noggit/wmo/WMOInstance.hpp>
 
 #include <fstream>
 #include <regex>

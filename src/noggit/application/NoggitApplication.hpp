@@ -1,8 +1,4 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
-
-#ifndef NOGGIT_APPLICATION_HPP
-#define NOGGIT_APPLICATION_HPP
+#pragma once
 
 #include <ClientData.hpp>
 #include <QJsonDocument>
@@ -63,5 +59,3 @@ private:
 };
 
 } // namespace Noggit::Application
-
-#endif // NOGGIT_APPLICATION_HPP

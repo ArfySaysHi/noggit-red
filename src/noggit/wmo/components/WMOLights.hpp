@@ -1,7 +1,7 @@
 #pragma once
 
-#include "noggit/WMOLighting.h"
-#include "noggit/data/WMOData.hpp"
+#include <noggit/data/WMOData.hpp>
+#include <noggit/wmo/WMOLighting.hpp>
 #include <vector>
 
 namespace Noggit::WMO {

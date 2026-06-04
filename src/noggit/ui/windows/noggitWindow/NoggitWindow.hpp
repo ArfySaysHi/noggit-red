@@ -1,5 +1,4 @@
-#ifndef NOGGIT_WINDOW_NOGGIT_HPP
-#define NOGGIT_WINDOW_NOGGIT_HPP
+#pragma once
 
 #include <QWidget>
 #include <QtWidgets/QMainWindow>
@@ -91,5 +90,5 @@ private:
 
   virtual void closeEvent(QCloseEvent *) override;
 };
+
 } // namespace Noggit::Ui::Windows
-#endif // NOGGIT_WINDOW_NOGGIT_HPP

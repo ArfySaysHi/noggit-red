@@ -14,7 +14,6 @@
 #include <noggit/Selection.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/UidStorage.hpp>
-#include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
 #include <noggit/project/CurrentProject.hpp>
 #include <noggit/ui/CurrentTexture.h>
@@ -48,6 +47,7 @@
 #include <noggit/ui/tools/UiCommon/ImageBrowser.hpp>
 #include <noggit/ui/tools/ViewToolbar/Ui/ViewToolbar.hpp>
 #include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
+#include <noggit/wmo/WMOInstance.hpp> // WMOInstance
 #include <opengl/scoped.hpp>
 #include <opengl/types.hpp>
 #include <variant>
@@ -1142,7 +1142,7 @@ void MapView::setupHotkeys() {
       Qt::Key_H, MOD_shift,
       [&] {
         ModelManager::clear_hidden_models();
-        WMOManager::clear_hidden_wmos();
+        Noggit::WMO::WMOManager::clear_hidden_wmos();
       },
       [&] {
         return terrainMode == editing_mode::object && !NOGGIT_CUR_ACTION;
@@ -2030,7 +2030,7 @@ MapView::~MapView() {
 
   ModelManager::report();
   TextureManager::report();
-  WMOManager::report();
+  Noggit::WMO::WMOManager::report();
 
   NOGGIT_ACTION_MGR->disconnect();
 
@@ -3936,7 +3936,7 @@ void MapView::unloadOpenglData() {
   OpenGL::context::scoped_setter const _(::gl, context());
 
   ModelManager::unload_all(_context);
-  WMOManager::unload_all(_context);
+  Noggit::WMO::WMOManager::unload_all(_context);
   TextureManager::unload_all(_context);
 
   for (MapTile *tile : _world->mapIndex.loaded_tiles()) {

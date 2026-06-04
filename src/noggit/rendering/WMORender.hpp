@@ -11,7 +11,7 @@
 
 namespace Noggit::WMO {
 class WMO;
-}
+} // namespace Noggit::WMO
 
 namespace Noggit::Rendering {
 

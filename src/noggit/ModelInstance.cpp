@@ -11,8 +11,8 @@
 #include <noggit/Misc.h>  // checkinside
 #include <noggit/Model.h> // Model, etc.
 #include <noggit/ModelInstance.h>
-#include <noggit/WMOInstance.h>
 #include <noggit/rendering/Primitives.hpp>
+#include <noggit/wmo/WMOInstance.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 

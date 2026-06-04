@@ -1,8 +1,8 @@
 #pragma once
 
-#include "glm/ext/vector_float3.hpp"
-#include "noggit/WmoLiquid.hpp"
 #include <cstdint>
+#include <glm/ext/vector_float3.hpp>
+#include <noggit/wmo/WMOLiquid.hpp>
 
 namespace WMOData {
 

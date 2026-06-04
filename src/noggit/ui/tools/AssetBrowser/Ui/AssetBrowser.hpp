@@ -1,5 +1,4 @@
-#ifndef NOGGIT_ASSETBROWSER_HPP
-#define NOGGIT_ASSETBROWSER_HPP
+#pragma once
 
 #include <noggit/ui/tools/AssetBrowser/Ui/Model/TreeManager.hpp>
 #include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
@@ -45,7 +44,6 @@ protected:
 
   void setupConnectsCommon();
 };
+
 } // namespace Ui::Tools::AssetBrowser::Ui
 } // namespace Noggit
-
-#endif // NOGGIT_ASSETBROWSER_HPP

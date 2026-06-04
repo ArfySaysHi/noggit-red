@@ -2,6 +2,7 @@
 // (version 3).
 
 #pragma once
+
 #include "noggit/TextureSet.hpp"
 #include <QImage>
 #include <array>
@@ -15,7 +16,7 @@
 #include <noggit/TextureManager.h>
 #include <noggit/TextureSet.hpp>
 #include <noggit/ToolEnums.hpp>
-#include <noggit/WMOInstance.h>
+#include <noggit/wmo/WMOInstance.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/texture.hpp>
 #include <optional>

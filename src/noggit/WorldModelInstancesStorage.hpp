@@ -3,15 +3,13 @@
 
 #pragma once
 #include <atomic>
-#include <functional>
 #include <mutex>
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
 #include <noggit/TileIndex.hpp>
-#include <noggit/WMOInstance.h>
+#include <noggit/wmo/WMOInstance.hpp>
 #include <opengl/scoped.hpp>
 #include <unordered_map>
-#include <variant>
 #include <vector>
 
 class World;

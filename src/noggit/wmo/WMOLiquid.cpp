@@ -3,9 +3,9 @@
 
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
-#include <noggit/WmoLiquid.hpp>
 #include <noggit/World.h>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/wmo/WMOLiquid.hpp>
 #include <opengl/context.hpp>
 #include <opengl/context.inl>
 #include <opengl/shader.hpp>

@@ -28,11 +28,11 @@
 #include <noggit/TextureManager.h>
 #include <noggit/TextureSet.hpp>
 #include <noggit/ToolEnums.hpp>
-#include <noggit/WMOInstance.h>
 #include <noggit/application/NoggitApplication.hpp>
 #include <noggit/project/CurrentProject.hpp>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/TexturingGUI.h>
+#include <noggit/wmo/WMOInstance.hpp>
 #include <string>
 #include <unordered_set>
 #include <utility>

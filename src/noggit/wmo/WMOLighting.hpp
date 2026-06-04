@@ -1,7 +1,7 @@
 #pragma once
 
-#include "noggit/data/WMOData.hpp"
 #include <ClientFile.hpp>
+#include <noggit/data/WMOData.hpp>
 
 #include <GL/gl.h>
 #include <glm/glm.hpp>

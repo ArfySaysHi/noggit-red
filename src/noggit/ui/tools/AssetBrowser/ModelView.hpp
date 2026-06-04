@@ -1,5 +1,4 @@
-#ifndef NOGGIT_ModelView_HPP
-#define NOGGIT_ModelView_HPP
+#pragma once
 
 #include <QElapsedTimer>
 #include <QFocusEvent>
@@ -15,9 +14,9 @@
 #include <noggit/Camera.hpp>
 #include <noggit/Model.h>
 #include <noggit/Selection.h>
-#include <noggit/WMO.h>
-#include <noggit/WMOInstance.h>
 #include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
+#include <noggit/wmo/WMO.hpp>
+#include <noggit/wmo/WMOInstance.hpp>
 
 namespace Noggit {
 namespace Ui::Tools::AssetBrowser {
@@ -82,7 +81,6 @@ private:
                                     Qt::Key_A, Qt::Key_Q, Qt::Key_E};
   void checkInputsSettings();
 };
+
 } // namespace Ui::Tools::AssetBrowser
 } // namespace Noggit
-
-#endif // NOGGIT_ModelView_HPP

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "noggit/WMOMaterial.hpp"
 #include "noggit/data/WMOData.hpp"
+#include "noggit/wmo/WMOMaterial.hpp"
 #include <vector>
 
 namespace Noggit::WMO {

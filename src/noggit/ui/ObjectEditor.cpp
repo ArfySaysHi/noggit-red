@@ -8,7 +8,6 @@
 #include <noggit/MapView.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelInstance.h>
-#include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
 #include <noggit/application/NoggitApplication.hpp>
 #include <noggit/ui/Checkbox.hpp>
@@ -17,6 +16,7 @@
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
 #include <noggit/ui/tools/UiCommon/expanderwidget.h>
+#include <noggit/wmo/WMOInstance.hpp>
 #include <util/qt/overload.hpp>
 
 #include <QButtonGroup>
@@ -429,7 +429,7 @@ object_editor::object_editor(MapView *mapView, World *world,
 
   connect(clearListButton, &QPushButton::clicked, ([=, this]() {
             ModelManager::clear_hidden_models();
-            WMOManager::clear_hidden_wmos();
+            Noggit::WMO::WMOManager::clear_hidden_wmos();
           }));
 
   connect(clearGroupsButton, &QPushButton::clicked,

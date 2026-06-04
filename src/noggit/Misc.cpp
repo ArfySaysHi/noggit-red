@@ -5,11 +5,8 @@
 #include <noggit/Misc.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
-#include <noggit/WMOInstance.h>
+#include <noggit/wmo/WMOInstance.hpp>
 
-#include <iomanip>
-#include <map>
-#include <sstream>
 #include <string>
 #include <vector>
 

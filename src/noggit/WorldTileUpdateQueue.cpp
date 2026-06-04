@@ -5,8 +5,8 @@
 
 #include <noggit/Log.h>
 #include <noggit/ModelInstance.h>
-#include <noggit/WMOInstance.h>
 #include <noggit/World.h>
+#include <noggit/wmo/WMOInstance.hpp>
 
 namespace Noggit {
 struct instance_update {

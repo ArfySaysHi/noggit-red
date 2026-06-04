@@ -7,9 +7,9 @@
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h> // checkinside
 #include <noggit/ModelInstance.h>
-#include <noggit/wmo/WMO.hpp> // WMO
-#include <noggit/WMOInstance.h>
 #include <noggit/rendering/Primitives.hpp>
+#include <noggit/wmo/WMO.hpp> // WMO
+#include <noggit/wmo/WMOInstance.hpp>
 #include <opengl/scoped.hpp>
 
 #include <sstream>

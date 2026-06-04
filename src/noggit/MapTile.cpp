@@ -12,10 +12,10 @@
 #include <noggit/ModelManager.h>  // ModelManager
 #include <noggit/TextureSet.hpp>
 #include <noggit/TileWater.hpp>
-#include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
 #include <noggit/application/NoggitApplication.hpp>
 #include <noggit/ui/TexturingGUI.h>
+#include <noggit/wmo/WMOInstance.hpp> // WMOInstance
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 #include <util/CurrentFunction.hpp>
@@ -25,8 +25,6 @@
 
 #include <cassert>
 #include <limits>
-#include <list>
-#include <map>
 #include <string>
 #include <utility>
 #include <vector>

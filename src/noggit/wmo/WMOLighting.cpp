@@ -1,5 +1,5 @@
-#include "noggit/data/WMOData.hpp"
-#include <noggit/WMOLighting.h>
+#include <noggit/data/WMOData.hpp>
+#include <noggit/wmo/WMOLighting.hpp>
 
 #include <GL/gl.h>
 #include <noggit/wmo/WMO.hpp>
@@ -64,7 +64,8 @@ void WMOFog::init(const WMOData::Fog &fog) {
 
 void WMOFog::setup() {}
 
-void WMOGroup::fix_vertex_color_alpha(WMOData::GroupGeometry &geometry) {
+void Noggit::WMO::WMOGroup::fix_vertex_color_alpha(
+    WMOData::GroupGeometry &geometry) {
   int interior_batchs_start = 0;
 
   if (header.transparency_batches_count > 0) {

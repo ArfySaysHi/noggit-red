@@ -1,9 +1,9 @@
 // This file is part of Noggit3, licensed under GNU General Public License
 // (version 3).
 
-#include <noggit/WMOMaterial.hpp>
 #include <noggit/data/WMOData.hpp>
 #include <noggit/rendering/WMOGroupRender.hpp>
+#include <noggit/wmo/WMOMaterial.hpp>
 
 using namespace Noggit::Rendering;
 

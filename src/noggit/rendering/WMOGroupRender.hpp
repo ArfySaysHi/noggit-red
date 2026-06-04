@@ -4,8 +4,8 @@
 
 #include "noggit/data/WMOData.hpp"
 #include <math/frustum.hpp>
-#include <noggit/WMOMaterial.hpp>
 #include <noggit/rendering/BaseRender.hpp>
+#include <noggit/wmo/WMOMaterial.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 
