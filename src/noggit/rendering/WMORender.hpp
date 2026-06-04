@@ -1,8 +1,4 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
-
-#ifndef NOGGIT_WMORENDER_HPP
-#define NOGGIT_WMORENDER_HPP
+#pragma once
 
 #include <glm/glm.hpp>
 #include <math/frustum.hpp>
@@ -13,12 +9,15 @@
 
 #include <map>
 
+namespace Noggit::WMO {
 class WMO;
+}
 
 namespace Noggit::Rendering {
+
 class WMORender : public BaseRender {
 public:
-  WMORender(WMO *wmo);
+  WMORender(Noggit::WMO::WMO *wmoInstance) : _wmo(wmoInstance) {}
 
   void upload() override;
   void unload() override;
@@ -43,8 +42,7 @@ public:
   bool isUploaded() const;
 
 private:
-  WMO *_wmo;
+  Noggit::WMO::WMO *_wmo;
 };
-} // namespace Noggit::Rendering
 
-#endif // NOGGIT_WMORENDER_HPP
+} // namespace Noggit::Rendering

@@ -1,13 +1,8 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
-
 #include "WMORender.hpp"
 #include <map>
-#include <noggit/WMO.h>
+#include <noggit/wmo/WMO.hpp>
 
 using namespace Noggit::Rendering;
-
-WMORender::WMORender(WMO *wmo) : _wmo(wmo) {}
 
 void WMORender::upload() {
   for (auto &group : _wmo->groups) {
@@ -81,12 +76,6 @@ void WMORender::draw(
           .draw(model_view, projection, glm::mat4x4(1.0f),
                 {1.0f, 1.0f, 1.0f, 1.0f}, it->second.first, it->second.second);
     }
-    //    for (auto &group : _wmo->groups) {
-    //    Noggit::Rendering::Primitives::WireBox::getInstance(_wmo->_context)
-    //      .draw(model_view, projection, transform_matrix,
-    //          {1.0f, 1.0f, 1.0f, 1.0f}, group.BoundingBoxMin,
-    //        group.BoundingBoxMax);
-    //}
 
     Noggit::Rendering::Primitives::WireBox::getInstance(_wmo->_context)
         .draw(model_view, projection, transform_matrix,

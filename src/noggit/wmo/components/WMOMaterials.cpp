@@ -7,7 +7,7 @@ std::vector<WMOMaterial> WMOMaterials::buildFromRawData(
     const std::vector<WMOData::Material> &rawMaterials,
     const std::map<std::uint32_t, std::uint32_t> &texture_offset_to_index) {
   _materials.clear();
-  _materials.reserve(_materials.size());
+  _materials.reserve(rawMaterials.size());
 
   for (const auto &raw_mat : rawMaterials) {
     WMOMaterial mat;
@@ -17,11 +17,11 @@ std::vector<WMOMaterial> WMOMaterials::buildFromRawData(
     mat.texture1_index =
         (tex1_it != texture_offset_to_index.end()) ? tex1_it->second : 0;
 
-    // TODO: Remove magic numbers... again...
-    bool use_second_texture =
-        (raw_mat.shader == 6 || raw_mat.shader == 5 || raw_mat.shader == 3);
+    assert(raw_mat.shader <
+           static_cast<uint32_t>(WMOData::WMOWotLKShaderType::Count));
+    auto shader_type = static_cast<WMOData::WMOWotLKShaderType>(raw_mat.shader);
 
-    if (use_second_texture) {
+    if (WMOData::usesSecondTexture(shader_type)) {
       auto tex2_it = texture_offset_to_index.find(raw_mat.texture_offset_2);
       mat.texture2_index =
           (tex2_it != texture_offset_to_index.end()) ? tex2_it->second : 0;

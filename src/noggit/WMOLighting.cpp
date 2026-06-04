@@ -2,7 +2,7 @@
 #include <noggit/WMOLighting.h>
 
 #include <GL/gl.h>
-#include <noggit/WMO.h>
+#include <noggit/wmo/WMO.hpp>
 
 void WMOLight::init(const WMOData::Light &raw) {
   pos = glm::vec3(raw.pos.x, raw.pos.z, -raw.pos.y);

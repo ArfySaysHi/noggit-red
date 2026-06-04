@@ -1,5 +1,5 @@
 #include "noggit/data/WMOData.hpp"
-#include <noggit/WMO.h>
+#include <noggit/wmo/WMO.hpp>
 #include <noggit/WMOGroup.hpp>
 #include <noggit/application/NoggitApplication.hpp>
 

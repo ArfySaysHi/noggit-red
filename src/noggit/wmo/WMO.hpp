@@ -24,7 +24,6 @@
 #include <string>
 #include <vector>
 
-class WMO;
 class WMOInstance;
 class wmo_liquid;
 class Model;
@@ -33,6 +32,8 @@ namespace Noggit::Rendering {
 class WMOGroupRender;
 class WMORender;
 } // namespace Noggit::Rendering
+
+namespace Noggit::WMO {
 
 class WMO : public AsyncObject {
   friend class Noggit::Rendering::WMORender;
@@ -100,3 +101,5 @@ private:
   WMOData::Header _header;
   Noggit::Rendering::WMORender _renderer;
 };
+
+} // namespace Noggit::WMO

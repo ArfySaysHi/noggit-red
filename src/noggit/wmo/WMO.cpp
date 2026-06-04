@@ -1,32 +1,23 @@
-// This file is part of Noggit3, licensed under GNU General Public License
-// (version 3).
-
-#include "noggit/data/WMOData.hpp"
-#include "noggit/wmo/WMOBuilder.hpp"
 #include <math/frustum.hpp>
 #include <noggit/AsyncLoader.h>
 #include <noggit/Log.h>            // LogDebug
 #include <noggit/ModelManager.h>   // ModelManager
 #include <noggit/TextureManager.h> // TextureManager, Texture
-#include <noggit/WMO.h>
 #include <noggit/WMOLighting.h>
 #include <noggit/World.h>
 #include <noggit/application/NoggitApplication.hpp>
 #include <noggit/parsing/WMOParser.hpp>
 #include <noggit/rendering/Primitives.hpp>
+#include <noggit/wmo/WMO.hpp>
 #include <opengl/scoped.hpp>
 
-#include <algorithm>
-#include <map>
-#include <vector>
-
-WMO::WMO(BlizzardArchive::Listfile::FileKey const &file_key,
-         Noggit::NoggitRenderContext context)
+Noggit::WMO::WMO(BlizzardArchive::Listfile::FileKey const &file_key,
+                 Noggit::NoggitRenderContext context)
     : AsyncObject(file_key), _context(context), _renderer(this) {}
 
-void WMO::finishLoading() {
+void finishLoading() {
   BlizzardArchive::ClientFile f(
-      _file_key.filepath(),
+      file_key.filepath(),
       Noggit::Application::NoggitApplication::instance()->clientData());
   if (f.isEof()) {
     LogError << "Error loading WMO \"" << _file_key.stringRepr()
@@ -35,7 +26,6 @@ void WMO::finishLoading() {
     _state_changed.notify_all();
     return;
   }
-  LogDebug << "WMO file opened ok: " << _file_key.stringRepr();
 
   WMOParser parser;
 
@@ -71,7 +61,17 @@ void WMO::finishLoading() {
   auto rawDoodads = parser.parseMODD(f);
   auto rawFogs = parser.parseMFOG(f);
 
-  // TODO: Builder pattern for materials, lights and doodads
+  WMOBuilder builder(this, _context);
+  builder.buildFromParsedData(_header, texbuf, rawMaterials, rawLights,
+                              rawDoodads, modelNames, rawGroupHeaders,
+                              groupNameTable);
+
+  textures = builder.getTextures();
+  materials = builder.getMaterials();
+  lights = builder.getLights();
+  auto [doodadInstances, nearestLightPositions] = builder.getDoodads();
+  modelis = std::move(doodadInstances);
+  model_nearest_light_vector = std::move(nearestLightPositions);
 
   groups.reserve(rawGroupHeaders.size());
   for (size_t i = 0; i < rawGroupHeaders.size(); ++i)

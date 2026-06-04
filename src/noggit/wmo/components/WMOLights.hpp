@@ -23,6 +23,11 @@ public:
     return _lights.at(index);
   }
 
+  [[nodiscard]]
+  const std::vector<WMOLight> &getLights() const {
+    return _lights;
+  }
+
 private:
   std::vector<WMOLight> _lights;
 };

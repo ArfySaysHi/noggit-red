@@ -19,6 +19,11 @@ public:
     return _materials.size();
   }
 
+  [[nodiscard]]
+  const std::vector<WMOMaterial> &getMaterials() const {
+    return _materials;
+  }
+
 private:
   std::vector<WMOMaterial> _materials;
 };

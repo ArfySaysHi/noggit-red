@@ -192,6 +192,28 @@ struct Material {
 
   uint32_t runtime_data[4];
 };
+
+enum class WMOWotLKShaderType : int32_t {
+  Diffuse = 0,
+  Specular = 1,
+  Metal = 2,
+  Env = 3,
+  Opaque = 4,
+  EnvMetal = 5,
+  TwoLayerDiffuse = 6,
+  Count = 7
+};
+
+[[nodiscard]] inline bool usesSecondTexture(WMOWotLKShaderType shader_type) {
+  switch (shader_type) {
+  case WMOWotLKShaderType::Env:
+  case WMOWotLKShaderType::EnvMetal:
+  case WMOWotLKShaderType::TwoLayerDiffuse:
+    return true;
+  default:
+    return false;
+  }
+}
 static_assert(sizeof(WMOData::Material) == 0x40,
               "Material struct size mismatch");
 

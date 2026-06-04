@@ -16,7 +16,6 @@
 #include <noggit/Sky.h> // Skies, OutdoorLighting, OutdoorLightStats
 #include <noggit/TileIndex.hpp>
 #include <noggit/ToolEnums.hpp>
-#include <noggit/WMO.h> // WMOManager
 #include <noggit/WorldModelInstancesStorage.hpp>
 #include <noggit/WorldTileUpdateQueue.hpp>
 #include <noggit/project/ApplicationProject.h>
@@ -25,6 +24,7 @@
 #include <noggit/rendering/Primitives.hpp>
 #include <noggit/rendering/WorldRender.hpp>
 #include <noggit/ui/MinimapCreator.hpp>
+#include <noggit/wmo/WMO.hpp> // WMOManager
 #include <opengl/shader.fwd.hpp>
 #include <opengl/types.hpp>
 #include <optional>

@@ -1,7 +1,10 @@
+#pragma once
+
 #include "noggit/ContextObject.hpp"
 #include "noggit/ModelInstance.h"
 #include "noggit/data/WMOData.hpp"
 #include <vector>
+
 namespace Noggit::WMO {
 
 struct WMODoodadInstanceWithLight {
@@ -23,6 +26,16 @@ public:
   [[nodiscard]]
   size_t count() const {
     return _instances.size();
+  }
+
+  [[nodiscard]]
+  const std::vector<WMODoodadInstance> &getInstances() const {
+    return _instances;
+  }
+
+  [[nodiscard]]
+  const std::vector<glm::vec3> &getNearestLightPositions() const {
+    return _nearest_light_positions;
   }
 
 private:

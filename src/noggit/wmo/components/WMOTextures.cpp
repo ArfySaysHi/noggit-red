@@ -1,6 +1,7 @@
 #include <noggit/wmo/components/WMOTextures.hpp>
 
 namespace Noggit::WMO {
+
 WMOTextures::WMOTextures(NoggitRenderContext context) : _context(context) {}
 
 std::vector<scoped_blp_texture_reference> WMOTextures::buildFromMaterials(
@@ -11,11 +12,13 @@ std::vector<scoped_blp_texture_reference> WMOTextures::buildFromMaterials(
   for (const auto &raw_mat : rawMaterials) {
     loadOrGetTexture(raw_mat.texture_offset_1, texbuf);
 
-    // TODO: Remove magic numbers here
-    bool use_second_texture =
-        (raw_mat.shader == 6 || raw_mat.shader == 5 || raw_mat.shader == 3);
-    if (use_second_texture) {
-      loadOrGetTexture(raw_mat.texture_offset_2, texbuf);
+    if (raw_mat.shader <
+        static_cast<std::uint32_t>(WMOData::WMOWotLKShaderType::Count)) {
+      auto shader_type =
+          static_cast<WMOData::WMOWotLKShaderType>(raw_mat.shader);
+      if (usesSecondTexture(shader_type)) {
+        loadOrGetTexture(raw_mat.texture_offset_2, texbuf);
+      }
     }
   }
 
@@ -39,4 +42,5 @@ std::uint32_t WMOTextures::loadOrGetTexture(std::uint32_t ofs,
   _texture_offset_to_index[ofs] = new_index;
   return new_index;
 }
+
 } // namespace Noggit::WMO

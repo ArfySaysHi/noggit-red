@@ -1,6 +1,6 @@
 #include <Listfile.hpp>
 #include <noggit/ContextObject.hpp>
-#include <noggit/WMO.h>
+#include <noggit/wmo/WMO.hpp>
 #include <noggit/WMOManager.hpp>
 #include <string>
 
